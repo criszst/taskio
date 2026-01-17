@@ -32,7 +32,7 @@
         "taskio.color": {
           "type": "string",
           "default": "#6042f5",
-          "description": "Highlight color for Taskio tasks"
+          "description": "Highlight color for Taskio tasks (in hex format)."
         },
 
         "taskio.enhanceAllText": {

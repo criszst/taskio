@@ -4,6 +4,12 @@ import { isLikelyComment } from '../parser/commentDetector'
 
 let decorationType: vscode.TextEditorDecorationType
 
+/**
+ * Applies Taskio decorations to the given TextEditor.
+ *
+ * @param editor - the TextEditor to apply the decorations to.
+ */
+
 export function applyTaskioDecorations(editor: vscode.TextEditor): void {
   const { keywords }: { keywords: string[]; } = getTaskioConfig()
   const { color }: { color: string; } = getTaskioConfig()
@@ -25,26 +31,25 @@ export function applyTaskioDecorations(editor: vscode.TextEditor): void {
 
     if (!isLikelyComment(lineText)) continue
 
-    let match;
+    let match: RegExpExecArray | null;
+    let vsRange: vscode.Range;
 
     while ((match = regex.exec(lineText))) {
       if (enhanceAllText) {
         const start = new vscode.Position(line, 0)
         const end = new vscode.Position(line, lineText.length)
 
-        decorationsRange.push({
-          range: new vscode.Range(start, end)
-        })
+        vsRange = new vscode.Range(start, end)
 
       } else {
         const start = new vscode.Position(line, match.index)
         const end = new vscode.Position(line, match.index + match[1].length)
 
-        decorationsRange.push({
-          range: new vscode.Range(start, end)
-        })
+        vsRange = new vscode.Range(start, end)
 
       }
+
+      decorationsRange.push({ range: vsRange })
     }
   }
 
