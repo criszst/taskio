@@ -10,6 +10,9 @@ let decorationType: vscode.TextEditorDecorationType
  * @param editor - the TextEditor to apply the decorations to.
  */
 
+// TODO: Optimize decoration application for large files
+// like by use ternary operator to choose regex based on enhanceAllText, but i'll go with this for now
+
 export function applyTaskioDecorations(editor: vscode.TextEditor): void {
   const { keywords }: { keywords: string[]; } = getTaskioConfig()
   const { color }: { color: string; } = getTaskioConfig()

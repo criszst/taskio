@@ -1,5 +1,10 @@
 import * as vscode from 'vscode';
 import { applyTaskioDecorations } from './decoration/taskioDecoration';
+import { TreeProvider } from './treeView/TreeProvider';
+import TaskioComment from './types/TaskioComment';
+import { CommentStore } from './store/CommentStore';
+import ScanDocument from './scanner/CommentScanner';
+import CopyComment from './commands/CopyComment';
 
 export function activate(context: vscode.ExtensionContext) {
   console.log('🔥 Taskio activated');
@@ -31,6 +36,53 @@ export function activate(context: vscode.ExtensionContext) {
   );
 
   //#endregion
+
+
+  // #region TREE VIEW SETUP
+
+
+  const store = new CommentStore()
+  const treeProvider = new TreeProvider(store)
+
+  vscode.window.registerTreeDataProvider(
+    'taskioView',
+    treeProvider
+  );
+
+  if (vscode.window.activeTextEditor) {
+    const doc = vscode.window.activeTextEditor.document
+
+    store.setMany(ScanDocument(doc))
+    treeProvider.refresh()
+  }
+
+  context.subscriptions.push(vscode.commands.registerCommand('taskio.revealComment', () => {
+    treeProvider.refresh();
+  }));
+
+  context.subscriptions.push(vscode.commands.registerCommand('taskio.copyComment',
+    CopyComment
+  )
+  )
+
+  // TODO: Implement view TODO command
+  context.subscriptions.push(vscode.commands.registerCommand('taskio.viewTodo', () => {
+    vscode.commands.executeCommand('workbench.view.extension.taskio-view');
+  }))
+
+  vscode.workspace.onDidOpenTextDocument(document => {
+    store.setMany(ScanDocument(document));
+    treeProvider.refresh();
+  });
+
+  vscode.workspace.onDidChangeTextDocument(event => {
+    store.removeByUri(event.document.uri);
+    store.setMany(ScanDocument(event.document));
+    treeProvider.refresh();
+  });
+
+
+  // #endregion
 
 
 }

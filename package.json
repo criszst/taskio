@@ -15,6 +15,39 @@
   "activationEvents": ["onStartupFinished"],
   "main": "./dist/extension.js",
   "contributes": {
+
+    "menus": {
+      "view/item/context": [
+        {
+          "command": "taskio.revealComment",
+          "when": "view == taskioView && viewItem == taskioComment",
+          "group": "navigation"
+        },
+
+        {
+          "command": "taskio.copyComment",
+          "when": "view == taskioView && viewItem == taskioComment",
+          "group": "inline"
+        },
+
+        {
+          "command": "taskio.viewTodo",
+          "when": "view == taskioView && viewItem == taskioComment",
+          "group": "navigation"
+        }
+      ]
+    },
+
+    "views": {
+      "explorer": [
+        {
+          "id": "taskioView",
+          "name": "Taskio"
+        }
+      ]
+    },
+
+
     "configuration": {
       "type": "object",
       "title": "Taskio Configuration",
@@ -58,10 +91,21 @@
         }
       }
     },
+
     "commands": [
       {
-        "command": "taskio.addTask",
-        "title": "Taskio: Add Task"
+        "command": "taskio.revealComment",
+        "title": "Reveal Taskio Comment"
+      },
+
+      {
+        "command": "taskio.copyComment",
+        "title": "Copy Comment"
+      },
+
+      {
+        "command": "taskio.viewTodo",
+        "title": "View specifyed TODO in Taskio"
       }
     ]
   },
