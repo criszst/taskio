@@ -39,6 +39,8 @@ function getIconByKeyword(keyword: string): vscode.ThemeIcon {
       return new vscode.ThemeIcon('tools')
     case 'TODO':
       return new vscode.ThemeIcon('checklist')
+    case 'NOTE':
+      return new vscode.ThemeIcon('note')
     default:
       return new vscode.ThemeIcon('check')
   }
