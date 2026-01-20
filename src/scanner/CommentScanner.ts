@@ -31,7 +31,7 @@ export default function ScanDocument(document: vscode.TextDocument): TaskioComme
         line,
         character: match.index,
         keyword: match[1],
-        text: lineText.trim(),
+        text: lineText.trim().replace(/^[\/\s#\-\*]+/, ''), // Remove leading comment chars
       });
     }
   }
