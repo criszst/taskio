@@ -10,7 +10,7 @@ export class TreeItem extends vscode.TreeItem {
     this.command = {
       command: 'taskio.revealComment',
       title: 'Go to Comment',
-      arguments: [this.comment],
+      arguments: [comment]
     };
 
     this.iconPath = new vscode.ThemeIcon('comment-discussion');

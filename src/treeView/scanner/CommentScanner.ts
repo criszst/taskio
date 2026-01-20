@@ -1,8 +1,8 @@
 import * as vscode from 'vscode';
 
-import TaskioComment from '../types/TaskioComment';
+import TaskioComment from '../../types/TaskioComment';
 import { isLikelyComment } from '../parser/commentDetector';
-import { getTaskioConfig } from '../config/taskioConfig';
+import { getTaskioConfig } from '../../config/taskioConfig';
 
 export default function ScanDocument(document: vscode.TextDocument): TaskioComment[] {
   const { keywords }: { keywords: string[]; } = getTaskioConfig();

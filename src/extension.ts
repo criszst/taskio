@@ -3,8 +3,9 @@ import { applyTaskioDecorations } from './decoration/taskioDecoration';
 import { TreeProvider } from './treeView/TreeProvider';
 import TaskioComment from './types/TaskioComment';
 import { CommentStore } from './store/CommentStore';
-import ScanDocument from './scanner/CommentScanner';
+import ScanDocument from './treeView/scanner/CommentScanner';
 import CopyComment from './commands/CopyComment';
+import { RevealComment } from './commands/RevealComment';
 
 export function activate(context: vscode.ExtensionContext) {
   console.log('🔥 Taskio activated');
@@ -57,18 +58,13 @@ export function activate(context: vscode.ExtensionContext) {
   }
 
   context.subscriptions.push(vscode.commands.registerCommand('taskio.revealComment', () => {
-    treeProvider.refresh();
+    async (comment: TaskioComment) => await RevealComment(comment);
   }));
 
-  context.subscriptions.push(vscode.commands.registerCommand('taskio.copyComment',
-    CopyComment
-  )
-  )
+  context.subscriptions.push(vscode.commands.registerCommand('taskio.copyComment', () => {
+    async (comment: TaskioComment) => await CopyComment(comment);
+  }));
 
-  // TODO: Implement view TODO command
-  context.subscriptions.push(vscode.commands.registerCommand('taskio.viewTodo', () => {
-    vscode.commands.executeCommand('workbench.view.extension.taskio-view');
-  }))
 
   vscode.workspace.onDidOpenTextDocument(document => {
     store.setMany(ScanDocument(document));

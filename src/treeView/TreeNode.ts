@@ -2,7 +2,14 @@ import * as vscode from 'vscode';
 
 import TaskioComment from '../types/TaskioComment';
 
-export type TreeNode = | FileNode | CommentNode;
+export type TreeNode = FolderNode | FileNode | CommentNode;
+
+export class FolderNode extends vscode.TreeItem {
+  constructor(public readonly path: string, public readonly label: string) {
+    super(label, vscode.TreeItemCollapsibleState.Collapsed);
+    this.iconPath = vscode.ThemeIcon.Folder
+  }
+}
 
 export class FileNode extends vscode.TreeItem {
   constructor(public readonly uri: vscode.Uri, public readonly label: string) {
@@ -18,16 +25,17 @@ export class CommentNode extends vscode.TreeItem {
     super(comment.text, vscode.TreeItemCollapsibleState.None);
 
     this.description = `Line ${this.comment.line + 1}`;
-    this.tooltip = `${this.comment.keyword}: ${this.comment.text} (Line ${this.comment.line + 1})`;
+    this.tooltip = `${this.comment.text} (Line ${this.comment.line + 1})`;
+
+    this.contextValue = 'taskioComment';
 
     this.command = {
       command: 'taskio.revealComment',
       title: 'Go to Comment',
-      arguments: [this.comment],
+      arguments: [comment],
     };
 
     this.iconPath = getIconByKeyword(comment.keyword);
-    this.contextValue = 'taskioComment';
   }
 }
 
@@ -38,9 +46,13 @@ function getIconByKeyword(keyword: string): vscode.ThemeIcon {
     case 'FIXME':
       return new vscode.ThemeIcon('tools')
     case 'TODO':
-      return new vscode.ThemeIcon('checklist')
+      return new vscode.ThemeIcon('check-all')
     case 'NOTE':
       return new vscode.ThemeIcon('note')
+    case 'HACK':
+      return new vscode.ThemeIcon('flame')
+    case 'ERROR':
+      return new vscode.ThemeIcon('error')
     default:
       return new vscode.ThemeIcon('check')
   }

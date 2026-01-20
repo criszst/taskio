@@ -1,6 +1,6 @@
 import * as vscode from 'vscode'
 import { getTaskioConfig } from '../config/taskioConfig'
-import { isLikelyComment } from '../parser/commentDetector'
+import { isLikelyComment } from '../treeView/parser/commentDetector'
 
 let decorationType: vscode.TextEditorDecorationType
 

@@ -2,14 +2,15 @@ import * as vscode from 'vscode';
 import TaskioComment from '../types/TaskioComment';
 import { TreeItem } from './TreeItem';
 import { CommentStore } from '../store/CommentStore';
-import { CommentNode, FileNode, TreeNode } from './TreeNode';
+import { CommentNode, FileNode, FolderNode, TreeNode } from './TreeNode';
+import path from 'path';
 
 export class TreeProvider implements vscode.TreeDataProvider<TreeNode> {
   private _onDidChangeTreeData: vscode.EventEmitter<TreeItem | undefined | void> = new vscode.EventEmitter<TreeItem | undefined | void>();
 
   readonly onDidChangeTreeData: vscode.Event<TreeItem | undefined | void> = this._onDidChangeTreeData.event;
 
-  constructor(private store: CommentStore) {}
+  constructor(private store: CommentStore) { }
 
   refresh(): void {
     this._onDidChangeTreeData.fire(undefined);
@@ -22,22 +23,49 @@ export class TreeProvider implements vscode.TreeDataProvider<TreeNode> {
   getChildren(element?: TreeNode): TreeNode[] | Thenable<TreeNode[]> {
     const comments = this.store.getAll();
 
-    if(!element) {
-      const files = new Map<string, vscode.Uri>();
+    const workspaceFolders = vscode.workspace.workspaceFolders?.[0].uri.fsPath;
 
-      for (const comment of comments) {
-        files.set(comment.uri.fsPath, comment.uri);
+    if (!workspaceFolders) return []
+
+    if (!element) {
+      const folders = new Set<string>();
+
+      for (const c of comments) {
+        const relative = path.relative(workspaceFolders, c.uri.fsPath);
+        const folder = relative.split(path.sep);
+        folders.add(folder[0]);
       }
 
-      return Array.from(files.entries()).map(([path, uri]) => 
-         new FileNode(uri, path.split(/[\\/]/).pop()!)
-      );
+      return Array.from(folders).map(folderName => new FolderNode(path.join(workspaceFolders, folderName), folderName) );
     }
 
+
+    if (element instanceof FolderNode) {
+      const nodes = new Map<string, TreeNode>();
+
+      for (const c of comments) {
+        if (!c.uri.fsPath.startsWith(element.path)) continue;
+
+        const relative = path.relative(element.path, c.uri.fsPath);
+        const parts = relative.split(path.sep);
+
+        if (parts.length > 1) {
+          const subPart = path.join(element.path, parts[0]);
+          nodes.set(subPart, new FolderNode(subPart, parts[0]));
+        }
+
+        else {
+          nodes.set(c.uri.fsPath, new FileNode(c.uri, path.basename(c.uri.fsPath)));
+        }
+      }
+
+      return Array.from(nodes.values());
+    }
+
+
     if (element instanceof FileNode) {
-      return comments
-      .filter(comment => comment.uri.fsPath === element.uri.fsPath)
-      .map(comment => new CommentNode(comment));
+      const fileComments = comments.filter(c => c.uri.fsPath === element.uri.fsPath);
+      return fileComments.map(c => new CommentNode(c));
     }
 
     return [];

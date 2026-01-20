@@ -28,12 +28,6 @@
           "command": "taskio.copyComment",
           "when": "view == taskioView && viewItem == taskioComment",
           "group": "inline"
-        },
-
-        {
-          "command": "taskio.viewTodo",
-          "when": "view == taskioView && viewItem == taskioComment",
-          "group": "navigation"
         }
       ]
     },
@@ -95,17 +89,12 @@
     "commands": [
       {
         "command": "taskio.revealComment",
-        "title": "Reveal Taskio Comment"
+        "title": "View Taskio Comment"
       },
 
       {
         "command": "taskio.copyComment",
         "title": "Copy Comment"
-      },
-
-      {
-        "command": "taskio.viewTodo",
-        "title": "View specifyed TODO in Taskio"
       }
     ]
   },
