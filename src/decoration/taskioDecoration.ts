@@ -37,14 +37,12 @@ export function applyTaskioDecorations(editor: vscode.TextEditor): void {
     let match: RegExpExecArray | null;
     let vsRange: vscode.Range;
 
+
     while ((match = regex.exec(lineText))) {
       if (enhanceAllText) {
-        const start = new vscode.Position(line, 0)
-        const end = new vscode.Position(line, lineText.length)
-
-        vsRange = new vscode.Range(start, end)
-
-      } else {
+        vsRange = new vscode.Range(new vscode.Position(line, 0), new vscode.Position(line, lineText.length))
+      }
+      else {
         const start = new vscode.Position(line, match.index)
         const end = new vscode.Position(line, match.index + match[1].length)
 
@@ -56,5 +54,5 @@ export function applyTaskioDecorations(editor: vscode.TextEditor): void {
     }
   }
 
-   editor.setDecorations(decorationType, decorationsRange)
+  editor.setDecorations(decorationType, decorationsRange)
 }
