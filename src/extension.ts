@@ -7,6 +7,7 @@ import ScanDocument from './treeView/scanner/CommentScanner';
 import CopyComment from './commands/CopyComment';
 import { RevealComment } from './commands/RevealComment';
 import { SearchTodos } from './commands/SearchTodos';
+import { ScanWorkspace } from './treeView/scanner/WorkspaceScanner';
 
 export function activate(context: vscode.ExtensionContext) {
   console.log('🔥 Taskio activated');
@@ -44,7 +45,13 @@ export function activate(context: vscode.ExtensionContext) {
 
 
   const store = new CommentStore()
-  const treeProvider = new TreeProvider(store)
+  const treeProvider = new TreeProvider(store);
+
+  // There is no way this is correct loll
+   (async () => { if (vscode.workspace.workspaceFolders) {
+      await ScanWorkspace(store);
+      treeProvider.refresh();
+   } })();
 
   vscode.window.registerTreeDataProvider(
     'taskioView',

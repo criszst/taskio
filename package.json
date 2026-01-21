@@ -19,12 +19,6 @@
     "menus": {
       "view/item/context": [
         {
-          "command": "taskio.revealComment",
-          "when": "view == taskioView && viewItem == taskioComment",
-          "group": "navigation"
-        },
-
-        {
           "command": "taskio.copyComment",
           "when": "view == taskioView && viewItem == taskioComment",
           "group": "inline"
@@ -37,14 +31,32 @@
           "when": "view == taskioView",
           "group": "navigation"
         }
+      ],
+
+      "explorer/context": [
+        {
+          "command": "taskio.searchTodos",
+          "when": "explorerResourceIsFolder == false",
+          "group": "navigation"
+        }
+      ]
+    },
+
+     "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "taskio-tree",
+          "title": "Taskio",
+          "icon": "resources/package-explorer.svg"
+        }
       ]
     },
 
     "views": {
-      "explorer": [
+      "taskio-tree": [
         {
           "id": "taskioView",
-          "name": "Taskio"
+          "name": "Tree View"
         }
       ]
     },
@@ -95,11 +107,6 @@
     },
 
     "commands": [
-      {
-        "command": "taskio.revealComment",
-        "title": "View Taskio Comment"
-      },
-
       {
         "command": "taskio.copyComment",
         "title": "Copy Comment"
