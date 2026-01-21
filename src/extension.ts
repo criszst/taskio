@@ -6,6 +6,7 @@ import { CommentStore } from './store/CommentStore';
 import ScanDocument from './treeView/scanner/CommentScanner';
 import CopyComment from './commands/CopyComment';
 import { RevealComment } from './commands/RevealComment';
+import { SearchTodos } from './commands/SearchTodos';
 
 export function activate(context: vscode.ExtensionContext) {
   console.log('🔥 Taskio activated');
@@ -57,13 +58,25 @@ export function activate(context: vscode.ExtensionContext) {
     treeProvider.refresh()
   }
 
-  context.subscriptions.push(vscode.commands.registerCommand('taskio.revealComment', () => {
-    async (comment: TaskioComment) => await RevealComment(comment);
-  }));
+  context.subscriptions.push(vscode.commands.registerCommand('taskio.revealComment',
+    async (comment: TaskioComment) => {
+      if (!comment) return vscode.window.showWarningMessage('Taaskio: No comment selected.');
+      await RevealComment(comment);
+    }
+  )
+  );
 
-  context.subscriptions.push(vscode.commands.registerCommand('taskio.copyComment', () => {
-    async (comment: TaskioComment) => await CopyComment(comment);
-  }));
+
+  context.subscriptions.push(vscode.commands.registerCommand('taskio.copyComment',
+    async (comment: TaskioComment) => {
+      if (!comment) return;
+      await CopyComment(comment);
+    }
+  )
+);
+
+
+  context.subscriptions.push(vscode.commands.registerCommand('taskio.searchTodos', () => SearchTodos(store)));
 
 
   vscode.workspace.onDidOpenTextDocument(document => {

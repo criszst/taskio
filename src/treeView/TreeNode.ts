@@ -7,7 +7,7 @@ export type TreeNode = FolderNode | FileNode | CommentNode;
 export class FolderNode extends vscode.TreeItem {
   constructor(public readonly path: string, public readonly label: string) {
     super(label, vscode.TreeItemCollapsibleState.Collapsed);
-    this.iconPath = vscode.ThemeIcon.Folder
+    this.iconPath = vscode.ThemeIcon.Folder;
   }
 }
 

@@ -29,6 +29,14 @@
           "when": "view == taskioView && viewItem == taskioComment",
           "group": "inline"
         }
+      ],
+
+      "view/title": [
+        {
+          "command": "taskio.searchTodos",
+          "when": "view == taskioView",
+          "group": "navigation"
+        }
       ]
     },
 
@@ -95,6 +103,11 @@
       {
         "command": "taskio.copyComment",
         "title": "Copy Comment"
+      },
+
+      {
+        "command": "taskio.searchTodos",
+        "title": "🔍 Search for TODOs"
       }
     ]
   },
