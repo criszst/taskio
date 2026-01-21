@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { CommentStore } from '../../store/CommentStore';
-import ScanDocument from './CommentScanner';
+import ScanDocument from './DocumentScanner';
 
 export async function ScanWorkspace(store: CommentStore) {
   if (!vscode.workspace.workspaceFolders) {

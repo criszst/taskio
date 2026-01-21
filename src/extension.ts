@@ -3,7 +3,7 @@ import { applyTaskioDecorations } from './decoration/taskioDecoration';
 import { TreeProvider } from './treeView/TreeProvider';
 import TaskioComment from './types/TaskioComment';
 import { CommentStore } from './store/CommentStore';
-import ScanDocument from './treeView/scanner/CommentScanner';
+import ScanDocument from './treeView/scanner/DocumentScanner';
 import CopyComment from './commands/CopyComment';
 import { RevealComment } from './commands/RevealComment';
 import { SearchTodos } from './commands/SearchTodos';
