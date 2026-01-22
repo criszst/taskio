@@ -8,10 +8,15 @@ export async function ScanWorkspace(store: CommentStore) {
     return;
   }
 
-  const files = await vscode.workspace.findFiles('**/*.{js,ts,jsx,tsx,py,java,cs,cpp,go,rb,rs,php,html,css,scss,md}', '**/node_modules/**');
+  const files = await vscode.workspace.findFiles(
+    '**/*.{js,ts,jsx,tsx,py,java,cs,cpp,go,rb,rs,php,html,css,scss,md}', //includes
+    '**/node_modules/**, **/out/**, **/dist/**' // excludes
+  );
 
-  for (const file of  files) {
+  
+  files.forEach(async file => {
     const doc = await vscode.workspace.openTextDocument(file);
+
     store.setMany(ScanDocument(doc));
-  }
+  })
 }
