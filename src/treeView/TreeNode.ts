@@ -1,6 +1,9 @@
 import * as vscode from 'vscode';
 
 import TaskioComment from '../types/TaskioComment';
+import TaskioPriority from '../types/TaskioPriority';
+
+import { getIconByPriority, getIconByKeyword } from '../decoration/IconDecorators';
 
 export type TreeNode = FolderNode | FileNode | CommentNode;
 
@@ -22,10 +25,10 @@ export class FileNode extends vscode.TreeItem {
 
 export class CommentNode extends vscode.TreeItem {
   constructor(public readonly comment: TaskioComment) {
-    super(comment.text, vscode.TreeItemCollapsibleState.None);
+    super(comment.displayText ?? comment.text, vscode.TreeItemCollapsibleState.None);
 
-    this.description = `Line ${this.comment.line + 1}`;
-    this.tooltip = `${this.comment.text} (Line ${this.comment.line + 1})`;
+    this.description = `Line ${this.comment.line + 1} - ${this.comment.priority.toUpperCase()}`;
+    this.tooltip = `${this.comment.displayText ?? this.comment.text} (Line ${this.comment.line + 1})`;
 
     this.contextValue = 'taskioComment';
 
@@ -35,25 +38,8 @@ export class CommentNode extends vscode.TreeItem {
       arguments: [comment],
     };
 
-    this.iconPath = getIconByKeyword(comment.keyword);
+
+    this.iconPath = this.comment.priority !== 'default' ? getIconByPriority(this.comment.priority): getIconByKeyword(comment.keyword);
   }
 }
 
-function getIconByKeyword(keyword: string): vscode.ThemeIcon {
-  switch (keyword.toUpperCase()) {
-    case 'BUG':
-      return new vscode.ThemeIcon('bug')
-    case 'FIXME':
-      return new vscode.ThemeIcon('tools')
-    case 'TODO':
-      return new vscode.ThemeIcon('check-all')
-    case 'NOTE':
-      return new vscode.ThemeIcon('note')
-    case 'HACK':
-      return new vscode.ThemeIcon('flame')
-    case 'ERROR':
-      return new vscode.ThemeIcon('error')
-    default:
-      return new vscode.ThemeIcon('check')
-  }
-}

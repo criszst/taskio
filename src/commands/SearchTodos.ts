@@ -6,6 +6,7 @@ import { RevealComment } from './RevealComment';
 
 export async function SearchTodos(store: CommentStore) {
   const comments = store.getAll();
+  const order = { high: 0, medium: 1, low: 2, default: 4, };
 
   if (!comments.length) {
     vscode.window.showInformationMessage('Taskio: No TODOs found');
@@ -13,12 +14,12 @@ export async function SearchTodos(store: CommentStore) {
   }
 
   const items: (vscode.QuickPickItem & { comment: TaskioComment })[] =
-    comments.map(comment => {
+    comments.sort((a, b) => order[a.priority] - order[b.priority]).map(comment => {
       const file = path.basename(comment.uri.fsPath);
 
       return {
-        label: `${comment.keyword}: ${comment.text}`,
-        description: `${file}:${comment.line + 1}`,
+        label: `${comment.displayText ?? comment.text}`,
+        description: `${file}:${comment.line + 1} - ${comment.priority.toUpperCase()}`,
         comment
       };
     });

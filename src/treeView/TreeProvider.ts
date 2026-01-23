@@ -22,8 +22,10 @@ export class TreeProvider implements vscode.TreeDataProvider<TreeNode> {
 
   getChildren(element?: TreeNode): TreeNode[] | Thenable<TreeNode[]> {
     const comments = this.store.getAll();
+    const order = { high: 0, medium: 1, low: 2, default: 4, };
 
     const workspaceFolders = vscode.workspace.workspaceFolders?.[0].uri.fsPath;
+    
 
     if (!workspaceFolders) return []
 
@@ -64,7 +66,7 @@ export class TreeProvider implements vscode.TreeDataProvider<TreeNode> {
 
 
     if (element instanceof FileNode) {
-      const fileComments = comments.filter(c => c.uri.fsPath === element.uri.fsPath);
+      const fileComments = comments.sort((a, b) => order[a.priority] - order[b.priority]).filter(c => c.uri.fsPath === element.uri.fsPath);
       return fileComments.map(c => new CommentNode(c));
     }
 

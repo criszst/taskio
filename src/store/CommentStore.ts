@@ -1,6 +1,8 @@
 import * as vscode from "vscode";
 
 import TaskioComment from "../types/TaskioComment";
+import TaskioPriority from "../types/TaskioPriority";
+
 
 export class CommentStore {
   private comments: Map<string, TaskioComment>;
@@ -27,4 +29,22 @@ export class CommentStore {
     return Array.from(this.comments.values());
   }
 
+  getByUri(uri: vscode.Uri): TaskioComment[] {
+    return Array.from(this.comments.values()).filter(comment => comment.uri.fsPath === uri.fsPath);
+  }
+
+  setPriority(id: string, priority: TaskioPriority): void {
+    const comment = this.comments.get(id)
+
+    if (!comment) return;
+
+    comment.priority = priority
+    this.comments.set(id, comment);
+  }
+
+  getPriority(id: string): string {
+    const comment = this.comments.get(id)?.priority ?? 'medium'
+
+    return comment
+  }
 }

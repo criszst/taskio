@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { applyTaskioDecorations } from './decoration/taskioDecoration';
+import { ApplyDecorators } from './decoration/ApplyDecorators';
 import { TreeProvider } from './treeView/TreeProvider';
 import TaskioComment from './types/TaskioComment';
 import { CommentStore } from './store/CommentStore';
@@ -12,11 +12,14 @@ import { ScanWorkspace } from './treeView/scanner/WorkspaceScanner';
 export function activate(context: vscode.ExtensionContext) {
   console.log('🔥 Taskio activated');
 
+  const store = new CommentStore()
+  const treeProvider = new TreeProvider(store);
+
 
   const update = () => {
     const editor = vscode.window.activeTextEditor;
 
-    if (editor) applyTaskioDecorations(editor)
+    if (editor) ApplyDecorators(editor, store)
   };
 
   update();
@@ -29,7 +32,7 @@ export function activate(context: vscode.ExtensionContext) {
     vscode.workspace.onDidChangeTextDocument(event => {
       const editor = vscode.window.activeTextEditor
       if (editor && event.document === editor.document) {
-        applyTaskioDecorations(editor)
+        ApplyDecorators(editor, store)
       }
     })
   );
@@ -41,17 +44,17 @@ export function activate(context: vscode.ExtensionContext) {
   //#endregion
 
 
+
   // #region TREE VIEW SETUP
 
 
-  const store = new CommentStore()
-  const treeProvider = new TreeProvider(store);
-
-  // There is no way this is correct loll
-   (async () => { if (vscode.workspace.workspaceFolders) {
+  // ...
+  (async () => {
+    if (vscode.workspace.workspaceFolders) {
       await ScanWorkspace(store);
       treeProvider.refresh();
-   } })();
+    }
+  })();
 
   vscode.window.registerTreeDataProvider(
     'taskioView',
@@ -67,20 +70,16 @@ export function activate(context: vscode.ExtensionContext) {
 
   context.subscriptions.push(vscode.commands.registerCommand('taskio.revealComment',
     async (comment: TaskioComment) => {
-      if (!comment) return vscode.window.showWarningMessage('Taaskio: No comment selected.');
       await RevealComment(comment);
     }
-  )
-  );
+  ));
 
 
   context.subscriptions.push(vscode.commands.registerCommand('taskio.copyComment',
     async (comment: TaskioComment) => {
-      if (!comment) return;
       await CopyComment(comment);
     }
-  )
-);
+  ));
 
 
   context.subscriptions.push(vscode.commands.registerCommand('taskio.searchTodos', () => SearchTodos(store)));
@@ -92,10 +91,22 @@ export function activate(context: vscode.ExtensionContext) {
   });
 
   vscode.workspace.onDidChangeTextDocument(event => {
-    store.removeByUri(event.document.uri);
-    store.setMany(ScanDocument(event.document));
+    const editor = vscode.window.activeTextEditor;
+    const doc = event.document;
+
+
+    store.removeByUri(doc.uri);
+    store.setMany(ScanDocument(doc));
+
+
     treeProvider.refresh();
+
+    if (editor && editor.document === doc) {
+      ApplyDecorators(editor, store);
+
+    }
   });
+
 
 
   // #endregion

@@ -12,10 +12,11 @@
     "Formatters",
     "Other"
   ],
-  "activationEvents": ["onStartupFinished"],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
   "main": "./dist/extension.js",
   "contributes": {
-
     "menus": {
       "view/item/context": [
         {
@@ -23,6 +24,7 @@
           "when": "view == taskioView && viewItem == taskioComment",
           "group": "inline"
         }
+
       ],
 
       "view/title": [
@@ -32,7 +34,6 @@
           "group": "navigation"
         }
       ],
-
       "explorer/context": [
         {
           "command": "taskio.searchTodos",
@@ -41,8 +42,7 @@
         }
       ]
     },
-
-     "viewsContainers": {
+    "viewsContainers": {
       "activitybar": [
         {
           "id": "taskio-tree",
@@ -51,7 +51,6 @@
         }
       ]
     },
-
     "views": {
       "taskio-tree": [
         {
@@ -60,13 +59,11 @@
         }
       ]
     },
-
-
     "configuration": {
       "type": "object",
       "title": "Taskio Configuration",
       "properties": {
-        
+
         "taskio.keywords": {
           "type": "array",
           "default": [
@@ -76,6 +73,7 @@
           ],
           "description": "Keywords recognized by Taskio inside comments"
         },
+
         "taskio.color": {
           "type": "string",
           "default": "#6042f5",
@@ -88,11 +86,22 @@
           "description": "Enhance all text comment after TODO (or other keywords)."
         },
 
+        "taskio.priorityMarkers": {
+          "type": "object",
+          "default": {
+            "high": "!!!",
+            "medium": "!!",
+            "low": "!"
+          },
+          "description": "Priority markers based on repeated characters after the keyword"
+        },
+
         "taskio.enableNotifications": {
           "type": "boolean",
           "default": true,
           "description": "Enable or disable notifications for Taskio."
         },
+
         "taskio.taskListLocation": {
           "type": "string",
           "enum": [
@@ -105,16 +114,16 @@
         }
       }
     },
-
     "commands": [
       {
         "command": "taskio.copyComment",
-        "title": "Copy Comment"
+        "title": "Copy",
+        "enablement": "view == taskioView"
       },
-
       {
         "command": "taskio.searchTodos",
-        "title": "🔍 Search for TODOs"
+        "title": "🔍︎",
+        "enablement": "view == taskioView"
       }
     ]
   },

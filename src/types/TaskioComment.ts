@@ -1,4 +1,5 @@
 import { Uri } from "vscode";
+import TaskioPriority from "./TaskioPriority";
 
 interface TaskioComment {
   id: string;
@@ -7,6 +8,8 @@ interface TaskioComment {
   character: number;
   keyword: string;
   text: string;
+  displayText?: string;
+  priority: TaskioPriority;
 }
 
 export default TaskioComment;
