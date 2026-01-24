@@ -4,7 +4,7 @@
   "description": "Turn TODO comments into real taks",
   "version": "0.0.3",
   "engines": {
-    "vscode": ">=1.80.0"
+    "vscode": "^1.108.0"
   },
   "categories": [
     "Visualization",
