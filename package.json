@@ -1,17 +1,32 @@
 {
   "name": "taskio",
-  "displayName": "Taskio",
-  "description": "Turn TODO comments into real taks",
-  "version": "0.0.3",
+  "displayName": "Taskio - TODO List",
+  "description": "Turn TODO comments into real tasks",
+  "version": "0.0.4",
   "engines": {
     "vscode": "^1.108.0"
   },
   "categories": [
     "Visualization",
-    "Themes",
-    "Formatters",
     "Other"
   ],
+  "keywords": [
+    "todo",
+    "todo comments",
+    "todo tree",
+    "task",
+    "tasks",
+    "task list",
+    "task manager",
+    "task tracker",
+    "comments",
+    "code comments",
+    "productivity",
+    "developer productivity",
+    "vscode todo",
+    "vscode tasks"
+  ],
+
   "activationEvents": [
     "onStartupFinished"
   ],

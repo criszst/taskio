@@ -1,47 +1,53 @@
-# Taskio
+# Taskio – TODO Comments as Tasks for VS Code
 
-Turn TODO comments into real, actionable tasks inside Visual Studio Code.
+Turn TODO, FIXME and BUG comments into **real, actionable tasks** inside Visual Studio Code.
 
-Taskio scans your codebase for comment keywords such as `TODO`, `FIXME`, and `BUG`, and displays them in a dedicated task list, helping you track pending work directly from your editor.
-
+**Taskio** scans your codebase for TODO-style comments and transforms them into a centralized **task list**, helping developers track pending work without leaving the editor.
 
 <div align="center">
-  
-![alt text](https://i.ibb.co/5gn0pPY2/todo-example-3.png)
-  
-</div>
 
+![Taskio TODO Example](https://i.ibb.co/5gn0pPY2/todo-example-3.png)
+
+</div>
 
 ---
 
 ## Features
 
-- Automatically detects TODO-style comments
-- Displays tasks in a dedicated Tree View
-- Search across TODO's
-- Supports task priorities using markers (`!`, `!!`, `!!!`)
-- Customizable highlight behavior and colors
-- Lightweight and fast
+- 🔍 Automatically detects `TODO`, `FIXME` and `BUG` comments  
+- 🌳 Displays all tasks in a dedicated **Tree View**  
+- ⚡ Fast search across TODO comments  
+- 🎯 Task priorities using markers (`!`, `!!`, `!!!`)  
+- 🎨 Customizable highlight colors and behavior  
+- 🪶 Lightweight and fast (no performance impact)
+
+---
+
+## How It Works
+
+Taskio continuously scans your workspace for comment keywords and keeps them organized in a task tree.
+
+No setup required — install and start writing TODOs.
 
 ---
 
 ## Supported Keywords
 
-By default, Taskio detects:
+By default, Taskio detects the following keywords:
 
 - `TODO`
 - `FIXME`
 - `BUG`
 
-You can customize this list through the extension settings.
+You can fully customize this list in the extension settings.
 
 ---
 
 ## Customization
 
-Taskio can be configured in the VS Code settings UI or via `settings.json`.
+Taskio can be configured via the VS Code **Settings UI** or directly in `settings.json`.
 
-Example configuration:
+### Example configuration
 
 ```json
 {
@@ -52,16 +58,23 @@ Example configuration:
     "high": "!!!",
     "medium": "!!",
     "low": "!"
-  },
+  }
 }
 ```
 
-### Configuration Options
+### Configuration options
 
-- **`taskio.keywords`**: Defines which comment keywords Taskio should detect as tasks.  
-- **`taskio.color`**: Sets the highlight color used to mark tasks in the editor.  
-- **`taskio.enhanceAllText`**: Highlights the entire comment line instead of only the keyword.
-- **`taskio.priorityMarkers`**: Defines the markers used to determine task priority levels.
+- **`taskio.keywords`**  
+  Defines which comment keywords are recognized as tasks.
+
+- **`taskio.color`**  
+  Sets the highlight color used to mark tasks in the editor.
+
+- **`taskio.enhanceAllText`**  
+  Highlights the entire comment line instead of only the keyword.
+
+- **`taskio.priorityMarkers`**  
+  Defines how task priority is detected using repeated characters.
 
 ---
 
@@ -73,22 +86,17 @@ You can define task priority directly in your comments using exclamation marks:
 - `!!` → Medium priority  
 - `!!!` → High priority  
 
-Example:
+### Example
 
 ```ts
 // TODO! Refactor this function
 // FIXME!! Handle edge cases
-// BUG!!! This crashes on startup
+// BUG!!! Crashes on startup
 ```
 
-Tasks with higher priority markers are visually distinguished in the task list and search list.
+Higher priority tasks are visually distinguished in the task tree and search results.
 
 ---
 
-## Why Taskio
-
-TODO comments are easy to write but easy to forget.
-
-As projects grow, unfinished notes get scattered across files. Taskio turns those comments into a centralized task list inside Visual Studio Code, so you always know what still needs attention.
-
-No external tools, no context switching — just your tasks, right next to your code.
+### ⭐ Enjoying Taskio?
+If Taskio helps you stay productive, consider leaving a ⭐ review on the VS Code Marketplace — it really helps!
