@@ -46,7 +46,7 @@ function createDecorations() {
     medium: vscode.window.createTextEditorDecorationType({
       fontWeight: 'bold',
       backgroundColor: '#f1fa8c44',
-      color: '#f1fa8c',
+      color: '#9fa74e',
     }),
     low: vscode.window.createTextEditorDecorationType({ 
       fontWeight: 'bold',

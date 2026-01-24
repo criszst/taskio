@@ -15,6 +15,10 @@
   "activationEvents": [
     "onStartupFinished"
   ],
+
+    "publisher": "taskio",
+    "icon": "taskio-icon.png",
+
   "main": "./dist/extension.js",
   "contributes": {
     "menus": {
@@ -47,7 +51,7 @@
         {
           "id": "taskio-tree",
           "title": "Taskio",
-          "icon": "resources/package-explorer.svg"
+          "icon": "taskio.svg"
         }
       ]
     },
@@ -55,7 +59,8 @@
       "taskio-tree": [
         {
           "id": "taskioView",
-          "name": "Tree View"
+          "name": "Tree View",
+          "icon": "taskio.svg"
         }
       ]
     },
@@ -94,23 +99,6 @@
             "low": "!"
           },
           "description": "Priority markers based on repeated characters after the keyword"
-        },
-
-        "taskio.enableNotifications": {
-          "type": "boolean",
-          "default": true,
-          "description": "Enable or disable notifications for Taskio."
-        },
-
-        "taskio.taskListLocation": {
-          "type": "string",
-          "enum": [
-            "Side Panel",
-            "Bottom Panel",
-            "Floating Window"
-          ],
-          "default": "Side Panel",
-          "description": "Location of the Taskio task list panel."
         }
       }
     },

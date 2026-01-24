@@ -1,3 +1,4 @@
+import { SemicolonPreference } from "typescript";
 import typescriptEslint from "typescript-eslint";
 
 export default [{
@@ -19,10 +20,9 @@ export default [{
             format: ["camelCase", "PascalCase"],
         }],
 
-        curly: "warn",
+        curly: "off",
         eqeqeq: "warn",
         "no-throw-literal": "warn",
-        semi: "warn",
-        "disable eslint curly": "on",
+        semi: "off",
     },
 }];

@@ -3,7 +3,7 @@ import * as vscode from 'vscode';
 import TaskioComment from '../../types/TaskioComment';
 import TaskioPriority from '../../types/TaskioPriority';
 
-import { isLikelyComment } from '../parser/commentDetector';
+import { isLikelyComment } from '../parser/CommentDetector';
 import { getTaskioConfig } from '../../config/taskioConfig';
 import DetectPriority from '../parser/PriorityDetector';
 
@@ -11,8 +11,6 @@ import DetectPriority from '../parser/PriorityDetector';
 
 export default function ScanDocument(document: vscode.TextDocument): TaskioComment[] {
   const { keywords, priorityMarkers }: { keywords: string[]; priorityMarkers: Record<TaskioPriority, string>; } = getTaskioConfig();
-
-
 
   const markers = Object.values(priorityMarkers);
 
@@ -24,11 +22,7 @@ export default function ScanDocument(document: vscode.TextDocument): TaskioComme
 
 
 
-  const keywordRegex = new RegExp(
-  `(?:^|\\s)(?:\\/\\/|#|--)\\s*(${keywords.join('|')})([${priorityCharClass}]*)`,
-  'i'
-);
-
+  const keywordRegex = new RegExp(`(?<![A-Z0-9_])(${keywords.join('|')})([${priorityCharClass}]*)(?=\\s|:|-)`, 'gi' );
 
   const results: TaskioComment[] = [];
 
@@ -43,7 +37,6 @@ export default function ScanDocument(document: vscode.TextDocument): TaskioComme
     let match: RegExpExecArray | null;
 
     while ((match = keywordRegex.exec(lineText))) {
-      const keyword = match[1];
       const suffix = match[2] ?? '';
 
       const priority = DetectPriority(suffix, priorityMarkers);
@@ -59,7 +52,7 @@ export default function ScanDocument(document: vscode.TextDocument): TaskioComme
         keyword: match[1],
         text: fullText,
         displayText: fullText.replace(priorityMarkers[priority], ''),
-        priority,
+        priority: priority ?? 'default',
       });
     }
   }
