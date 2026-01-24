@@ -25,8 +25,8 @@ export default function ScanDocument(document: vscode.TextDocument): TaskioComme
 
 
   const keywordRegex = new RegExp(
-    `(?<![A-Z0-9_])(${keywords.join('|')})([${priorityCharClass}]*)(?=\\s|:|-)`,
-    'gi'
+  `(?:^|\\s)(?:\\/\\/|#|--)\\s*(${keywords.join('|')})([${priorityCharClass}]*)`,
+  'i'
 );
 
 
