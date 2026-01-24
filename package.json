@@ -2,7 +2,7 @@
   "name": "taskio",
   "displayName": "Taskio",
   "description": "Turn TODO comments into real taks",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "engines": {
     "vscode": "1.108.0"
   },
