@@ -6,6 +6,13 @@
   "engines": {
     "vscode": "^1.70.0"
   },
+  "publisher": "taskio",
+  "icon": "taskio-icon.png",
+  "repository": {
+    "type": "git", 
+    "url": "https://github.com/criszst/taskio.git"
+     },
+
   "categories": [
     "Visualization",
     "Other"
@@ -30,9 +37,6 @@
   "activationEvents": [
     "onStartupFinished"
   ],
-
-    "publisher": "taskio",
-    "icon": "taskio-icon.png",
 
   "main": "./dist/extension.js",
   "contributes": {

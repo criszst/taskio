@@ -7,7 +7,7 @@ import CommentDetector from '../parser/CommentDetector';
 import { getTaskioConfig } from '../../config/GetConfig';
 import DetectPriority from '../parser/PriorityDetector';
 
-  // TODO: test for TODO tree
+
 
 export default function ScanDocument(document: vscode.TextDocument): TaskioComment[] {
   const { keywords, priorityMarkers }: { keywords: string[]; priorityMarkers: Record<TaskioPriority, string>; } = getTaskioConfig();

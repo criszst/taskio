@@ -18,6 +18,10 @@ export function activate(context: vscode.ExtensionContext) {
   const store = new CommentStore()
   const treeProvider = new TreeProvider(store);
 
+    const treeView = vscode.window.createTreeView('taskioView', {
+  treeDataProvider: treeProvider
+});
+
 
   
   const update = () => {
@@ -63,10 +67,6 @@ export function activate(context: vscode.ExtensionContext) {
       treeProvider.refresh();
     }
   })();
-
-  const treeView = vscode.window.createTreeView('taskioView', {
-  treeDataProvider: treeProvider
-});
 
   if (vscode.window.activeTextEditor) {
     const doc = vscode.window.activeTextEditor.document
