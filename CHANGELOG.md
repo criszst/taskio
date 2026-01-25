@@ -6,6 +6,13 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ---
 
+## [0.0.6] – 2026-01-26
+
+### Improved
+- Improved Search action placement in the Taskio Tree View for better discoverability
+
+---
+
 ## [0.0.5] – 2026-01-25
 
 ### Added

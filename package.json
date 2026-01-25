@@ -50,14 +50,14 @@
         {
           "command": "taskio.searchTodos",
           "when": "view == taskioView",
-          "group": "navigation"
+          "group": "navigation@1"
         }
       ],
       "explorer/context": [
         {
           "command": "taskio.searchTodos",
           "when": "explorerResourceIsFolder == false",
-          "group": "navigation"
+          "group": "navigation@1"
         }
       ]
     },
@@ -126,7 +126,7 @@
 
       {
         "command": "taskio.searchTodos",
-        "title": "🔍︎",
+        "title": "🔍︎ Search",
         "enablement": "view == taskioView"
       }
     ]
