@@ -1,4 +1,4 @@
-# Taskio – TODO Comments as Tasks for VS Code
+# Taskio - TODO List
 
 Turn TODO, FIXME and BUG comments into **real, actionable tasks** inside Visual Studio Code.
 
