@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import { CommentStore } from '../../store/CommentStore';
 import ScanDocument from './DocumentScanner';
+import shouldIgnoreDocument from '../../config/IgnoredFiles';
 
 export async function ScanWorkspace(store: CommentStore) {
   if (!vscode.workspace.workspaceFolders) {
@@ -9,14 +10,19 @@ export async function ScanWorkspace(store: CommentStore) {
   }
 
   const files = await vscode.workspace.findFiles(
-    '**/*.{js,ts,jsx,tsx,py,java,cs,cpp,go,rb,rs,php,html,css,scss,md}', //includes
-    '**/node_modules/**, **/out/**, **/dist/**' // excludes
-  );
+  '**/*.{js,ts,jsx,tsx,py,java,cs,cpp,go,rb,rs,php,html,css,scss,md}',
+  '**/{node_modules,out,dist}/**',
+  undefined
+);
 
   
-  files.forEach(async file => {
+  await Promise.all(
+  files.map(async file => {
+    if (shouldIgnoreDocument(file)) return;
+     
     const doc = await vscode.workspace.openTextDocument(file);
-
     store.setMany(ScanDocument(doc));
   })
+);
+
 }

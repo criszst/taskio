@@ -8,6 +8,7 @@ import CopyComment from './commands/CopyComment';
 import { RevealComment } from './commands/RevealComment';
 import { SearchTodos } from './commands/SearchTodos';
 import { ScanWorkspace } from './treeView/scanner/WorkspaceScanner';
+import shouldIgnoreDocument from './config/IgnoredFiles';
 
 export function activate(context: vscode.ExtensionContext) {
   console.log('🔥 Taskio activated');
@@ -30,6 +31,10 @@ export function activate(context: vscode.ExtensionContext) {
     vscode.window.onDidChangeActiveTextEditor(update),
 
     vscode.workspace.onDidChangeTextDocument(event => {
+
+      if (shouldIgnoreDocument(event.document.uri)) return;
+
+
       const editor = vscode.window.activeTextEditor
       if (editor && event.document === editor.document) {
         ApplyDecorators(editor, store)
@@ -64,8 +69,11 @@ export function activate(context: vscode.ExtensionContext) {
   if (vscode.window.activeTextEditor) {
     const doc = vscode.window.activeTextEditor.document
 
+    if (!shouldIgnoreDocument(doc.uri)) {
+
     store.setMany(ScanDocument(doc))
     treeProvider.refresh()
+    }
   }
 
   context.subscriptions.push(vscode.commands.registerCommand('taskio.revealComment',
@@ -86,11 +94,18 @@ export function activate(context: vscode.ExtensionContext) {
 
 
   vscode.workspace.onDidOpenTextDocument(document => {
+
+    if (shouldIgnoreDocument(document.uri)) return;
+
+
     store.setMany(ScanDocument(document));
     treeProvider.refresh();
   });
 
   vscode.workspace.onDidChangeTextDocument(event => {
+
+    if (shouldIgnoreDocument(event.document.uri)) return;
+
     const editor = vscode.window.activeTextEditor;
     const doc = event.document;
 

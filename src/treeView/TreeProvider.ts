@@ -47,9 +47,12 @@ export class TreeProvider implements vscode.TreeDataProvider<TreeNode> {
 
       for (const c of comments) {
         if (!c.uri.fsPath.startsWith(element.path)) continue;
+        
 
         const relative = path.relative(element.path, c.uri.fsPath);
         const parts = relative.split(path.sep);
+
+        if (relative.startsWith('node_modules')) continue;
 
         if (parts.length > 1) {
           const subPart = path.join(element.path, parts[0]);

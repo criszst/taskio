@@ -1,6 +1,6 @@
 import * as vscode from 'vscode'
 import { CommentStore } from '../store/CommentStore'
-import { getTaskioConfig } from '../config/taskioConfig'
+import { getTaskioConfig } from '../config/GetConfig'
 
 let currentDecorations = {
   default: vscode.window.createTextEditorDecorationType({

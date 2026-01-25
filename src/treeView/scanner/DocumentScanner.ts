@@ -3,8 +3,8 @@ import * as vscode from 'vscode';
 import TaskioComment from '../../types/TaskioComment';
 import TaskioPriority from '../../types/TaskioPriority';
 
-import { isLikelyComment } from '../parser/CommentDetector';
-import { getTaskioConfig } from '../../config/taskioConfig';
+import CommentDetector from '../parser/CommentDetector';
+import { getTaskioConfig } from '../../config/GetConfig';
 import DetectPriority from '../parser/PriorityDetector';
 
   // TODO: test for TODO tree
@@ -29,26 +29,33 @@ export default function ScanDocument(document: vscode.TextDocument): TaskioComme
   for (let line = 0; line < document.lineCount; line++) {
     const lineText = document.lineAt(line).text;
 
+    console.log(lineText)
 
-    if (!isLikelyComment(lineText)) continue;
+    const commentText = CommentDetector(lineText);
+
+
+    if (!commentText) continue;
 
     keywordRegex.lastIndex = 0;
 
     let match: RegExpExecArray | null;
 
-    while ((match = keywordRegex.exec(lineText))) {
+    while ((match = keywordRegex.exec(commentText))) {
       const suffix = match[2] ?? '';
 
       const priority = DetectPriority(suffix, priorityMarkers);
 
       const id = `${document.uri.toString()}:${line}:${match.index}`;
-      const fullText = lineText.slice(match.index);
+      const fullText = commentText.slice(match.index);
+
+      const baseIndex = lineText.indexOf(commentText);
+      const charIndex = baseIndex + match.index;
 
       results.push({
         id,
         uri: document.uri,
         line,
-        character: match.index,
+        character: charIndex,
         keyword: match[1],
         text: fullText,
         displayText: fullText.replace(priorityMarkers[priority], ''),
