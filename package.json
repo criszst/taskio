@@ -2,16 +2,16 @@
   "name": "taskio",
   "displayName": "Taskio - TODO List",
   "description": "Turn TODO comments into real tasks",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "engines": {
     "vscode": "^1.70.0"
   },
   "publisher": "taskio",
-  "icon": "taskio-icon.png",
+  "icon": "assets/taskio-icon.png",
   "repository": {
     "type": "git", 
     "url": "https://github.com/criszst/taskio.git"
-     },
+  },
 
   "categories": [
     "Visualization",
@@ -70,7 +70,7 @@
         {
           "id": "taskio-tree",
           "title": "Taskio",
-          "icon": "taskio.svg"
+          "icon": "assets/taskio.svg"
         }
       ]
     },
@@ -79,7 +79,7 @@
         {
           "id": "taskioView",
           "name": "Tree View",
-          "icon": "taskio.svg"
+          "icon": "assets/taskio.svg"
         }
       ]
     },

@@ -14,12 +14,12 @@ Turn TODO, FIXME and BUG comments into **real, actionable tasks** inside Visual 
 
 ## Features
 
-- 🔍 Automatically detects `TODO`, `FIXME` and `BUG` comments  
-- 🌳 Displays all tasks in a dedicated **Tree View**  
-- ⚡ Fast search across TODO comments  
-- 🎯 Task priorities using markers (`!`, `!!`, `!!!`)  
-- 🎨 Customizable highlight colors and behavior  
-- 🪶 Lightweight and fast (no performance impact)
+- Automatically detects `TODO`, `FIXME` and `BUG` comments  
+- Displays all tasks in a dedicated **Tree View**  
+- Fast search across TODO comments  
+- Task priorities using markers (`!`, `!!`, `!!!`)  
+- Customizable highlight colors and behavior  
+- Lightweight and fast (no performance impact)
 
 ---
 

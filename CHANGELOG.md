@@ -6,6 +6,13 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ---
 
+## [0.0.7] - 2026-01-26
+
+### Added
+- Publicly accessible repository for the Taskio extension, containing the source code and build process.
+
+---
+
 ## [0.0.6] – 2026-01-26
 
 ### Improved
