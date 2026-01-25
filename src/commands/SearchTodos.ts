@@ -1,8 +1,12 @@
 import * as vscode from 'vscode';
-import TaskioComment from '../types/TaskioComment';
-import { CommentStore } from '../store/CommentStore';
 import path from 'path';
+
+import TaskioComment from '../types/TaskioComment';
+
+import { CommentStore } from '../store/CommentStore';
 import { RevealComment } from './RevealComment';
+
+import { getEmojiByPriority } from '../decoration/IconDecorators';
 
 export async function SearchTodos(store: CommentStore) {
   const comments = store.getAll();
@@ -18,7 +22,7 @@ export async function SearchTodos(store: CommentStore) {
       const file = path.basename(comment.uri.fsPath);
 
       return {
-        label: `${comment.displayText ?? comment.text}`,
+        label: `${getEmojiByPriority(comment.priority)} ${comment.displayText ?? comment.text}`,
         description: `${file}:${comment.line + 1} - ${comment.priority.toUpperCase()}`,
         comment
       };

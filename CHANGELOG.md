@@ -15,11 +15,9 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
   - Copy file name and line number
 - Priority emojis displayed in the Search / Quick Pick list
 - Context menu action to copy tasks directly from the Tree View
-- Improved keyword stripping logic for copied content
+
 
 ### Improved
-- Task search ordering by priority (high → low → default)
-- Tree View item clarity with better labels and tooltips
 - Internal command structure for future copy-related features
 
 ### Fixed

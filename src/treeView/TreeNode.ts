@@ -28,7 +28,7 @@ export class CommentNode extends vscode.TreeItem {
     super(comment.displayText ?? comment.text, vscode.TreeItemCollapsibleState.None);
 
     this.description = `Line ${this.comment.line + 1} - ${this.comment.priority.toUpperCase()}`;
-    this.tooltip = `${this.comment.displayText ?? this.comment.text} (Line ${this.comment.line + 1})`;
+    this.tooltip = `${this.comment.displayText ?? this.comment.text} (Line ${this.comment.line + 1}) - ${this.comment.priority.toUpperCase()}`;
 
     this.contextValue = 'taskioComment';
 
@@ -38,7 +38,8 @@ export class CommentNode extends vscode.TreeItem {
       arguments: [comment],
     };
 
-
+    this.resourceUri = comment.uri;
+    
     this.iconPath = this.comment.priority !== 'default' ? getIconByPriority(this.comment.priority): getIconByKeyword(comment.keyword);
   }
 }

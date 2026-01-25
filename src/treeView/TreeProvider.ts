@@ -1,14 +1,18 @@
 import * as vscode from 'vscode';
-import TaskioComment from '../types/TaskioComment';
-import { TreeItem } from './TreeItem';
-import { CommentStore } from '../store/CommentStore';
-import { CommentNode, FileNode, FolderNode, TreeNode } from './TreeNode';
+
+import { TreeItem } from 'vscode';
+
 import path from 'path';
 
-export class TreeProvider implements vscode.TreeDataProvider<TreeNode> {
-  private _onDidChangeTreeData: vscode.EventEmitter<TreeItem | undefined | void> = new vscode.EventEmitter<TreeItem | undefined | void>();
+import { CommentStore } from '../store/CommentStore';
+import { CommentNode, FileNode, FolderNode, TreeNode } from './TreeNode';
 
-  readonly onDidChangeTreeData: vscode.Event<TreeItem | undefined | void> = this._onDidChangeTreeData.event;
+
+
+export class TreeProvider implements vscode.TreeDataProvider<TreeNode> {
+  private _onDidChangeTreeData: vscode.EventEmitter<TreeNode | undefined | void> = new vscode.EventEmitter<TreeNode | undefined | void>();
+
+  readonly onDidChangeTreeData: vscode.Event<TreeNode | undefined | void> = this._onDidChangeTreeData.event;
 
   constructor(private store: CommentStore) { }
 

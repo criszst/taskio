@@ -9,6 +9,8 @@ import { RevealComment } from './commands/RevealComment';
 import { SearchTodos } from './commands/SearchTodos';
 import { ScanWorkspace } from './treeView/scanner/WorkspaceScanner';
 import shouldIgnoreDocument from './config/IgnoredFiles';
+import { CommentNode } from './treeView/TreeNode';
+import updateTreeTitle from './utils/TreeTitle';
 
 export function activate(context: vscode.ExtensionContext) {
   console.log('🔥 Taskio activated');
@@ -17,6 +19,7 @@ export function activate(context: vscode.ExtensionContext) {
   const treeProvider = new TreeProvider(store);
 
 
+  
   const update = () => {
     const editor = vscode.window.activeTextEditor;
 
@@ -61,10 +64,9 @@ export function activate(context: vscode.ExtensionContext) {
     }
   })();
 
-  vscode.window.registerTreeDataProvider(
-    'taskioView',
-    treeProvider
-  );
+  const treeView = vscode.window.createTreeView('taskioView', {
+  treeDataProvider: treeProvider
+});
 
   if (vscode.window.activeTextEditor) {
     const doc = vscode.window.activeTextEditor.document
@@ -73,6 +75,7 @@ export function activate(context: vscode.ExtensionContext) {
 
     store.setMany(ScanDocument(doc))
     treeProvider.refresh()
+    updateTreeTitle(treeView, store)
     }
   }
 
@@ -84,7 +87,8 @@ export function activate(context: vscode.ExtensionContext) {
 
 
   context.subscriptions.push(vscode.commands.registerCommand('taskio.copyComment',
-    async (comment: TaskioComment) => {
+    async (comment: CommentNode) => {
+      console.log(comment);
       await CopyComment(comment);
     }
   ));
@@ -100,6 +104,7 @@ export function activate(context: vscode.ExtensionContext) {
 
     store.setMany(ScanDocument(document));
     treeProvider.refresh();
+    updateTreeTitle(treeView, store)
   });
 
   vscode.workspace.onDidChangeTextDocument(event => {
@@ -115,6 +120,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 
     treeProvider.refresh();
+    updateTreeTitle(treeView, store)
 
     if (editor && editor.document === doc) {
       ApplyDecorators(editor, store);

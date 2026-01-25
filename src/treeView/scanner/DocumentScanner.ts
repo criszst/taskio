@@ -29,8 +29,6 @@ export default function ScanDocument(document: vscode.TextDocument): TaskioComme
   for (let line = 0; line < document.lineCount; line++) {
     const lineText = document.lineAt(line).text;
 
-    console.log(lineText)
-
     const commentText = CommentDetector(lineText);
 
 

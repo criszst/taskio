@@ -2,9 +2,9 @@
   "name": "taskio",
   "displayName": "Taskio - TODO List",
   "description": "Turn TODO comments into real tasks",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "engines": {
-    "vscode": "^1.108.0"
+    "vscode": "^1.70.0"
   },
   "categories": [
     "Visualization",
@@ -123,6 +123,7 @@
         "title": "Copy",
         "enablement": "view == taskioView"
       },
+      
       {
         "command": "taskio.searchTodos",
         "title": "🔍︎",

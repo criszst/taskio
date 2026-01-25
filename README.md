@@ -6,7 +6,7 @@ Turn TODO, FIXME and BUG comments into **real, actionable tasks** inside Visual 
 
 <div align="center">
 
-![Taskio TODO Example](https://i.ibb.co/5gn0pPY2/todo-example-3.png)
+![Taskio TODO Example](./image.png)
 
 </div>
 

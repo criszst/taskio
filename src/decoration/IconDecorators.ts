@@ -46,3 +46,16 @@ export function getIconByKeyword(keyword: string): ThemeIcon {
       return new ThemeIcon('check')
   }
 }
+
+export function getEmojiByPriority(priority: TaskioPriority): string {
+  switch (priority) {
+    case 'high':
+      return '🔴'
+    case 'medium':
+      return '🟡'
+    case 'low':
+      return '🟢';
+    default:
+      return '';
+  }
+}
