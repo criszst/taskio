@@ -6,6 +6,10 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ---
 
+## 0.0.8 - 2026-01-26
+- Updated README demo (media optimization)
+
+
 ## [0.0.7] - 2026-01-26
 
 ### Added
