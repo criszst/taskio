@@ -6,7 +6,47 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ---
 
-## [0.0.3] – 2026-01-25
+## [0.0.5] – 2026-01-25
+
+### Added
+- Smart Copy command for tasks:
+  - Copy description only (without keyword and priority markers)
+  - Copy full comment text
+  - Copy file name and line number
+- Priority emojis displayed in the Search / Quick Pick list
+- Context menu action to copy tasks directly from the Tree View
+- Improved keyword stripping logic for copied content
+
+### Improved
+- Task search ordering by priority (high → low → default)
+- Tree View item clarity with better labels and tooltips
+- Internal command structure for future copy-related features
+
+### Fixed
+- Issue where Copy command received an undefined comment
+- Incorrect task text being copied in some edge cases
+- Minor UX inconsistencies in task selection
+
+---
+
+## [0.0.4] – 2026-01-24
+
+### Added
+- Copy action to copy only the task description (without keyword)
+- Improved keyword parsing to extract clean descriptions
+
+### Improved
+- Regex accuracy to avoid false positives inside strings and JSX
+- Task detection consistency across different languages
+- Internal comment parsing logic
+
+### Fixed
+- False detection of TODO-like words inside strings and return statements
+- Incorrect priority parsing in edge cases
+
+---
+
+## [0.0.3] – 2026-01-24
 
 ### Added
 - Priority markers support using `!`, `!!` and `!!!`
