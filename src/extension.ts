@@ -11,6 +11,7 @@ import { ScanWorkspace } from './treeView/scanner/WorkspaceScanner';
 import shouldIgnoreDocument from './config/IgnoredFiles';
 import { CommentNode } from './treeView/TreeNode';
 import updateTreeTitle from './utils/TreeTitle';
+import TreeViewMode from './types/TreeViewMode';
 
 export function activate(context: vscode.ExtensionContext) {
   console.log('🔥 Taskio activated');
@@ -18,12 +19,15 @@ export function activate(context: vscode.ExtensionContext) {
   const store = new CommentStore()
   const treeProvider = new TreeProvider(store);
 
-    const treeView = vscode.window.createTreeView('taskioView', {
-  treeDataProvider: treeProvider
-});
 
 
-  
+  const treeView = vscode.window.createTreeView('taskioView', {
+    treeDataProvider: treeProvider
+  });
+
+
+
+
   const update = () => {
     const editor = vscode.window.activeTextEditor;
 
@@ -73,9 +77,9 @@ export function activate(context: vscode.ExtensionContext) {
 
     if (!shouldIgnoreDocument(doc.uri)) {
 
-    store.setMany(ScanDocument(doc))
-    treeProvider.refresh()
-    updateTreeTitle(treeView, store)
+      store.setMany(ScanDocument(doc))
+      treeProvider.refresh()
+      updateTreeTitle(treeView, store)
     }
   }
 
@@ -95,6 +99,24 @@ export function activate(context: vscode.ExtensionContext) {
 
 
   context.subscriptions.push(vscode.commands.registerCommand('taskio.searchTodos', () => SearchTodos(store)));
+
+  vscode.commands.registerCommand('taskio.organize', async () => {
+    const mode = await vscode.window.showQuickPick(
+      [
+        { label: '🌳 Tree', value: 'tree' },
+        { label: '📄 Files', value: 'files' },
+        { label: '📁 Folders', value: 'folders' },
+        { label: '📋 List', value: 'list' },
+      ],
+      { placeHolder: 'Organize Taskio by...' }
+    );
+
+    if (!mode) return;
+
+    treeProvider.setMode(mode.value as TreeViewMode);
+  });
+
+
 
 
   vscode.workspace.onDidOpenTextDocument(document => {
