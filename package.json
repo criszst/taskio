@@ -61,6 +61,11 @@
           "command": "taskio.organize",
           "when": "view == taskioView",
           "group": "navigation@2"
+        },
+        {
+          "command": "taskio.filter",
+          "when": "view == taskioView",
+          "group": "$navigation@3"
         }
       ],
       "explorer/context": [
@@ -73,6 +78,12 @@
           "command": "taskio.organize",
           "when": "explorerResourceIsFolder == false",
           "group": "navigation@2"
+        },
+
+        {
+          "command": "taskio.filter",
+          "when": "explorerResourceIsFolder == false",
+          "group": "navigation@3"
         }
       ]
     },
@@ -141,13 +152,21 @@
 
       {
         "command": "taskio.searchTodos",
-        "title": "🔍︎ Search",
+        "title": "Search Tasks",
+        "icon": "$(search)",
         "enablement": "view == taskioView"
       }, 
       
       {
         "command": "taskio.organize",
-        "title": "☰ Organize",
+        "title": "Organize Tasks by Mode",
+        "icon": "$(list-unordered)",
+        "enablement": "view == taskioView"
+      },
+      {
+        "command": "taskio.filter",
+        "title": "Filter Tasks",
+        "icon": "$(filter)",
         "enablement": "view == taskioView"
       }
     ]

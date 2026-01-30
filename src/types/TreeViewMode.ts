@@ -1,8 +1,3 @@
-export type TreeViewMode =
-  | 'tree'
-  | 'files'
-  | 'folders'
-  | 'list'
-  | 'priority';
+export type TreeViewMode = 'tree' | 'files' | 'folders' | 'list';
 
 export default TreeViewMode;

@@ -103,10 +103,10 @@ export function activate(context: vscode.ExtensionContext) {
   vscode.commands.registerCommand('taskio.organize', async () => {
     const mode = await vscode.window.showQuickPick(
       [
-        { label: '🌳 Tree', value: 'tree' },
-        { label: '📄 Files', value: 'files' },
-        { label: '📁 Folders', value: 'folders' },
-        { label: '📋 List', value: 'list' },
+        { label: 'Tree View', value: 'tree' },
+        { label: 'Files', value: 'files' },
+        { label: 'Folders', value: 'folders' },
+        { label: 'List', value: 'list' },
       ],
       { placeHolder: 'Organize Taskio by...' }
     );
