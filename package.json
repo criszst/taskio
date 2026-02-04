@@ -2,7 +2,7 @@
   "name": "taskio",
   "displayName": "Taskio - TODO List",
   "description": "Turn TODO comments into real tasks",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "engines": {
     "vscode": "^1.70.0"
   },
