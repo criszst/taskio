@@ -15,11 +15,13 @@ export function registerWorkspaceHandler(manager: EventManager, deps: TaskioDepe
   manager.register(
     vscode.workspace.onDidRenameFiles(async event => {
       for (const file of event.files) {
-        if (shouldIgnoreDocument(file.oldUri)) return;
-        if (shouldIgnoreDocument(file.newUri)) return;
+        if (shouldIgnoreDocument(file.oldUri)) continue;
+        if (shouldIgnoreDocument(file.newUri)) continue;
 
+        // removing old state
         store.removeByUri(file.oldUri);
 
+        // adding new state
         const doc = await vscode.workspace.openTextDocument(file.newUri);
         store.setMany(ScanDocument(doc));
       }
@@ -38,7 +40,12 @@ export function registerWorkspaceHandler(manager: EventManager, deps: TaskioDepe
       for (const uri of event.files) {
         if (shouldIgnoreDocument(uri)) return;
 
-        store.removeByUri(uri);
+        const doc = vscode.workspace.textDocuments.find(d => d.uri.toString() === uri.toString());
+        if (doc) {
+          store.replaceByUri(uri, ScanDocument(doc));
+        } else {
+          store.removeByUri(uri);
+        }
       }
 
       treeProvider.refresh();

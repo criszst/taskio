@@ -5,6 +5,41 @@ All notable changes to the "taskio" extension will be documented in this file.
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
 ---
+## [0.1.1] – 2026-02-02
+
+### Added
+- Export tasks to JSON
+- Export tasks to Markdown
+
+### Improved
+- Task ordering by priority (high → low)
+- Cleaner exported task descriptions
+
+---
+
+## [0.1.0] – 2026-02-01
+
+### Added
+- Due date support in tasks
+- Overdue task visual highlight
+- Quick Code Actions (mark as done, copy, reveal)
+
+### Improved
+- Task parsing robustness
+- Tree View performance
+
+---
+
+## [0.0.9] – 2026-01-30
+
+### Added
+- Task grouping by folder and file
+- Priority-based sorting option
+
+### Improved
+- Internal data model for tasks
+
+---
 
 ## 0.0.8 - 2026-01-26
 - Updated README demo (media optimization)

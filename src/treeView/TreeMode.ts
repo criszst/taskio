@@ -53,51 +53,58 @@ export default class TreeMode {
 
     // ROOT - FOLDERS/FILES
     if (!element) {
-      const folders = new Map<string, FolderNode>();
-      const rootFiles = new Map<string, FileNode>();
+      const nodes = new Map<string, TreeNode>();
 
-      for (const comment of comments) {
-        const folderPath = path.dirname(comment.uri.fsPath);
+      for (const c of comments) {
+        const relative = path.relative(workspace, c.uri.fsPath);
+        const parts = relative.split(path.sep);
 
-        // Files without SubFolder (on ROOT)
-        if (folderPath === workspace) {
-
-          if (!rootFiles.has(comment.uri.fsPath)) {
-            rootFiles.set(comment.uri.fsPath, new FileNode(comment.uri, path.basename(comment.uri.fsPath)));
-          }
-
-        }
-        // Files on SubFolder
-        else {
-          const displayName = path.basename(folderPath);
-
-          if (!folders.has(folderPath)) {
-            folders.set(folderPath, new FolderNode(folderPath, displayName));
-          }
+        if (parts.length === 1) {
+        
+          nodes.set(
+            c.uri.fsPath,
+            new FileNode(c.uri, parts[0])
+          );
+        } else {
+          
+          const folderPath = path.join(workspace, parts[0]);
+          nodes.set(
+            folderPath,
+            new FolderNode(folderPath, parts[0])
+          );
         }
       }
 
-      return [...rootFiles.values(), ...folders.values()];
+      return Array.from(nodes.values());
     }
 
     // FOLDER / FILES 
     if (element instanceof FolderNode) {
-      const files = new Map<string, FileNode>();
+      const nodes = new Map<string, TreeNode>();
 
-      for (const comment of comments) {
-        const todoFolder = path.dirname(comment.uri.fsPath);
+      for (const c of comments) {
+        if (!c.uri.fsPath.startsWith(element.path + path.sep)) continue;
 
-        if (todoFolder === element.path) {
-          if (!files.has(comment.uri.fsPath)) {
-            files.set(
-              comment.uri.fsPath,
-              new FileNode(comment.uri, path.basename(comment.uri.fsPath))
-            );
-          }
+        const relative = path.relative(element.path, c.uri.fsPath);
+        const parts = relative.split(path.sep);
+
+        if (parts.length === 1) {
+    
+          nodes.set(
+            c.uri.fsPath,
+            new FileNode(c.uri, parts[0])
+          );
+        } else {
+         
+          const subFolderPath = path.join(element.path, parts[0]);
+          nodes.set(
+            subFolderPath,
+            new FolderNode(subFolderPath, parts[0])
+          );
         }
       }
 
-      return Array.from(files.values());
+      return Array.from(nodes.values());
     }
 
     // FILE
@@ -113,41 +120,36 @@ export default class TreeMode {
 
   public getTreeMode(element: TreeNode): TreeNode[] | Thenable<TreeNode[]> {
     const comments = this.store.getAll();
-    const workspace = vscode.workspace.workspaceFolders?.[0].uri.fsPath;
 
     const workspaceFolders = vscode.workspace.workspaceFolders?.[0].uri.fsPath;
-    const ignored = ['node_modules', '.git', 'dist'];
 
 
     if (!workspaceFolders) return []
 
     if (!element) {
-      const folders = new Map<string, FolderNode>();
-      const rootFiles = new Map<string, FileNode>();
+      const nodes = new Map<string, TreeNode>();
 
-      for (const comment of comments) {
-        const folderPath = path.dirname(comment.uri.fsPath);
+      for (const c of comments) {
+        const relative = path.relative(workspaceFolders, c.uri.fsPath);
+        const parts = relative.split(path.sep);
 
-        // Files without SubFolder (on ROOT)
-        if (folderPath === workspace) {
-
-          if (!rootFiles.has(comment.uri.fsPath)) {
-            rootFiles.set(comment.uri.fsPath, new FileNode(comment.uri, path.basename(comment.uri.fsPath)));
-          }
-
-        }
-        // Files on SubFolder
-        else {
-          const displayName = path.basename(folderPath);
-
-          if (!folders.has(folderPath)) {
-            folders.set(folderPath, new FolderNode(folderPath, displayName));
-          }
+        if (parts.length === 1) {
+          
+          nodes.set(
+            c.uri.fsPath,
+            new FileNode(c.uri, parts[0])
+          );
+        } else {
+    
+          const folderPath = path.join(workspaceFolders, parts[0]);
+          nodes.set(
+            folderPath,
+            new FolderNode(folderPath, parts[0])
+          );
         }
       }
 
-      return [...rootFiles.values(), ...folders.values()];
-
+      return Array.from(nodes.values());
     }
 
 
@@ -155,21 +157,24 @@ export default class TreeMode {
       const nodes = new Map<string, TreeNode>();
 
       for (const c of comments) {
-        if (!c.uri.fsPath.startsWith(element.path)) continue;
-
+        if (!c.uri.fsPath.startsWith(element.path + path.sep)) continue;
 
         const relative = path.relative(element.path, c.uri.fsPath);
         const parts = relative.split(path.sep);
 
-        if (ignored.includes(parts[0])) continue;
-
-        if (parts.length > 1) {
-          const subPart = path.join(element.path, parts[0]);
-          nodes.set(subPart, new FolderNode(subPart, parts[0]));
-        }
-
-        else {
-          nodes.set(c.uri.fsPath, new FileNode(c.uri, path.basename(c.uri.fsPath)));
+        if (parts.length === 1) {
+    
+          nodes.set(
+            c.uri.fsPath,
+            new FileNode(c.uri, parts[0])
+          );
+        } else {
+      
+          const subFolderPath = path.join(element.path, parts[0]);
+          nodes.set(
+            subFolderPath,
+            new FolderNode(subFolderPath, parts[0])
+          );
         }
       }
 

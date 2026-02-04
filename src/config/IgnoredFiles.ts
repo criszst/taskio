@@ -144,7 +144,6 @@ export default function shouldIgnoreDocument(uri: Uri): boolean {
 
   
   const fileExtension = path.extname(fsPath);
-  console.log('File extension:', fileExtension);
   
   if (fileExtension === '') return true;
   

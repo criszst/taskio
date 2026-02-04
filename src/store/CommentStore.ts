@@ -25,6 +25,14 @@ export class CommentStore {
     }
   }
 
+  replaceByUri(uri: vscode.Uri, comments: TaskioComment[]) {
+  this.comments = new Map<string, TaskioComment>(Array.from(this.comments.entries()).filter(([id, comment]) => comment.uri.toString() !== uri.toString()));
+  for (const comment of comments) {
+    this.comments.set(comment.id, comment);
+  }
+}
+
+
   getAll(): TaskioComment[] {
     return Array.from(this.comments.values());
   }

@@ -10,9 +10,11 @@ import { registerEditorHandler } from './events/handlers/editorHandler';
 import { registerCommands } from './events/RegisterCommands';
 
 
-export function activate(context: vscode.ExtensionContext) {
+export async function activate(context: vscode.ExtensionContext) {
   const deps = createDeps();
   const eventManager = new EventManager();
+
+  await verifyWorkspaceChanges(deps);
 
   registerEditorHandler(eventManager, deps);
 
@@ -21,8 +23,7 @@ export function activate(context: vscode.ExtensionContext) {
 
   registerCommands(context, deps);
 
-  verifyWorkspaceChanges(deps);
-
+  
   context.subscriptions.push(eventManager);
 
 }
