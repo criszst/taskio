@@ -12,7 +12,7 @@ import EventManager from '../EventManager';
 export function registerWorkspaceHandler(manager: EventManager, deps: TaskioDependencies): void {
   const { store, treeProvider, treeView, updateTreeTitle } = deps;
 
-   manager.register(
+  manager.register(
     vscode.workspace.onDidRenameFiles(async event => {
       for (const file of event.files) {
         if (shouldIgnoreDocument(file.oldUri)) return;
@@ -53,4 +53,10 @@ export async function verifyWorkspaceChanges(deps: TaskioDependencies): Promise<
 
   await ScanWorkspace(deps.store);
   deps.treeProvider.refresh();
+
+  for (const editor of vscode.window.visibleTextEditors) {
+    if (!shouldIgnoreDocument(editor.document.uri)) {
+      deps.applyDecorators(editor, deps.store);
+    }
+  }
 }

@@ -8,19 +8,23 @@ import EventManager from '../EventManager';
 export function registerDocumentHandler(manager: EventManager, deps: TaskioDependencies): void {
   const { store, treeProvider, treeView, applyDecorators, updateTreeTitle } = deps;
 
-   manager.register(
+  manager.register(
     vscode.workspace.onDidOpenTextDocument(doc => {
       if (shouldIgnoreDocument(doc.uri)) return;
 
       store.setMany(ScanDocument(doc));
       treeProvider.refresh();
       updateTreeTitle(treeView, store);
+
+      const editor = vscode.window.visibleTextEditors.find(e => e.document.uri.toString() === doc.uri.toString());
+
+      if (editor) applyDecorators(editor, store);
     })
   );
 
   manager.register(
     vscode.workspace.onDidChangeTextDocument(event => {
-     const doc = event.document;
+      const doc = event.document;
       if (shouldIgnoreDocument(doc.uri)) return;
 
       store.removeByUri(doc.uri);
@@ -29,7 +33,7 @@ export function registerDocumentHandler(manager: EventManager, deps: TaskioDepen
       treeProvider.refresh();
       updateTreeTitle(treeView, store);
 
-      const editor = vscode.window.visibleTextEditors.find(e => e.document === doc);
+      const editor = vscode.window.visibleTextEditors.find(e => e.document.uri.toString() === doc.uri.toString());
 
       if (editor) applyDecorators(editor, store);
     })
