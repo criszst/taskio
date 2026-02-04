@@ -1,6 +1,7 @@
 import * as vscode from 'vscode'
 import { CommentStore } from '../store/CommentStore'
 import { getTaskioConfig } from '../config/GetConfig'
+import shouldIgnoreDocument from '../config/IgnoredFiles';
 
 let currentDecorations = {
   default: vscode.window.createTextEditorDecorationType({
@@ -60,6 +61,11 @@ createDecorations();
 
 export function ApplyDecorators(editor: vscode.TextEditor, store: CommentStore): void {
   const uri = editor.document.uri;
+  
+
+  if (shouldIgnoreDocument(uri)) return;
+
+  
   const { enhanceAllText } = getTaskioConfig();
   
   const byPriority = {

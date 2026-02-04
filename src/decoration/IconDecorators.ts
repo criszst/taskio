@@ -5,22 +5,13 @@ import TaskioPriority from "../types/TaskioPriority";
 export function getIconByPriority(priority: TaskioPriority): ThemeIcon {
   switch (priority) {
     case 'high':
-      return new ThemeIcon(
-        'circle-filled',
-        new ThemeIcon('charts.red')
-      );
+      return new ThemeIcon( 'circle-filled', new ThemeIcon('charts.red'));
 
     case 'medium':
-      return new ThemeIcon(
-        'circle-filled',
-        new ThemeIcon('charts.yellow')
-      );
+      return new ThemeIcon( 'circle-filled', new ThemeIcon('charts.yellow') );
 
     case 'low':
-      return new ThemeIcon(
-        'circle-filled',
-        new ThemeIcon('charts.green')
-      );
+      return new ThemeIcon( 'circle-filled', new ThemeIcon('charts.green') );
 
     default:
       return new ThemeIcon('circle-outline');

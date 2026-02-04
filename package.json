@@ -2,7 +2,7 @@
   "name": "taskio",
   "displayName": "Taskio - TODO List",
   "description": "Turn TODO comments into real tasks",
-  "version": "0.0.9",
+  "version": "0.1.0",
   "engines": {
     "vscode": "^1.70.0"
   },
@@ -52,7 +52,7 @@
 
       "view/title": [
         {
-          "command": "taskio.searchTodos",
+          "command": "taskio.searchTasks",
           "when": "view == taskioView",
           "group": "navigation@1"
         },
@@ -62,18 +62,20 @@
           "when": "view == taskioView",
           "group": "navigation@2"
         },
+        
         {
-          "command": "taskio.filter",
+          "command": "taskio.exportTasks",
           "when": "view == taskioView",
-          "group": "$navigation@3"
+          "group": "navigation@3"
         }
       ],
       "explorer/context": [
         {
-          "command": "taskio.searchTodos",
+          "command": "taskio.searchTasks",
           "when": "explorerResourceIsFolder == false",
           "group": "navigation@1"
         },
+
         {
           "command": "taskio.organize",
           "when": "explorerResourceIsFolder == false",
@@ -81,10 +83,11 @@
         },
 
         {
-          "command": "taskio.filter",
+          "command": "taskio.exportTasks",
           "when": "explorerResourceIsFolder == false",
           "group": "navigation@3"
         }
+
       ]
     },
     "viewsContainers": {
@@ -140,6 +143,12 @@
             "low": "!"
           },
           "description": "Priority markers based on repeated characters after the keyword"
+        },
+
+        "taskio.showStatistics": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show statistics panel in the Taskio view"
         }
       }
     },
@@ -151,7 +160,7 @@
       },
 
       {
-        "command": "taskio.searchTodos",
+        "command": "taskio.searchTasks",
         "title": "Search Tasks",
         "icon": "$(search)",
         "enablement": "view == taskioView"
@@ -163,10 +172,11 @@
         "icon": "$(list-unordered)",
         "enablement": "view == taskioView"
       },
+
       {
-        "command": "taskio.filter",
-        "title": "Filter Tasks",
-        "icon": "$(filter)",
+        "command": "taskio.exportTasks",
+        "title": "Export Tasks",
+        "icon": "$(export)",
         "enablement": "view == taskioView"
       }
     ]
