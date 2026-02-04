@@ -5,7 +5,15 @@ All notable changes to the "taskio" extension will be documented in this file.
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
 ---
-## [0.1.1] – 2026-02-02
+## [0.1.2] - 2026.04.02
+
+## Fixed
+- Some files (after renaming them) did not appear in the initial scan.
+- File extensions such as `.c`, `.h`, `.hpp`, `.cc` did not appear in the matching workspace pattern.
+
+---
+
+## [0.1.1] – 2026.03.02
 
 ### Added
 - Export tasks to JSON
@@ -17,7 +25,7 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ---
 
-## [0.1.0] – 2026-02-01
+## [0.1.0] – 2026.02.02
 
 ### Added
 - Due date support in tasks
@@ -30,7 +38,7 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ---
 
-## [0.0.9] – 2026-01-30
+## [0.0.9] – 2026.01.30
 
 ### Added
 - Task grouping by folder and file
@@ -41,25 +49,25 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ---
 
-## 0.0.8 - 2026-01-26
+## 0.0.8 - 2026.01.26
 - Updated README demo (media optimization)
 
 
-## [0.0.7] - 2026-01-26
+## [0.0.7] - 2026.01.26
 
 ### Added
 - Publicly accessible repository for the Taskio extension, containing the source code and build process.
 
 ---
 
-## [0.0.6] – 2026-01-26
+## [0.0.6] – 2026.01.26
 
 ### Improved
 - Improved Search action placement in the Taskio Tree View for better discoverability
 
 ---
 
-## [0.0.5] – 2026-01-25
+## [0.0.5] – 2026.01.25
 
 ### Added
 - Smart Copy command for tasks:
@@ -80,24 +88,15 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ---
 
-## [0.0.4] – 2026-01-24
+## [0.0.4] – 2026.01.24
 
 ### Added
 - Copy action to copy only the task description (without keyword)
 - Improved keyword parsing to extract clean descriptions
 
-### Improved
-- Regex accuracy to avoid false positives inside strings and JSX
-- Task detection consistency across different languages
-- Internal comment parsing logic
-
-### Fixed
-- False detection of TODO-like words inside strings and return statements
-- Incorrect priority parsing in edge cases
-
 ---
 
-## [0.0.3] – 2026-01-24
+## [0.0.3] – 2026.01.24
 
 ### Added
 - Priority markers support using `!`, `!!` and `!!!`
@@ -112,11 +111,10 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ### Fixed
 - Edge cases where comments were not detected correctly
-- Minor visual glitches in the task list
 
 ---
 
-## [0.0.2] – 2026-01-24
+## [0.0.2] – 2026.01.24
 
 ### Added
 - Configurable TODO keywords (`taskio.keywords`)
@@ -125,11 +123,10 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ### Improved
 - Task detection accuracy
-- Internal architecture for future features
 
 ---
 
-## [0.0.1] – 2026-01-24
+## [0.0.1] – 2026.01.24
 
 ### Added
 - Initial release

@@ -17,6 +17,10 @@ export class CommentStore {
     }
   }
 
+  clear(): void {
+    this.comments.clear();
+  }
+
   removeByUri(uri: vscode.Uri): void {
     for (const [id, comment] of this.comments) {
       if (comment.uri.fsPath === uri.fsPath) {

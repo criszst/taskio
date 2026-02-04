@@ -1,6 +1,6 @@
 import path from "path";
-import { Uri, workspace, FilePermission } from "vscode";
-
+import fs from 'fs';
+import { Uri, workspace } from "vscode";
 
 export default function shouldIgnoreDocument(uri: Uri): boolean {
   const fsPath = uri.fsPath;
@@ -11,16 +11,16 @@ export default function shouldIgnoreDocument(uri: Uri): boolean {
   
 
   const workspaceFolders = workspace.workspaceFolders;
+
   if (workspaceFolders && workspaceFolders.length > 0) {
-    const isInWorkspace = workspaceFolders.some(folder => 
-      fsPath.startsWith(folder.uri.fsPath)
-    );
+    const isInWorkspace = workspaceFolders.some(folder => fsPath.startsWith(folder.uri.fsPath));
+
     if (!isInWorkspace) {
       return true;
     }
   }
   
-  // FOLDERS
+
   const ignoredFolders = [
     'node_modules',
     'dist',
@@ -44,7 +44,7 @@ export default function shouldIgnoreDocument(uri: Uri): boolean {
   ];
   
   for (const folder of ignoredFolders) {
-    if (fsPath.includes(`${path.sep}${folder}${path.sep}`) || 
+    if (fsPath.includes(`${path.sep}${folder}${path.sep}`) ||
         fsPath.endsWith(`${path.sep}${folder}`)) {
       return true;
     }
@@ -52,28 +52,18 @@ export default function shouldIgnoreDocument(uri: Uri): boolean {
   
   // FILES EXTENSIONS
   const ignoredExtensions = [
-    
     '.md',
     '.mdx',
     '.txt',
     '.json',
-    
-   
     '.log',
     '.lock',
-    
- 
     '.min.js',
     '.min.css',
-    
- 
     '.map',
-    
-
     '.d.ts',
-    
     '.git',
-    
+
     // IMAGES
     '.svg',
     '.png',
@@ -83,23 +73,21 @@ export default function shouldIgnoreDocument(uri: Uri): boolean {
     '.ico',
     '.webp',
     '.bmp',
-    
+
     // DOCS
     '.pdf',
     '.doc',
     '.docx',
-    
     '.zip',
     '.tar',
     '.gz',
     '.rar',
     '.7z',
-    
     '.exe',
     '.dll',
     '.so',
     '.dylib',
-    
+
     // DB
     '.db',
     '.sqlite',
@@ -112,7 +100,7 @@ export default function shouldIgnoreDocument(uri: Uri): boolean {
     }
   }
   
-
+  // Specific files
   const fileName = path.basename(fsPath);
   const ignoredFiles = [
     // Lock files
@@ -122,44 +110,51 @@ export default function shouldIgnoreDocument(uri: Uri): boolean {
     'composer.lock',
     'Gemfile.lock',
     'poetry.lock',
-    
+
     // Config files
     '.gitignore',
     '.dockerignore',
     '.eslintignore',
     '.prettierignore',
-    
+
     // Environment files
     '.env',
     '.env.local',
     '.env.development',
     '.env.production',
     '.env.test',
-    
+
     // IDE files
     '.DS_Store',
     'Thumbs.db',
     'desktop.ini',
   ];
-
   
+  if (ignoredFiles.includes(fileName)) {
+    return true;
+  }
+  
+ 
   const fileExtension = path.extname(fsPath);
   
-  if (fileExtension === '') return true;
-  
-  if (ignoredExtensions.includes(fileExtension)) return true;
-  
-  
+  if (fileExtension === '') {
+    try {
+      if (fs.existsSync(fsPath) && fs.statSync(fsPath).isFile()) {
+        return true;
+      }
+    } catch (error) {
+      return true;
+    }
+  }
 
-  // files that appear on unix
+  
+  // files that appear on unix-like systems as hidden files
   if (fileName.startsWith('.') && fileName !== '.') {
-
     const allowedDotFiles = [
       '.eslintrc.js',
       '.prettierrc.js',
       '.babelrc.js',
     ];
-
     if (!allowedDotFiles.includes(fileName)) {
       return true;
     }

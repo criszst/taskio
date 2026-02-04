@@ -9,9 +9,50 @@ export async function ScanWorkspace(store: CommentStore) {
     return;
   }
 
+    const extensions = [
+    // Assembly
+    'asm', 's', 'S',
+
+    // JavaScript/TypeScript
+    'js', 'ts', 'jsx', 'tsx', 'mjs', 'cjs',
+
+    // Python
+    'py', 'pyw',
+
+    // Java/C#
+    'java', 'cs',
+
+    // C/C++
+    'c', 'cpp', 'cc', 'cxx', 'h', 'hpp', 'hxx',
+
+    // Go/Rust
+    'go', 'rs',
+
+    // Ruby/PHP
+    'rb', 'php',
+
+    // Web
+    'html', 'htm', 'css', 'scss', 'sass', 'less',
+
+    // Frameworks
+    'vue', 'svelte',
+
+    // Shell
+    'sh', 'bash',
+
+    // SQL
+    'sql',
+
+    // S,
+    'swift',
+
+    // Kotlin
+    'kt', 'kts'
+  ];
+
   const files = await vscode.workspace.findFiles(
-    '**/*.{js,ts,jsx,tsx,py,java,cs,cpp,go,rb,rs,php,html,css,scss}',
-    '**/{node_modules,out,dist,build,.git,.next,coverage}/**',
+    `**/*.{${extensions.join(',')}}`,
+    '**/{node_modules,out,dist,build,.git,.vscode,.next,.nuxt,coverage,.cache,__pycache__,vendor,target,bin,obj}/**',
     undefined
   );
   

@@ -4,6 +4,9 @@ import shouldIgnoreDocument from '../../config/IgnoredFiles';
 import { CommentStore } from '../../store/CommentStore';
 import { TaskioDependencies } from '../../types/TaskioDependencies';
 import EventManager from '../EventManager';
+import ScanDocument from '../../treeView/scanner/DocumentScanner';
+import { ScanWorkspace } from '../../treeView/scanner/WorkspaceScanner';
+import { syncDocument } from './documentHandler';
 
 export function registerEditorHandler(manager: EventManager, deps: TaskioDependencies): void {
 
@@ -13,7 +16,7 @@ export function registerEditorHandler(manager: EventManager, deps: TaskioDepende
 
       if (shouldIgnoreDocument(editor.document.uri)) return;
 
-      deps.applyDecorators(editor, deps.store);
+      syncDocument(editor.document, deps);
     })
   );
 
@@ -22,7 +25,7 @@ export function registerEditorHandler(manager: EventManager, deps: TaskioDepende
       const editor = vscode.window.activeTextEditor;
       if (!editor) return;
 
-      if (windowState.focused) deps.applyDecorators(editor, deps.store);
+      if (windowState.focused) syncDocument(editor.document, deps);
     })
   );
 

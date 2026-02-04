@@ -7,7 +7,6 @@ import { TreeItem } from "vscode";
 import { CommentStore } from "../store/CommentStore";
 import { CommentNode, FileNode, FolderNode, TreeNode } from "./TreeNode";
 
-
 export default class TreeMode {
   readonly order = { high: 0, medium: 1, low: 2, default: 4 };
 

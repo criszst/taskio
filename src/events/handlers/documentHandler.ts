@@ -8,27 +8,46 @@ import EventManager from '../EventManager';
 export function registerDocumentHandler(manager: EventManager, deps: TaskioDependencies): void {
   const { store, treeProvider, treeView, applyDecorators, updateTreeTitle } = deps;
 
-  const syncDocument = (doc: vscode.TextDocument) => {
-    if (shouldIgnoreDocument(doc.uri)) return;
+  manager.register(
+    vscode.workspace.onDidOpenTextDocument(event => syncDocument(event, deps))
+  );
 
-      store.replaceByUri(doc.uri, ScanDocument(doc));
+  manager.register(
+    vscode.workspace.onDidChangeTextDocument(event => syncDocument(event.document, deps))
+  );
+
+  manager.register(
+    vscode.window.onDidChangeWindowState(event => {
+      for (const editor of vscode.window.visibleTextEditors) {
+        if (!shouldIgnoreDocument(editor.document.uri)) {
+          console.log(editor.document.uri.fsPath, editor.document.languageId);
+          
+          syncDocument(editor.document, deps);
+          applyDecorators(editor, store);
+        }
+      }
+    })
+  )
+}
+
+ export const syncDocument = (doc: vscode.TextDocument, deps: TaskioDependencies): void => {
+  const { store, treeProvider, treeView, applyDecorators, updateTreeTitle } = deps;
+
+    if (shouldIgnoreDocument(doc.uri)) {
+      store.removeByUri(doc.uri);
 
       treeProvider.refresh();
       updateTreeTitle(treeView, store);
 
-      const editor = vscode.window.visibleTextEditors.find(e => e.document.uri.toString() === doc.uri.toString());
+      return;
+    }
 
-      if (editor) applyDecorators(editor, store);
+    store.replaceByUri(doc.uri, ScanDocument(doc));
+
+    treeProvider.refresh();
+    updateTreeTitle(treeView, store);
+
+    const editor = vscode.window.visibleTextEditors.find(e => e.document.uri.toString() === doc.uri.toString());
+
+    if (editor) applyDecorators(editor, store);
   };
-
-  manager.register(
-    vscode.workspace.onDidOpenTextDocument(syncDocument)
-  );
-
-  manager.register(
-    vscode.workspace.onDidChangeTextDocument(event => {
-      syncDocument(event.document);
-    })
-  );
-
-}
