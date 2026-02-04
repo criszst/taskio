@@ -4,16 +4,16 @@ import path from 'path';
 import TaskioComment from '../types/TaskioComment';
 
 import { CommentStore } from '../store/CommentStore';
-import { RevealComment } from './RevealComment';
+import RevealComment from './RevealComment';
 
 import { getEmojiByPriority } from '../decoration/IconDecorators';
 
-export async function SearchTodos(store: CommentStore) {
+export default async function SearchTasks(store: CommentStore) {
   const comments = store.getAll();
   const order = { high: 0, medium: 1, low: 2, default: 4, };
 
   if (!comments.length) {
-    vscode.window.showInformationMessage('Taskio: No TODOs found');
+    vscode.window.showInformationMessage('Taskio: No Tasks found');
     return;
   }
 
@@ -29,7 +29,7 @@ export async function SearchTodos(store: CommentStore) {
     });
 
   const picked = await vscode.window.showQuickPick(items, {
-    placeHolder: 'Search TODOs (type to filter)'
+    placeHolder: 'Search Tasks (type to filter)'
   });
 
   if (!picked || !picked.comment) return;

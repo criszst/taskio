@@ -5,7 +5,8 @@ import TaskioPriority from "../types/TaskioPriority";
 import { ApplyDecorators } from "../decoration/ApplyDecorators";
 import { CommentNode } from "../treeView/TreeNode";
 
-export function setPriority(store: CommentStore, priority: TaskioPriority) {
+// TODO!! Finish this set priority to add in Quick Actions menu
+export function SetPriority(store: CommentStore, priority: TaskioPriority) {
   return (node: CommentNode | TaskioComment) => {
     if (!node) return;
     

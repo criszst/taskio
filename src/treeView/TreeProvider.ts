@@ -10,18 +10,25 @@ import TreeMode from './TreeMode';
 
 
 
-export class TreeProvider implements vscode.TreeDataProvider<TreeNode> {
+export class TreeProvider implements vscode.TreeDataProvider<TreeNode>{
   private _onDidChangeTreeData = new vscode.EventEmitter<void>();
   readonly onDidChangeTreeData = this._onDidChangeTreeData.event;
 
+  private showStatistics: boolean = true;
+
+
   private mode: TreeViewMode = 'tree';
   readonly treeMode: TreeMode;
+
 
   readonly order = { high: 0, medium: 1, low: 2, default: 4 };
 
 
   constructor(private store: CommentStore) {
     this.treeMode = new TreeMode(this.store);
+
+    const config = vscode.workspace.getConfiguration('taskio');
+    this.showStatistics = config.get('showStatistics', true);
   }
 
 
@@ -35,7 +42,7 @@ export class TreeProvider implements vscode.TreeDataProvider<TreeNode> {
     this._onDidChangeTreeData.fire();
   }
 
-  getTreeItem(item: TreeItem) {
+  getTreeItem(item: TreeItem): TreeItem | Thenable<TreeItem> {
     return item;
   }
 
@@ -54,11 +61,10 @@ export class TreeProvider implements vscode.TreeDataProvider<TreeNode> {
       case 'tree':
         return this.treeMode.getTreeMode(element);
 
-        
+
       default:
         return this.treeMode.getTreeMode(element);
     }
   }
-
 
 }

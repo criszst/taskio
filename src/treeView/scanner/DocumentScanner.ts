@@ -20,7 +20,12 @@ export default function ScanDocument(document: vscode.TextDocument): TaskioComme
   
   for (let line = 0; line < document.lineCount; line++) {
     const lineText = document.lineAt(line).text;
-    const commentText = CommentDetector(lineText);
+
+    // Removing string literals
+    // like  const string = "This is a // TODO: inside a string variable";
+    const lineWithoutString = lineText.replace(/(["'`])(?:\\.|(?!\1).)*\1/g,''); 
+
+    const commentText = CommentDetector(lineWithoutString);
     
     if (!commentText) continue;
     
@@ -35,7 +40,7 @@ export default function ScanDocument(document: vscode.TextDocument): TaskioComme
       const baseIndex = lineText.indexOf(commentText);
       const charIndex = baseIndex + match.index;
       
-      const displayText = fullText.replace(/^(?:\/\/|#|--|\/\*|\*)\s*/, '') .replace(priorityMarkers[priority], '');  
+      const displayText = fullText.replace(/^(?:\/\/|#|--|\/\*|\*)\s*/, '').replace(priorityMarkers[priority], '');  
       
       results.push({
         id,

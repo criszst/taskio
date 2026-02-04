@@ -11,7 +11,7 @@ import { CommentNode, FileNode, FolderNode, TreeNode } from "./TreeNode";
 export default class TreeMode {
   readonly order = { high: 0, medium: 1, low: 2, default: 4 };
 
-  constructor(private store: CommentStore) {}
+  constructor(private store: CommentStore) { }
 
   public getListMode() {
     return this.store
@@ -21,7 +21,7 @@ export default class TreeMode {
   }
 
   public getFileMode(element: TreeItem): TreeNode[] {
-     let comments: TaskioComment[] = this.store.getAll();
+    let comments: TaskioComment[] = this.store.getAll();
 
     let files: Map<string, FileNode> = new Map<string, FileNode>();
 
@@ -46,48 +46,74 @@ export default class TreeMode {
   }
 
   public getFoldersMode(element: TreeItem): TreeNode[] {
-     const comments = this.store.getAll();
-        const workspace = vscode.workspace.workspaceFolders?.[0].uri.fsPath;
-    
-        if (!workspace) return [];
-    
-        // ROOT -> FOLDERS
-        if (!element) {
-          const folders = new Map<string, FolderNode>();
-    
-          for (const comment of comments) {
-            const folderPath = path.dirname(comment.uri.fsPath);
-    
-            if (!folders.has(folderPath)) {
-              folders.set(
-                folderPath,
-                new FolderNode(folderPath, path.basename(folderPath))
-              );
-            }
+    const comments = this.store.getAll();
+    const workspace = vscode.workspace.workspaceFolders?.[0].uri.fsPath;
+
+    if (!workspace) return [];
+
+    // ROOT - FOLDERS/FILES
+    if (!element) {
+      const folders = new Map<string, FolderNode>();
+      const rootFiles = new Map<string, FileNode>();
+
+      for (const comment of comments) {
+        const folderPath = path.dirname(comment.uri.fsPath);
+
+        // Files without SubFolder (on ROOT)
+        if (folderPath === workspace) {
+
+          if (!rootFiles.has(comment.uri.fsPath)) {
+            rootFiles.set(comment.uri.fsPath, new FileNode(comment.uri, path.basename(comment.uri.fsPath)));
           }
-    
-          return [...folders.values()];
+
         }
-    
-        // FOLDERS -> COMMENTS
-        if (element instanceof FolderNode) {
-          return comments
-            .filter(comment => {
-              const todoFolder = path.dirname(comment.uri.fsPath);
-              
-              // getting only children
-              // just to dont leave the same "TODO" on father and children root
-              return todoFolder === element.path; 
-            })
-            .sort((a, b) => this.order[a.priority] - this.order[b.priority])
-            .map(c => new CommentNode(c));
+        // Files on SubFolder
+        else {
+          const displayName = path.basename(folderPath);
+
+          if (!folders.has(folderPath)) {
+            folders.set(folderPath, new FolderNode(folderPath, displayName));
+          }
         }
-    
-        return [];
+      }
+
+      return [...rootFiles.values(), ...folders.values()];
+    }
+
+    // FOLDER / FILES 
+    if (element instanceof FolderNode) {
+      const files = new Map<string, FileNode>();
+
+      for (const comment of comments) {
+        const todoFolder = path.dirname(comment.uri.fsPath);
+
+        if (todoFolder === element.path) {
+          if (!files.has(comment.uri.fsPath)) {
+            files.set(
+              comment.uri.fsPath,
+              new FileNode(comment.uri, path.basename(comment.uri.fsPath))
+            );
+          }
+        }
+      }
+
+      return Array.from(files.values());
+    }
+
+    // FILE
+    if (element instanceof FileNode) {
+      return comments
+        .filter(comment => comment.uri.fsPath === element.uri.fsPath)
+        .sort((a, b) => this.order[a.priority] - this.order[b.priority])
+        .map(c => new CommentNode(c));
+    }
+
+    return [];
   }
 
   public getTreeMode(element: TreeNode): TreeNode[] | Thenable<TreeNode[]> {
-     const comments = this.store.getAll();
+    const comments = this.store.getAll();
+    const workspace = vscode.workspace.workspaceFolders?.[0].uri.fsPath;
 
     const workspaceFolders = vscode.workspace.workspaceFolders?.[0].uri.fsPath;
     const ignored = ['node_modules', '.git', 'dist'];
@@ -96,15 +122,32 @@ export default class TreeMode {
     if (!workspaceFolders) return []
 
     if (!element) {
-      const folders = new Set<string>();
+      const folders = new Map<string, FolderNode>();
+      const rootFiles = new Map<string, FileNode>();
 
-      for (const c of comments) {
-        const relative = path.relative(workspaceFolders, c.uri.fsPath);
-        const folder = relative.split(path.sep);
-        folders.add(folder[0]);
+      for (const comment of comments) {
+        const folderPath = path.dirname(comment.uri.fsPath);
+
+        // Files without SubFolder (on ROOT)
+        if (folderPath === workspace) {
+
+          if (!rootFiles.has(comment.uri.fsPath)) {
+            rootFiles.set(comment.uri.fsPath, new FileNode(comment.uri, path.basename(comment.uri.fsPath)));
+          }
+
+        }
+        // Files on SubFolder
+        else {
+          const displayName = path.basename(folderPath);
+
+          if (!folders.has(folderPath)) {
+            folders.set(folderPath, new FolderNode(folderPath, displayName));
+          }
+        }
       }
 
-      return Array.from(folders).map(folderName => new FolderNode(path.join(workspaceFolders, folderName), folderName));
+      return [...rootFiles.values(), ...folders.values()];
+
     }
 
 

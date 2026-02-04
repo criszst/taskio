@@ -1,7 +1,7 @@
 import * as vscode from 'vscode'
 import TaskioComment from '../types/TaskioComment'
 
-export async function RevealComment(comment: TaskioComment) {
+export default async function RevealComment(comment: TaskioComment) {
   if (!comment) return vscode.window.showWarningMessage('Taskio: No comment selected.');
 
   const doc = await vscode.workspace.openTextDocument(comment.uri)
