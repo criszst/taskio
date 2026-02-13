@@ -11,6 +11,9 @@ type ExportedTask = {
   priority: string;
 };
 
+// BUG!: The Export Json is exporting the text with the keyword syntax in some languages, like python
+// Causing the exported text appears with keyword, like " #TODO: this is a task " instead of "TODO: this is a task"
+
 export default async function ExportToJson(comments: TaskioComment[]): Promise<string> {
   const { keywords } = getTaskioConfig();
 

@@ -17,6 +17,8 @@ export default function createDeps(): TaskioDependencies {
     treeDataProvider: treeProvider
   });
 
+   treeProvider.attachTreeView(treeView);
+
   return {
     store,
     treeProvider,

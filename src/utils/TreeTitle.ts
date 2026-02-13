@@ -1,7 +1,10 @@
-import * as vscode from 'vscode';
-import { CommentStore } from '../store/CommentStore';
+import { TreeView } from 'vscode';
 
-export default function updateTreeTitle(treeView: vscode.TreeView<any>, store: CommentStore) {
+import { CommentStore } from '../store/CommentStore';
+import { TreeProvider } from '../treeView/TreeProvider';
+
+export default function updateTreeTitle(treeView: TreeView<any>, store: CommentStore, title?: string): void {
   const count = store.getAll().length;
-  treeView.title = count > 0 ? `Tree View (${count})` : 'Tree View';
+  
+  treeView.title = title ? `${title} (${count})` : `Tree View (${count})`;
 }

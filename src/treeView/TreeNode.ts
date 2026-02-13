@@ -55,7 +55,7 @@ export class CommentNode extends vscode.TreeItem {
     this.contextValue = 'taskioComment';
 
     this.command = {
-      command: 'taskio.revealComment',
+      command: 'taskio.RevealComment',
       title: 'Go to Comment',
       arguments: [comment],
     };

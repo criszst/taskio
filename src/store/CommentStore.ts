@@ -11,6 +11,10 @@ export class CommentStore {
     this.comments = new Map<string, TaskioComment>();
   }
 
+  update(comment: TaskioComment): void {
+    this.comments.set(comment.id, comment);
+  }
+
   setMany(newComments: TaskioComment[]): void {
     for (const comment of newComments) {
       this.comments.set(comment.id, comment);
@@ -19,6 +23,11 @@ export class CommentStore {
 
   clear(): void {
     this.comments.clear();
+  }
+
+
+  remove(id: string): void {
+    this.comments.delete(id);
   }
 
   removeByUri(uri: vscode.Uri): void {
@@ -55,8 +64,12 @@ export class CommentStore {
   }
 
   getPriority(id: string): string {
-    const comment = this.comments.get(id)?.priority ?? 'medium'
+    const comment = this.comments.get(id)?.priority ?? 'default';
 
     return comment
+  }
+
+  refresh() {
+    this.comments = new Map<string, TaskioComment>(this.comments);
   }
 }

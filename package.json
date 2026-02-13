@@ -2,17 +2,16 @@
   "name": "taskio",
   "displayName": "Taskio - TODO List",
   "description": "Turn TODO comments into real tasks",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "engines": {
     "vscode": "^1.70.0"
   },
   "publisher": "taskio",
   "icon": "assets/taskio-icon.png",
   "repository": {
-    "type": "git", 
+    "type": "git",
     "url": "https://github.com/criszst/taskio.git"
   },
-
   "categories": [
     "Visualization",
     "Other"
@@ -33,61 +32,67 @@
     "vscode todo",
     "vscode tasks"
   ],
-
   "activationEvents": [
     "onStartupFinished"
   ],
-
   "main": "./dist/extension.js",
   "contributes": {
     "menus": {
       "view/item/context": [
         {
-          "command": "taskio.copyComment",
+          "command": "taskio.CopyComment",
+          "when": "view == taskioView && viewItem == taskioComment",
+          "group": "inline"
+        },
+        {
+          "command": "taskio.RemoveTask",
           "when": "view == taskioView && viewItem == taskioComment",
           "group": "inline"
         }
-
       ],
-
       "view/title": [
         {
-          "command": "taskio.searchTasks",
+          "command": "taskio.SearchTasks",
           "when": "view == taskioView",
           "group": "navigation@1"
         },
-
         {
-          "command": "taskio.organize",
+          "command": "taskio.Refresh",
           "when": "view == taskioView",
           "group": "navigation@2"
         },
-        
         {
-          "command": "taskio.exportTasks",
+          "command": "taskio.Organize",
           "when": "view == taskioView",
           "group": "navigation@3"
+        },
+        {
+          "command": "taskio.ExportTasks",
+          "when": "view == taskioView",
+          "group": "navigation@4"
         }
       ],
       "explorer/context": [
         {
-          "command": "taskio.searchTasks",
+          "command": "taskio.SearchTasks",
           "when": "explorerResourceIsFolder == false",
           "group": "navigation@1"
         },
-
         {
-          "command": "taskio.organize",
+          "command": "taskio.Refresh",
           "when": "explorerResourceIsFolder == false",
           "group": "navigation@2"
         },
-
         {
-          "command": "taskio.exportTasks",
+          "command": "taskio.Organize",
           "when": "explorerResourceIsFolder == false",
           "group": "navigation@3"
+        },
+        {
+          "command": "taskio.ExportTasks",
+          "when": "explorerResourceIsFolder == false",
+          "group": "navigation@4"
         }
-
       ]
     },
     "viewsContainers": {
@@ -112,7 +117,6 @@
       "type": "object",
       "title": "Taskio Configuration",
       "properties": {
-
         "taskio.keywords": {
           "type": "array",
           "default": [
@@ -122,19 +126,16 @@
           ],
           "description": "Keywords recognized by Taskio inside comments"
         },
-
         "taskio.color": {
           "type": "string",
           "default": "#6042f5",
           "description": "Highlight color for Taskio tasks (in hex format)."
         },
-
         "taskio.enhanceAllText": {
           "type": "boolean",
           "default": false,
           "description": "Enhance all text comment after TODO (or other keywords)."
         },
-
         "taskio.priorityMarkers": {
           "type": "object",
           "default": {
@@ -144,7 +145,6 @@
           },
           "description": "Priority markers based on repeated characters after the keyword"
         },
-
         "taskio.showStatistics": {
           "type": "boolean",
           "default": true,
@@ -154,30 +154,41 @@
     },
     "commands": [
       {
-        "command": "taskio.copyComment",
-        "title": "Copy",
+        "command": "taskio.CopyComment",
+        "title": "Copy Comment",
+        "icon": "$(copy)",
         "enablement": "view == taskioView"
       },
-
       {
-        "command": "taskio.searchTasks",
+        "command": "taskio.SearchTasks",
         "title": "Search Tasks",
         "icon": "$(search)",
         "enablement": "view == taskioView"
-      }, 
-      
+      },
       {
-        "command": "taskio.organize",
+        "command": "taskio.Refresh",
+        "title": "Refresh Tree View",
+        "icon": "$(refresh)",
+        "enablement": "view == taskioView"
+      },
+      {
+        "command": "taskio.Organize",
         "title": "Organize Tasks by Mode",
         "icon": "$(list-unordered)",
         "enablement": "view == taskioView"
       },
-
       {
-        "command": "taskio.exportTasks",
+        "command": "taskio.ExportTasks",
         "title": "Export Tasks",
         "icon": "$(export)",
         "enablement": "view == taskioView"
+      },
+
+      {
+        "command": "taskio.RemoveTask",
+        "title": "Remove Task",
+        "icon": "$(trash)",
+        "enablement": "view == taskioView && viewItem == taskioComment"
       }
     ]
   },
@@ -196,15 +207,17 @@
     "test": "vscode-test"
   },
   "devDependencies": {
-    "@types/vscode": "^1.70.0",
+    "@types/jest": "^30.0.0",
     "@types/mocha": "^10.0.10",
-    "@types/node": "22.x",
-    "typescript-eslint": "^8.52.0",
-    "eslint": "^9.39.2",
+    "@types/node": "^22.19.11",
+    "@types/vscode": "^1.70.0",
+    "@vscode/test-cli": "^0.0.12",
+    "@vscode/test-electron": "^2.5.2",
     "esbuild": "^0.27.2",
+    "eslint": "^9.39.2",
+    "mocha": "^11.7.5",
     "npm-run-all": "^4.1.5",
     "typescript": "^5.9.3",
-    "@vscode/test-cli": "^0.0.12",
-    "@vscode/test-electron": "^2.5.2"
+    "typescript-eslint": "^8.52.0"
   }
 }

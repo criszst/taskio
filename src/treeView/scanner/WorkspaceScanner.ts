@@ -3,65 +3,54 @@ import { CommentStore } from '../../store/CommentStore';
 import ScanDocument from './DocumentScanner';
 import shouldIgnoreDocument from '../../config/IgnoredFiles';
 
+export const SUPPORTED_EXTENSIONS = [
+  'ts','js','tsx','jsx',
+  'py','java','cs', 'csharp', 'vb',
+  'cpp','c','h',
+  'go','rs','php','rb',
+  'swift','kt',
+  'html','css','scss',
+  'yaml','yml','toml',
+  'r','rmd'
+];
+
+const EXCLUDED_GLOB =
+  '**/{node_modules,dist,out,build,.git,.vscode,.next,.nuxt,coverage,.cache,__pycache__,vendor,target,bin,obj,.angular,.svelte-kit}/**';
+
 export async function ScanWorkspace(store: CommentStore) {
-  if (!vscode.workspace.workspaceFolders) {
+  const folders = vscode.workspace.workspaceFolders;
+
+  if (!folders?.length) {
     vscode.window.showWarningMessage('Taskio: No workspace folder found to scan.');
     return;
   }
 
-    const extensions = [
-    // Assembly
-    'asm', 's', 'S',
+  const pattern = `**/*.{${SUPPORTED_EXTENSIONS.join(',')}}`;
 
-    // JavaScript/TypeScript
-    'js', 'ts', 'jsx', 'tsx', 'mjs', 'cjs',
-
-    // Python
-    'py', 'pyw',
-
-    // Java/C#
-    'java', 'cs',
-
-    // C/C++
-    'c', 'cpp', 'cc', 'cxx', 'h', 'hpp', 'hxx',
-
-    // Go/Rust
-    'go', 'rs',
-
-    // Ruby/PHP
-    'rb', 'php',
-
-    // Web
-    'html', 'htm', 'css', 'scss', 'sass', 'less',
-
-    // Frameworks
-    'vue', 'svelte',
-
-    // Shell
-    'sh', 'bash',
-
-    // SQL
-    'sql',
-
-    // S,
-    'swift',
-
-    // Kotlin
-    'kt', 'kts'
-  ];
-
-  const files = await vscode.workspace.findFiles(
-    `**/*.{${extensions.join(',')}}`,
-    '**/{node_modules,out,dist,build,.git,.vscode,.next,.nuxt,coverage,.cache,__pycache__,vendor,target,bin,obj}/**',
-    undefined
+  const allFiles = await Promise.all(
+    folders.map(folder =>
+      vscode.workspace.findFiles(
+        new vscode.RelativePattern(folder, pattern),
+        EXCLUDED_GLOB
+      )
+    )
   );
-  
-  await Promise.all(
-    files.map(async file => {
-      if (shouldIgnoreDocument(file)) return;
-       
+
+  const flatFiles = allFiles.flat();
+
+  for (const file of flatFiles) {
+    if (shouldIgnoreDocument(file)) continue;
+
+    try {
       const doc = await vscode.workspace.openTextDocument(file);
-      store.setMany(ScanDocument(doc));
-    })
-  );
+      const comments = ScanDocument(doc);
+
+      if (comments.length) {
+        store.setMany(comments);
+      }
+
+    } catch (err) {
+      console.error('Taskio scan error:', err);
+    }
+  }
 }

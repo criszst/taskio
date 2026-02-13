@@ -6,7 +6,7 @@ import { TaskioDependencies } from '../../types/TaskioDependencies';
 import EventManager from '../EventManager';
 
 export function registerDocumentHandler(manager: EventManager, deps: TaskioDependencies): void {
-  const { store, treeProvider, treeView, applyDecorators, updateTreeTitle } = deps;
+  const { store, applyDecorators } = deps;
 
   manager.register(
     vscode.workspace.onDidOpenTextDocument(event => syncDocument(event, deps))

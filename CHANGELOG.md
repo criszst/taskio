@@ -5,6 +5,13 @@ All notable changes to the "taskio" extension will be documented in this file.
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
 ---
+## [0.1.3] - 2026-02-13
+
+### Added
+- Refactored TreeView architecture to prevent infinite refresh loop
+- Dynamic title update when switching between List, Files, Folders, and Tree modes
+- Added Remove Command and Refresh Command
+
 ## [0.1.2] - 2026.04.02
 
 ## Fixed

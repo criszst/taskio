@@ -26,7 +26,7 @@ export function registerWorkspaceHandler(manager: EventManager, deps: TaskioDepe
       }
 
       treeProvider.refresh();
-      updateTreeTitle(treeView, store);
+      deps.updateTreeTitle(deps.treeView, deps.store);
     })
   );
 
@@ -50,7 +50,7 @@ export function registerWorkspaceHandler(manager: EventManager, deps: TaskioDepe
       }
 
       treeProvider.refresh();
-      updateTreeTitle(treeView, store);
+      deps.updateTreeTitle(deps.treeView, deps.store);
     })
   );
 

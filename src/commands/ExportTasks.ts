@@ -67,7 +67,7 @@ export default async function ExportTasks(store: CommentStore, format: string): 
 
       fs.writeFileSync(uri.fsPath, await ExportToJson(comments), 'utf-8');
 
-      vscode.window.showInformationMessage(`Taskio: Exported ${comments.length} tasks!`);
+      vscode.window.showInformationMessage(`Taskio: Exported ${comments.length}!`);
       return;
     }
 

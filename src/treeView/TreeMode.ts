@@ -6,6 +6,7 @@ import TaskioComment from "../types/TaskioComment";
 import { TreeItem } from "vscode";
 import { CommentStore } from "../store/CommentStore";
 import { CommentNode, FileNode, FolderNode, TreeNode } from "./TreeNode";
+import { TreeProvider } from "./TreeProvider";
 
 export default class TreeMode {
   readonly order = { high: 0, medium: 1, low: 2, default: 4 };
@@ -13,10 +14,11 @@ export default class TreeMode {
   constructor(private store: CommentStore) { }
 
   public getListMode() {
-    return this.store
+
+    return this.sortNodes(this.store
       .getAll()
       .sort((a, b) => this.order[a.priority] - this.order[b.priority])
-      .map(c => new CommentNode(c));
+      .map(c => new CommentNode(c)));
   }
 
   public getFileMode(element: TreeItem): TreeNode[] {
@@ -41,16 +43,16 @@ export default class TreeMode {
     }
 
 
-    return Array.from(files.values());
+    return this.sortNodes(Array.from(files.values()));
   }
 
-  public getFoldersMode(element: TreeItem): TreeNode[] {
+  public getFoldersMode(element?: TreeItem): TreeNode[] {
     const comments = this.store.getAll();
     const workspace = vscode.workspace.workspaceFolders?.[0].uri.fsPath;
 
     if (!workspace) return [];
 
-    // ROOT - FOLDERS/FILES
+    // ROOT
     if (!element) {
       const nodes = new Map<string, TreeNode>();
 
@@ -59,60 +61,69 @@ export default class TreeMode {
         const parts = relative.split(path.sep);
 
         if (parts.length === 1) {
-        
+          // arquivo direto no workspace
           nodes.set(
             c.uri.fsPath,
             new FileNode(c.uri, parts[0])
           );
-        } else {
-          
-          const folderPath = path.join(workspace, parts[0]);
+        }
+
+        else if (parts.length === 2) {
+          // arquivo dentro de pasta principal (mantém ela)
+          const folderName = parts[0];
+          const folderPath = path.join(workspace, folderName);
+
           nodes.set(
             folderPath,
-            new FolderNode(folderPath, parts[0])
+            new FolderNode(folderPath, folderName)
+          );
+        }
+
+        else {
+          // arquivo em subpasta profunda → sobe apenas a última pasta
+          const folderName = parts[parts.length - 2];
+          const folderPath = path.join(workspace, folderName);
+
+          nodes.set(
+            folderPath,
+            new FolderNode(folderPath, folderName)
           );
         }
       }
 
-      return Array.from(nodes.values());
+      return this.sortNodes(Array.from(nodes.values()));
     }
 
-    // FOLDER / FILES 
+    // FOLDER
     if (element instanceof FolderNode) {
-      const nodes = new Map<string, TreeNode>();
+      return comments
+        .filter(c => {
+          const relative = path.relative(workspace, c.uri.fsPath);
+          const parts = relative.split(path.sep);
 
-      for (const c of comments) {
-        if (!c.uri.fsPath.startsWith(element.path + path.sep)) continue;
+          if (parts.length === 1) return false;
 
-        const relative = path.relative(element.path, c.uri.fsPath);
-        const parts = relative.split(path.sep);
+          if (parts.length === 2) {
+            // arquivo pertence à pasta principal
+            return parts[0] === element.label;
+          }
 
-        if (parts.length === 1) {
-    
-          nodes.set(
-            c.uri.fsPath,
-            new FileNode(c.uri, parts[0])
-          );
-        } else {
-         
-          const subFolderPath = path.join(element.path, parts[0]);
-          nodes.set(
-            subFolderPath,
-            new FolderNode(subFolderPath, parts[0])
-          );
-        }
-      }
-
-      return Array.from(nodes.values());
+          // arquivo pertence à subpasta elevada
+          return parts[parts.length - 2] === element.label;
+        })
+        .sort((a, b) => this.order[a.priority] - this.order[b.priority])
+        .map(c => new CommentNode(c));
     }
 
     // FILE
     if (element instanceof FileNode) {
       return comments
-        .filter(comment => comment.uri.fsPath === element.uri.fsPath)
+        .filter(c => c.uri.fsPath === element.uri.fsPath)
         .sort((a, b) => this.order[a.priority] - this.order[b.priority])
         .map(c => new CommentNode(c));
     }
+
+
 
     return [];
   }
@@ -133,22 +144,17 @@ export default class TreeMode {
         const parts = relative.split(path.sep);
 
         if (parts.length === 1) {
-          
-          nodes.set(
-            c.uri.fsPath,
-            new FileNode(c.uri, parts[0])
-          );
+
+          nodes.set(c.uri.fsPath, new FileNode(c.uri, parts[0]));
         } else {
-    
+
           const folderPath = path.join(workspaceFolders, parts[0]);
-          nodes.set(
-            folderPath,
-            new FolderNode(folderPath, parts[0])
-          );
+          nodes.set(folderPath, new FolderNode(folderPath, parts[0]));
         }
       }
 
-      return Array.from(nodes.values());
+      return this.sortNodes(Array.from(nodes.values()));
+
     }
 
 
@@ -162,13 +168,13 @@ export default class TreeMode {
         const parts = relative.split(path.sep);
 
         if (parts.length === 1) {
-    
+
           nodes.set(
             c.uri.fsPath,
             new FileNode(c.uri, parts[0])
           );
         } else {
-      
+
           const subFolderPath = path.join(element.path, parts[0]);
           nodes.set(
             subFolderPath,
@@ -177,7 +183,7 @@ export default class TreeMode {
         }
       }
 
-      return Array.from(nodes.values());
+      return this.sortNodes(Array.from(nodes.values()));
     }
 
 
@@ -188,4 +194,16 @@ export default class TreeMode {
 
     return [];
   }
+
+  private sortNodes(nodes: TreeNode[]): TreeNode[] {
+    return nodes.sort((a, b) => {
+      if (a instanceof FolderNode && !(b instanceof FolderNode)) return -1;
+      if (!(a instanceof FolderNode) && b instanceof FolderNode) return 1;
+
+      return (a.label ?? '').toString().localeCompare(
+        (b.label ?? '').toString()
+      );
+    });
+  }
+
 }
