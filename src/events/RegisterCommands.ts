@@ -27,7 +27,7 @@ export function registerCommands(context: ExtensionContext, deps: TaskioDependen
     ),
 
     commands.registerCommand('taskio.Organize', async () => {
-      const mode = await window.showQuickPick(
+      const mode: { label: string; value: string; } | undefined = await window.showQuickPick(
         [
           { label: 'Tree View', value: 'tree' },
           { label: 'Files', value: 'files' },
@@ -38,8 +38,9 @@ export function registerCommands(context: ExtensionContext, deps: TaskioDependen
       );
 
       if (!mode) return;
+
       deps.treeProvider.setMode(mode.value as TreeViewMode);
-    }),
+    }), 
 
     commands.registerCommand('taskio.ExportTasks', async () => {
       const exportFormat = await window.showQuickPick(
@@ -50,8 +51,10 @@ export function registerCommands(context: ExtensionContext, deps: TaskioDependen
         ],
 
         { placeHolder: 'Select export format' },
+        
       );
 
+      if (!exportFormat) return;
 
       await ExportTasks(deps.store, exportFormat?.value || 'txt');
     }),

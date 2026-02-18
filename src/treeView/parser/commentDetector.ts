@@ -19,6 +19,12 @@ function CommentDetector(line: string): string | null {
     }
   }
 
+  // To react files like jsx/tsx
+ if (trimmed.includes('/*')) {
+    const startIndex = line.indexOf('/*');
+    return line.slice(startIndex); 
+  }
+
   // Python, Shell
   const hashComment = 
       trimmed.startsWith('#') 
@@ -38,6 +44,7 @@ function CommentDetector(line: string): string | null {
     return trimmed;
   }
 
+  // HTML comments (a type of)
   if (line.endsWith('-->')) {
     const hasComment = line.replace('-->', '').trim();
 
