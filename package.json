@@ -48,6 +48,10 @@
           "command": "taskio.RemoveTask",
           "when": "view == taskioView && viewItem == taskioComment",
           "group": "inline"
+        },
+        {
+          "command": "taskio.trello.SendTask",
+          "when": "view == taskioView && viewItem == taskioComment"
         }
       ],
       "view/title": [
@@ -145,10 +149,15 @@
           },
           "description": "Priority markers based on repeated characters after the keyword"
         },
-        "taskio.showStatistics": {
-          "type": "boolean",
-          "default": true,
-          "description": "Show statistics panel in the Taskio view"
+        "taskio.trello.boardId": {
+          "type": "string",
+          "default": "",
+          "description": "Board ID for Trello integration (optional)"
+        },
+        "taskio.trello.listId": {
+          "type": "string",
+          "default": "",
+          "description": "List ID for Trello integration (optional)"
         }
       }
     },
@@ -183,12 +192,23 @@
         "icon": "$(export)",
         "enablement": "view == taskioView"
       },
-
       {
         "command": "taskio.RemoveTask",
         "title": "Remove Task",
         "icon": "$(trash)",
         "enablement": "view == taskioView && viewItem == taskioComment"
+      },
+
+      {
+        "command": "taskio.trello.SetupIntegration",
+        "title": "Setup Trello Integration",
+        "category": "Taskio - Trello"
+      },
+      
+      {
+        "command": "taskio.trello.SendTask",
+        "title": "Send Task to Trello",
+        "category": "Taskio - Trello"
       }
     ]
   },
@@ -219,5 +239,8 @@
     "npm-run-all": "^4.1.5",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.52.0"
+  },
+  "dependencies": {
+    "axios": "^1.13.5"
   }
 }

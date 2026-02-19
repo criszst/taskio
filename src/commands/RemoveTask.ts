@@ -3,6 +3,8 @@ import { window, workspace, WorkspaceEdit } from "vscode";
 import { CommentStore } from "../store/CommentStore";
 import TaskioComment from "../types/TaskioComment";
 
+
+// TODO!: Refactor this to return a Result type instead of showing error messages directly, so the caller can decide how to handle errors
 type Result<Sucess, Error> = { ok: true, value: Sucess } | { ok: false, error: Error };
 
 const Ok = <Sucess, Error>(value: Sucess): Result<Sucess, Error> => ({ ok: true, value });

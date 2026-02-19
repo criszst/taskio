@@ -4,6 +4,7 @@ import { ApplyDecorators } from "../decoration/ApplyDecorators";
 import { CommentStore } from "../store/CommentStore";
 import { TreeProvider } from "../treeView/TreeProvider";
 import updateTreeTitle from "../utils/TreeTitle";
+import SecretStore from '../integrations/trello/SecretStorage';
 
 export type TaskioDependencies = {
   store: CommentStore;
@@ -11,4 +12,6 @@ export type TaskioDependencies = {
   treeView: vscode.TreeView<any>;
   applyDecorators: typeof ApplyDecorators;
   updateTreeTitle: typeof updateTreeTitle;
+  secretStore: SecretStore;
+  context: vscode.ExtensionContext;
 };

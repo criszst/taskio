@@ -10,6 +10,10 @@ interface TaskioComment {
   text: string;
   displayText?: string;
   priority: TaskioPriority;
+
+  // TRELLO
+  trelloCardId?: string;
+  syncStatus: "local" | "synced" | "error";
 }
 
 export default TaskioComment;

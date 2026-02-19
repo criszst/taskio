@@ -8,8 +8,9 @@ import { CommentStore } from '../store/CommentStore';
 import { ApplyDecorators } from '../decoration/ApplyDecorators';
 
 import { TaskioDependencies } from '../types/TaskioDependencies';
+import SecretStore from '../integrations/trello/SecretStorage';
 
-export default function createDeps(): TaskioDependencies {
+export default function createDeps(context: vscode.ExtensionContext): TaskioDependencies {
   const store = new CommentStore();
   const treeProvider = new TreeProvider(store);
 
@@ -19,11 +20,15 @@ export default function createDeps(): TaskioDependencies {
 
    treeProvider.attachTreeView(treeView);
 
+   const secretStore = new SecretStore(context.secrets);
+
   return {
     store,
     treeProvider,
     treeView,
     applyDecorators: ApplyDecorators,
-    updateTreeTitle
+    updateTreeTitle,
+    secretStore,
+    context
   };
 }

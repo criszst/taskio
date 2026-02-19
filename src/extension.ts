@@ -8,10 +8,12 @@ import { registerWorkspaceHandler, verifyWorkspaceChanges } from './events/handl
 import { registerEditorHandler } from './events/handlers/editorHandler';
 
 import { registerCommands } from './events/RegisterCommands';
+import SecretStore from './integrations/trello/SecretStorage';
 
 
 export async function activate(context: vscode.ExtensionContext) {
-  const deps = createDeps();
+  const deps = createDeps(context);
+
   const eventManager = new EventManager();
 
   await verifyWorkspaceChanges(deps);
@@ -23,7 +25,7 @@ export async function activate(context: vscode.ExtensionContext) {
 
   registerCommands(context, deps);
 
-  
+
   context.subscriptions.push(eventManager);
 
 }

@@ -11,6 +11,8 @@ import RemoveTask from '../commands/RemoveTask';
 import { TaskioDependencies } from '../types/TaskioDependencies';
 import ExportTasks from '../commands/ExportTasks';
 import { CommentNode } from '../treeView/TreeNode';
+import SendTask from '../integrations/trello/commands/SendTask';
+import { setupTrello } from '../integrations/trello/commands/SetupTrello';
 
 export function registerCommands(context: ExtensionContext, deps: TaskioDependencies) {
   context.subscriptions.push(
@@ -40,7 +42,7 @@ export function registerCommands(context: ExtensionContext, deps: TaskioDependen
       if (!mode) return;
 
       deps.treeProvider.setMode(mode.value as TreeViewMode);
-    }), 
+    }),
 
     commands.registerCommand('taskio.ExportTasks', async () => {
       const exportFormat = await window.showQuickPick(
@@ -51,7 +53,7 @@ export function registerCommands(context: ExtensionContext, deps: TaskioDependen
         ],
 
         { placeHolder: 'Select export format' },
-        
+
       );
 
       if (!exportFormat) return;
@@ -74,6 +76,18 @@ export function registerCommands(context: ExtensionContext, deps: TaskioDependen
 
     commands.registerCommand('taskio.Refresh',
       () => deps.treeProvider.refresh()
+    ),
+
+    commands.registerCommand('taskio.trello.SetupIntegration',
+      async () => {
+        setupTrello(deps.secretStore);
+      }
+    ),
+
+    commands.registerCommand('taskio.trello.SendTask',
+      async (node: CommentNode) => {
+        await SendTask(node.comment, deps);
+      }
     ),
 
   );

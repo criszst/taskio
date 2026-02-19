@@ -18,14 +18,14 @@ export function registerDocumentHandler(manager: EventManager, deps: TaskioDepen
 
   manager.register(
     vscode.window.onDidChangeWindowState(event => {
+
       for (const editor of vscode.window.visibleTextEditors) {
-        if (!shouldIgnoreDocument(editor.document.uri)) {
-          console.log(editor.document.uri.fsPath, editor.document.languageId);
-          
+        if (!shouldIgnoreDocument(editor.document.uri)) {          
           syncDocument(editor.document, deps);
           applyDecorators(editor, store);
         }
       }
+
     })
   )
 }
