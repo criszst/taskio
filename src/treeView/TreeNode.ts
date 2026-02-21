@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 
 import TaskioComment from '../types/TaskioComment';
 
-import { getIconByPriority, getIconByKeyword } from '../decoration/IconDecorators';
+import { getIconByPriority, getIconByKeyword, getIconBySynced } from '../decoration/IconDecorators';
 
 export type TreeNode = FolderNode | FileNode | CommentNode;
 
@@ -61,8 +61,18 @@ export class CommentNode extends vscode.TreeItem {
     };
 
     this.resourceUri = comment.uri;
-    
-    this.iconPath = this.comment.priority !== 'default' ? getIconByPriority(this.comment.priority): getIconByKeyword(comment.keyword);
+ 
+    this.iconPath = this.determineIcon();
   }
+
+  private determineIcon() {
+    if (this.comment.syncStatus === 'synced') {
+      return getIconBySynced(this.comment.syncStatus, this.comment.priority);
+    }
+
+    return this.comment.priority === 'default' ? getIconByKeyword(this.comment) : getIconByPriority(this.comment.priority);
+
+  }
+
 }
 

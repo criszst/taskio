@@ -149,15 +149,33 @@
           },
           "description": "Priority markers based on repeated characters after the keyword"
         },
+
+        "taskio.trello.boardName": {
+          "type": "string",
+          "default": "",
+          "description": "Name of the board setup on Trello Integration",
+          "scope": "resource"
+        },
+
         "taskio.trello.boardId": {
           "type": "string",
           "default": "",
-          "description": "Board ID for Trello integration (optional)"
+          "description": "Board ID for Trello integration",
+          "scope": "resource"
         },
+
+        "taskio.trello.listName": {
+          "type": "string",
+          "default": "",
+          "description": "Name of the list setup on Trello Integration",
+          "scope": "resource"
+        },
+
         "taskio.trello.listId": {
           "type": "string",
           "default": "",
-          "description": "List ID for Trello integration (optional)"
+          "description": "List ID for Trello Integration",
+          "scope": "resource"
         }
       }
     },
@@ -204,7 +222,7 @@
         "title": "Setup Trello Integration",
         "category": "Taskio - Trello"
       },
-      
+
       {
         "command": "taskio.trello.SendTask",
         "title": "Send Task to Trello",

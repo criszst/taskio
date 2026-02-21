@@ -5,41 +5,39 @@ import shouldIgnoreDocument from '../config/IgnoredFiles';
 
 let currentDecorations = {
   default: vscode.window.createTextEditorDecorationType({
-      backgroundColor: `${getTaskioConfig().color}`,
-      color: `${getTaskioConfig().color}`,
-      fontWeight: 'bold',
-     }),
-     
-  high: vscode.window.createTextEditorDecorationType({ 
+    backgroundColor: `${getTaskioConfig().color}`,
+    color: `${getTaskioConfig().color}`,
+    fontWeight: 'bold',
+  }),
+
+  high: vscode.window.createTextEditorDecorationType({
     backgroundColor: '#ff555544',
-    color: '#ff5555' 
+    color: '#ff5555'
   }),
-  medium: vscode.window.createTextEditorDecorationType({ 
+  medium: vscode.window.createTextEditorDecorationType({
     backgroundColor: '#f1fa8c44',
-    color: '#f1fa8c' 
+    color: '#f1fa8c'
   }),
-  low: vscode.window.createTextEditorDecorationType({ 
+  low: vscode.window.createTextEditorDecorationType({
     backgroundColor: '#8be9fd44',
-    color: '#8be9fd' 
+    color: '#8be9fd'
   })
 };
 
 
 function createDecorations() {
-  const { color } = getTaskioConfig();
-  
   currentDecorations.high.dispose();
   currentDecorations.medium.dispose();
   currentDecorations.low.dispose();
-  
+
   currentDecorations = {
     default: vscode.window.createTextEditorDecorationType({
       fontWeight: 'bold',
-      backgroundColor: `${color}`,
+      backgroundColor: `${getTaskioConfig().color}`,
       color: `#f7f0f0b7`,
      }),
 
-    high: vscode.window.createTextEditorDecorationType({ 
+    high: vscode.window.createTextEditorDecorationType({
       fontWeight: 'bold',
       backgroundColor: '#ff555544',
       color: '#ff5555',
@@ -49,7 +47,7 @@ function createDecorations() {
       backgroundColor: '#f1fa8c44',
       color: '#9fa74e',
     }),
-    low: vscode.window.createTextEditorDecorationType({ 
+    low: vscode.window.createTextEditorDecorationType({
       fontWeight: 'bold',
       backgroundColor: `#8be9fd44`,
       color: '#8be9fd',
@@ -61,27 +59,26 @@ createDecorations();
 
 export function ApplyDecorators(editor: vscode.TextEditor, store: CommentStore): void {
   const uri = editor.document.uri;
-  
 
   if (shouldIgnoreDocument(uri)) return;
 
-  
+
   const { enhanceAllText } = getTaskioConfig();
-  
+
   const byPriority = {
     high: [] as vscode.DecorationOptions[],
     medium: [] as vscode.DecorationOptions[],
     low: [] as vscode.DecorationOptions[],
     default: [] as vscode.DecorationOptions[],
   };
-  
+
   const comments = store.getByUri(uri);
-  
+
   for (const comment of comments) {
     let range: vscode.Range;
-    
+
     if (enhanceAllText) {
-    
+
       range = new vscode.Range(
         new vscode.Position(comment.line, comment.character),
         new vscode.Position(
@@ -101,10 +98,14 @@ export function ApplyDecorators(editor: vscode.TextEditor, store: CommentStore):
       );
     }
     
-    const priority = (comment.priority ?? 'none') as keyof typeof byPriority;
+    const priority: keyof typeof byPriority =
+      comment.priority === 'high' ||
+      comment.priority === 'medium' ||
+      comment.priority === 'low' ? comment.priority : 'default';
+
     byPriority[priority].push({ range });
   }
-  
+
   editor.setDecorations(currentDecorations.high, byPriority.high);
   editor.setDecorations(currentDecorations.medium, byPriority.medium);
   editor.setDecorations(currentDecorations.low, byPriority.low);

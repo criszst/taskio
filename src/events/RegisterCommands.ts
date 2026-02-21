@@ -86,7 +86,7 @@ export function registerCommands(context: ExtensionContext, deps: TaskioDependen
 
     commands.registerCommand('taskio.trello.SendTask',
       async (node: CommentNode) => {
-        await SendTask(node.comment, deps);
+        await SendTask(node, deps);
       }
     ),
 

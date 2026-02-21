@@ -17,6 +17,18 @@ export default async function SelectBoardList(trello: TrelloService) {
 
   if (!boardPick) return;
 
+  await vscode.workspace.getConfiguration().update(
+    "taskio.trello.boardName",
+    boardPick.label,
+    vscode.ConfigurationTarget.Workspace
+  );
+
+  await vscode.workspace.getConfiguration().update(
+    "taskio.trello.boardId",
+    boardPick.boardId,
+    vscode.ConfigurationTarget.Workspace
+  );
+
   const lists = await trello.getLists(boardPick.boardId);
 
   const listPick = await vscode.window.showQuickPick(
@@ -30,9 +42,15 @@ export default async function SelectBoardList(trello: TrelloService) {
   if (!listPick) return;
 
   await vscode.workspace.getConfiguration().update(
+    "taskio.trello.listName",
+    listPick.label,
+    vscode.ConfigurationTarget.Workspace
+  );
+
+  await vscode.workspace.getConfiguration().update(
     "taskio.trello.listId",
     listPick.listId,
-    vscode.ConfigurationTarget.Global
+    vscode.ConfigurationTarget.Workspace
   );
 
   vscode.window.showInformationMessage("Board and list saved successfully ✅");

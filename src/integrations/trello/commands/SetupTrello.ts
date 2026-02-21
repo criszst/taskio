@@ -12,11 +12,12 @@ export async function setupTrello(secretStore: SecretStore) {
   await vscode.env.openExternal(vscode.Uri.parse(authUrl));
 
   const token = await vscode.window.showInputBox({
+    title: "Trello Token",
     prompt: "Paste your generated Trello token",
-    ignoreFocusOut: true
+    ignoreFocusOut: true,
   });
 
-  if (!token) return;
+  if (!token) return vscode.window.showErrorMessage("Trello token not provided.");
 
   await secretStore.saveTrelloCredentials(API_KEY, token);
 

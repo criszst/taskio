@@ -11,15 +11,29 @@ export class CommentStore {
     this.comments = new Map<string, TaskioComment>();
   }
 
+ 
   update(comment: TaskioComment): void {
     this.comments.set(comment.id, comment);
   }
 
   setMany(newComments: TaskioComment[]): void {
-    for (const comment of newComments) {
-      this.comments.set(comment.id, comment);
+    for (const newC of newComments) {
+        const existing = Array.from(this.comments.values()).find(old => 
+            old.uri.fsPath === newC.uri.fsPath && 
+            old.text === newC.text &&
+            Math.abs(old.line - newC.line) < 3
+        );
+
+        if (existing && existing.syncStatus === "synced") {
+            newC.syncStatus = "synced";
+            newC.trelloCardId = existing.trelloCardId;
+            newC.priority = existing.priority;
+            newC.id = existing.id;
+        }
+
+        this.comments.set(newC.id, newC);
     }
-  }
+}
 
   clear(): void {
     this.comments.clear();
@@ -38,10 +52,30 @@ export class CommentStore {
     }
   }
 
-  replaceByUri(uri: vscode.Uri, comments: TaskioComment[]) {
-  this.comments = new Map<string, TaskioComment>(Array.from(this.comments.entries()).filter(([id, comment]) => comment.uri.toString() !== uri.toString()));
-  for (const comment of comments) {
-    this.comments.set(comment.id, comment);
+  replaceByUri(uri: vscode.Uri, newComments: TaskioComment[]) {
+  const oldComments = this.getByUri(uri);
+
+  this.comments = new Map(
+    Array.from(this.comments.entries()).filter(
+      ([id, c]) => c.uri.toString() !== uri.toString()
+    )
+  );
+
+
+  for (const newC of newComments) {
+    const existing = oldComments.find(old => 
+      old.text === newC.text && 
+      Math.abs(old.line - newC.line) < 5
+    );
+
+    if (existing) {
+      newC.syncStatus = existing.syncStatus;
+      newC.trelloCardId = existing.trelloCardId;
+      newC.priority = existing.priority;
+      newC.id = existing.id;
+    }
+
+    this.comments.set(newC.id, newC);
   }
 }
 

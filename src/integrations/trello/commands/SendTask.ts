@@ -1,34 +1,34 @@
-import { ProgressLocation, window, workspace } from "vscode";
+import { Comment, ProgressLocation, window, workspace } from "vscode";
 
-import * as vscode from "vscode";
 import TaskioComment from "../../../types/TaskioComment";
-import { TrelloService } from "../TrelloService";
-import SecretStore from "../SecretStorage";
-
-import { CommentStore } from "../../../store/CommentStore";
-
-import createDeps from "../../../events/CreateDeps";
 import { TaskioDependencies } from "../../../types/TaskioDependencies";
 
-export default async function SendTask(comment: TaskioComment, deps: TaskioDependencies) {
+import { TrelloService } from "../TrelloService";
+
+import { CommentNode } from "../../../treeView/TreeNode";
+
+import TrelloCard from "../types/Card";
+import { ApplyDecorators } from "../../../decoration/ApplyDecorators";
+
+
+export default async function SendTask(comment: CommentNode, deps: TaskioDependencies) {
   const { store, treeProvider, secretStore, context } = deps;
 
-  if (!comment) return window.showWarningMessage('Taskio: No comment selected.');
+  const commentData: TaskioComment = comment.comment;
 
-  if (comment.syncStatus === 'synced') {
-    return window.showInformationMessage('This task is already synced with Trello.');
-  }
+  if (!commentData) return window.showWarningMessage('Taskio: No comment selected.');
 
-  if (!secretStore) {
-    return window.showErrorMessage('Trello integration not set up. Please run "Setup Trello Integration" command first.');
-  }
+  if (commentData.syncStatus === 'synced') return window.showInformationMessage('This task is already synced with Trello.');
+
+  if (!secretStore) return window.showErrorMessage('Trello integration not set up. Please run "Setup Trello Integration" command first.');
+  
 
   try {
     const config = workspace.getConfiguration();
     const listId = config.get<string>("taskio.trello.listId");
 
     if (!listId) {
-      window.showErrorMessage("No Trello list configured.");
+      window.showErrorMessage("No Trello list configured. Please run the 'Setup Trello Integration' command first.");
       return;
     }
 
@@ -40,21 +40,35 @@ export default async function SendTask(comment: TaskioComment, deps: TaskioDepen
         title: "Sending task to Trello...",
       },
       async () => {
-        const card: any = await trello.createCard(
-          listId,
-          comment.displayText ?? comment.text
+
+         const filePath = commentData.uri.fsPath.replace(/\\/g, '/');
+        const line = commentData.line + 1;
+        const char = commentData.character + 1;
+
+        const vscodeLink = `vscode://file/${encodeURI(filePath)}:${line}:${char}`
+
+        const description = `
+        **File:** \`${filePath}\`
+        **Position:** Line ${line}, Column ${char}
+         [Open in VS Code](${vscodeLink})`.trim();
+
+        const card = await trello.createCard(
+          {
+            listId,
+            name: commentData.displayText ?? commentData.text,
+            description,
+            priority: commentData.priority,
+          }
         );
 
 
-        comment.trelloCardId = card.id;
-        comment.syncStatus = "synced";
 
-        store.update(comment);
+        commentData.trelloCardId = card.id;
+        commentData.syncStatus = "synced";
 
-        await context.workspaceState.update(
-          "taskio.comments",
-          store.getAll()
-        );
+        store.update(commentData);
+
+        await context.workspaceState.update("taskio.comments", store.getAll());
       }
     );
 
@@ -64,8 +78,8 @@ export default async function SendTask(comment: TaskioComment, deps: TaskioDepen
 
   } catch (error) {
 
-    comment.syncStatus = "error";
-    store.update(comment);
+    commentData.syncStatus = "error";
+    store.update(commentData);
 
     await context.workspaceState.update(
       "taskio.comments",

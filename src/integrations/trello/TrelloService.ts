@@ -1,5 +1,6 @@
 import SecretStore from "./SecretStorage";
 import TrelloBoard from "./types/Board";
+import TrelloCard from "./types/Card";
 import { TrelloList } from "./types/List";
 
 
@@ -44,17 +45,26 @@ export class TrelloService {
     return res.json() as Promise<TrelloList[]>;
   }
 
-  async createCard(listId: string, name: string, desc?: string) {
+  async createCard(body: TrelloCard): Promise<any> {
     const { apiKey, token } = await this.getCredentials();
+
+    const tagMap: Record<string, string> = {
+      low: "green",
+      medium: "yellow",
+      high: "red",
+    };
+    
+    const labelColor = body.priority ? tagMap[body.priority.toLowerCase()] : undefined;
 
     const res = await fetch(`${this.baseUrl}/cards?key=${apiKey}&token=${token}`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          idList: listId,
-          name,
-          desc
+          idList: body.listId,
+          name: body.name,
+          desc: body.description,
+          labels: labelColor ? [labelColor] : []
         })
       }
     );

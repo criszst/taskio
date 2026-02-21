@@ -1,17 +1,18 @@
-import { ThemeIcon } from "vscode";
+import { ThemeColor, ThemeIcon } from "vscode";
 
 import TaskioPriority from "../types/TaskioPriority";
+import TaskioComment from "../types/TaskioComment";
 
 export function getIconByPriority(priority: TaskioPriority): ThemeIcon {
   switch (priority) {
     case 'high':
-      return new ThemeIcon( 'circle-filled', new ThemeIcon('charts.red'));
+      return new ThemeIcon('circle-filled', new ThemeColor('charts.red'));
 
     case 'medium':
-      return new ThemeIcon( 'circle-filled', new ThemeIcon('charts.yellow') );
+      return new ThemeIcon('circle-filled', new ThemeColor('charts.yellow'));
 
     case 'low':
-      return new ThemeIcon( 'circle-filled', new ThemeIcon('charts.green') );
+      return new ThemeIcon('circle-filled', new ThemeColor('charts.green'));
 
     default:
       return new ThemeIcon('circle-outline');
@@ -19,8 +20,16 @@ export function getIconByPriority(priority: TaskioPriority): ThemeIcon {
 }
 
 
-export function getIconByKeyword(keyword: string): ThemeIcon {
-  switch (keyword.toUpperCase()) {
+export function getIconByKeyword(comment: TaskioComment): ThemeIcon {
+
+  const keyword = comment.keyword
+
+  // FIXME: getIconByKeyword (bug, fixme...) not working correctly, bc the ScanDocumment returns the keyword + comment block (like // BUG, but the correct its only BUG )
+
+  // just a POG (programacao orientada a gambiarra)
+  const cleanKeyword = keyword.toUpperCase().slice(2, comment.keyword.length).trim();
+
+  switch (cleanKeyword) {
     case 'BUG':
       return new ThemeIcon('bug')
     case 'FIXME':
@@ -48,5 +57,26 @@ export function getEmojiByPriority(priority: TaskioPriority): string {
       return '🟢';
     default:
       return '';
+  }
+}
+
+
+export function getIconBySynced(status: "synced" | "error" | "local", priority: TaskioPriority): ThemeIcon | undefined {
+  switch (status) {
+    case "synced":
+      const priorityColors = {
+        "high": new ThemeColor("charts.red"),
+        "medium": new ThemeColor("charts.yellow"),
+        "low": new ThemeColor("charts.green"),
+        "default": new ThemeColor("charts"),
+      }
+
+      return new ThemeIcon("pass-filled", priorityColors[priority]);
+      
+    case "error":
+      return new ThemeIcon("error", new ThemeColor("charts.red"));
+
+    default:
+      return undefined;
   }
 }

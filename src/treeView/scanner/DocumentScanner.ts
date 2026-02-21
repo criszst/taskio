@@ -37,8 +37,13 @@ export default function ScanDocument(document: vscode.TextDocument): TaskioComme
     while ((match = keywordRegex.exec(commentText))) {
       const suffix = match[2] ?? '';
       const priority = DetectPriority(suffix, priorityMarkers);
+
+      console.log('suffix ', suffix)
+
       const id = `${document.uri.toString()}:${line}:${match.index}`;
+
       const fullText = commentText.slice(match.index);
+
       const baseIndex = lineText.indexOf(commentText);
       const charIndex = baseIndex + match.index;
 
@@ -54,10 +59,10 @@ export default function ScanDocument(document: vscode.TextDocument): TaskioComme
         uri: document.uri,
         line,
         character: charIndex,
-        keyword: match[0],
+        keyword: match[0].toUpperCase().trim(),
         text: fullText,
         displayText: displayText,
-        priority: priority ?? 'default',
+        priority: priority,
         syncStatus: 'local'
       });
     }

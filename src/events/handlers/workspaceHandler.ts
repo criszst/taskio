@@ -59,7 +59,6 @@ export function registerWorkspaceHandler(manager: EventManager, deps: TaskioDepe
 export async function verifyWorkspaceChanges(deps: TaskioDependencies): Promise<void> {
   if (!vscode.workspace.workspaceFolders) return;
 
-  deps.store.clear();
 
   await ScanWorkspace(deps.store);
 
