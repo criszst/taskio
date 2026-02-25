@@ -23,12 +23,6 @@ export default async function SelectBoardList(trello: TrelloService) {
     vscode.ConfigurationTarget.Workspace
   );
 
-  await vscode.workspace.getConfiguration().update(
-    "taskio.trello.boardId",
-    boardPick.boardId,
-    vscode.ConfigurationTarget.Workspace
-  );
-
   const lists = await trello.getLists(boardPick.boardId);
 
   const listPick = await vscode.window.showQuickPick(
@@ -44,12 +38,6 @@ export default async function SelectBoardList(trello: TrelloService) {
   await vscode.workspace.getConfiguration().update(
     "taskio.trello.listName",
     listPick.label,
-    vscode.ConfigurationTarget.Workspace
-  );
-
-  await vscode.workspace.getConfiguration().update(
-    "taskio.trello.listId",
-    listPick.listId,
     vscode.ConfigurationTarget.Workspace
   );
 

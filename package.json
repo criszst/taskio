@@ -157,24 +157,10 @@
           "scope": "resource"
         },
 
-        "taskio.trello.boardId": {
-          "type": "string",
-          "default": "",
-          "description": "Board ID for Trello integration",
-          "scope": "resource"
-        },
-
         "taskio.trello.listName": {
           "type": "string",
           "default": "",
           "description": "Name of the list setup on Trello Integration",
-          "scope": "resource"
-        },
-
-        "taskio.trello.listId": {
-          "type": "string",
-          "default": "",
-          "description": "List ID for Trello Integration",
           "scope": "resource"
         }
       }

@@ -38,8 +38,6 @@ export default function ScanDocument(document: vscode.TextDocument): TaskioComme
       const suffix = match[2] ?? '';
       const priority = DetectPriority(suffix, priorityMarkers);
 
-      console.log('suffix ', suffix)
-
       const id = `${document.uri.toString()}:${line}:${match.index}`;
 
       const fullText = commentText.slice(match.index);

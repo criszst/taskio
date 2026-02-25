@@ -10,6 +10,7 @@
     },
     // Turn off tsc task auto detection since we have the necessary tasks as npm scripts
     "typescript.tsc.autoDetect": "off",
-    "todo-tree.tree.showBadges": true,
-    "todo-tree.tree.showCountsInTree": false
+    "todo-tree.tree.showBadges": false,
+    "todo-tree.tree.showCountsInTree": false,
+    "todo-tree.tree.scanMode": "workspace only"
 }
