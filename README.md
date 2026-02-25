@@ -6,7 +6,7 @@ Taskio scans your codebase for TODO-style comments and transforms them into a ce
 
 <div align="center">
 
-![Taskio TODO Example](https://github.com/criszst/taskio/blob/master/media/TaskVideo-Example(5)(2).gif?raw=true)
+https://github.com/user-attachments/assets/e061bb14-9a16-4d05-b854-9f49bc164f8a
 
 </div>
 
