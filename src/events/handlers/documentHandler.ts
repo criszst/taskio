@@ -4,24 +4,25 @@ import ScanDocument from '../../treeView/scanner/DocumentScanner';
 import shouldIgnoreDocument from '../../config/IgnoredFiles';
 import { TaskioDependencies } from '../../types/TaskioDependencies';
 import EventManager from '../EventManager';
+import debounce from '../../utils/Debounce';
 
 export function registerDocumentHandler(manager: EventManager, deps: TaskioDependencies): void {
   const { store, applyDecorators } = deps;
 
   manager.register(
-    vscode.workspace.onDidOpenTextDocument(event => syncDocument(event, deps))
+    vscode.workspace.onDidOpenTextDocument(event => syncDocument(event, deps), 200)
   );
 
   manager.register(
-    vscode.workspace.onDidChangeTextDocument(event => syncDocument(event.document, deps))
+    vscode.workspace.onDidChangeTextDocument(event =>  syncDocument(event.document, deps), 200)
   );
 
   manager.register(
-    vscode.window.onDidChangeWindowState(event => {
+    vscode.window.onDidChangeWindowState(() => {
 
       for (const editor of vscode.window.visibleTextEditors) {
-        if (!shouldIgnoreDocument(editor.document.uri)) {          
-          syncDocument(editor.document, deps);
+        if (!shouldIgnoreDocument(editor.document.uri)) {
+          syncDocument(editor.document, deps) 
           applyDecorators(editor, store);
         }
       }
@@ -44,6 +45,8 @@ export function registerDocumentHandler(manager: EventManager, deps: TaskioDepen
 
     store.replaceByUri(doc.uri, ScanDocument(doc));
 
+    (async () => await deps.context.workspaceState.update("taskio.comments", deps.store.getAll()))();
+    
     treeProvider.refresh();
     updateTreeTitle(treeView, store);
 

@@ -1,11 +1,13 @@
 import * as vscode from "vscode";
-import SecretStore from "../SecretStorage";
-import { TrelloService } from "../TrelloService";
-import SelectBoardList from "./BoardList";
+import SecretStore from "../../SecretStorage";
+import { TrelloService } from "../../TrelloService";
+import SelectBoardList from "../SelectBoardList";
+import { TaskioDependencies } from "../../../../types/TaskioDependencies";
 
-export async function setupTrello(secretStore: SecretStore) {
+export async function setupTrello(secretStore: SecretStore, deps: TaskioDependencies) {
+  const { context } = deps;
 
- const API_KEY = "4edfd07cbe84b5604acc8b00782358e5";
+  const API_KEY = "4edfd07cbe84b5604acc8b00782358e5";
 
   const authUrl = `https://trello.com/1/authorize?expiration=never&name=Taskio&scope=read,write&response_type=token&key=${API_KEY}`;
 
@@ -31,5 +33,5 @@ export async function setupTrello(secretStore: SecretStore) {
 
   vscode.window.showInformationMessage("Trello connected successfully 🚀");
 
-  await SelectBoardList(trello);
+  await SelectBoardList(trello, context);
 }

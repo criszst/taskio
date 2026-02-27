@@ -2,7 +2,7 @@
   "name": "taskio",
   "displayName": "Taskio - TODO List",
   "description": "Turn TODO comments into real tasks",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "engines": {
     "vscode": "^1.70.0"
   },
@@ -41,17 +41,23 @@
       "view/item/context": [
         {
           "command": "taskio.CopyComment",
-          "when": "view == taskioView && viewItem == taskioComment",
-          "group": "inline"
+          "when": "view == taskioView && viewItem == taskioComment || view == taskioView && viewItem == taskioCommentSynced",
+          "group": "inline@1"
         },
         {
           "command": "taskio.RemoveTask",
-          "when": "view == taskioView && viewItem == taskioComment",
-          "group": "inline"
+          "when": "view == taskioView && viewItem == taskioComment || view == taskioView && viewItem == taskioCommentSynced",
+          "group": "inline@2"
         },
         {
           "command": "taskio.trello.SendTask",
-          "when": "view == taskioView && viewItem == taskioComment"
+          "when": "view == taskioView && viewItem == taskioComment || view == taskioView && viewItem == taskioCommentSynced",
+          "group": "edit@1"
+        },
+        {
+          "command": "taskio.trello.OpenCard",
+          "when": "view == taskioView && viewItem == taskioCommentSynced",
+          "group": "edit@2"
         }
       ],
       "view/title": [
@@ -72,6 +78,11 @@
         },
         {
           "command": "taskio.ExportTasks",
+          "when": "view == taskioView",
+          "group": "navigation@4"
+        },
+        {
+          "command": "taskio.trello.ManageIntegration",
           "when": "view == taskioView",
           "group": "navigation@4"
         }
@@ -96,6 +107,11 @@
           "command": "taskio.ExportTasks",
           "when": "explorerResourceIsFolder == false",
           "group": "navigation@4"
+        },
+        {
+          "command": "taskio.trello.ManageIntegration",
+          "when": "explorerResourceIsFolder == false",
+          "group": "navigation@5"
         }
       ]
     },
@@ -149,70 +165,91 @@
           },
           "description": "Priority markers based on repeated characters after the keyword"
         },
-
         "taskio.trello.boardName": {
           "type": "string",
           "default": "",
           "description": "Name of the board setup on Trello Integration",
+          "markdownDescription": "⚠️ **Read-only**. This is managed by the 'Setup Trello' command.",
           "scope": "resource"
         },
-
         "taskio.trello.listName": {
           "type": "string",
           "default": "",
           "description": "Name of the list setup on Trello Integration",
+          "markdownDescription": "⚠️ **Read-only**. This is managed by the 'Setup Trello' command.",
           "scope": "resource"
         }
       }
     },
     "commands": [
       {
-        "command": "taskio.CopyComment",
-        "title": "Copy Comment",
-        "icon": "$(copy)",
-        "enablement": "view == taskioView"
+        "command": "taskio.RevealComment",
+        "title": "Reveal Comment",
+        "category": "Taskio"
       },
       {
-        "command": "taskio.SearchTasks",
-        "title": "Search Tasks",
-        "icon": "$(search)",
-        "enablement": "view == taskioView"
+        "command": "taskio.CopyComment",
+        "title": "Copy Comment",
+        "category": "Taskio",
+        "icon": "$(copy)"
       },
       {
         "command": "taskio.Refresh",
-        "title": "Refresh Tree View",
-        "icon": "$(refresh)",
-        "enablement": "view == taskioView"
-      },
-      {
-        "command": "taskio.Organize",
-        "title": "Organize Tasks by Mode",
-        "icon": "$(list-unordered)",
-        "enablement": "view == taskioView"
-      },
-      {
-        "command": "taskio.ExportTasks",
-        "title": "Export Tasks",
-        "icon": "$(export)",
-        "enablement": "view == taskioView"
+        "title": "Refresh",
+        "category": "Taskio",
+        "icon": "$(refresh)"
       },
       {
         "command": "taskio.RemoveTask",
         "title": "Remove Task",
-        "icon": "$(trash)",
-        "enablement": "view == taskioView && viewItem == taskioComment"
+        "category": "Taskio",
+        "icon": "$(trash)"
       },
-
+      {
+        "command": "taskio.SearchTasks",
+        "title": "Search Tasks...",
+        "category": "Taskio",
+        "icon": "$(search)"
+      },
+      {
+        "command": "taskio.ExportTasks",
+        "title": "Export Tasks",
+        "category": "Taskio",
+        "icon": "$(export)"
+      },
+      {
+        "command": "taskio.Organize",
+        "title": "Change Grouping Mode",
+        "category": "Taskio",
+        "icon": "$(list-unordered)"
+      },
       {
         "command": "taskio.trello.SetupIntegration",
-        "title": "Setup Trello Integration",
-        "category": "Taskio - Trello"
+        "title": "Configure Trello Connection",
+        "category": "Taskio.Trello"
       },
-
+      {
+        "command": "taskio.trello.ManageIntegration",
+        "title": "Manage Trello Integration",
+        "category": "Taskio.Trello",
+        "icon": "$(gear)"
+      },
+      {
+        "command": "taskio.trello.OpenCard",
+        "title": "Open in Trello",
+        "category": "Taskio.Trello",
+        "icon": "$(browser)"
+      },
+      {
+        "command": "taskio.trello.Disconnect",
+        "title": "Disconnect Trello Account",
+        "category": "Taskio.Trello"
+      },
       {
         "command": "taskio.trello.SendTask",
-        "title": "Send Task to Trello",
-        "category": "Taskio - Trello"
+        "title": "Send to Trello",
+        "category": "Taskio.Trello",
+        "icon": "$(cloud-upload)"
       }
     ]
   },

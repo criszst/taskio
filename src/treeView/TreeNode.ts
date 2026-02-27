@@ -52,7 +52,9 @@ export class CommentNode extends vscode.TreeItem {
     this.description = `Line ${this.comment.line + 1} - ${this.comment.priority.toUpperCase()}`;
     this.tooltip = `${this.comment.displayText ?? this.comment.text} (Line ${this.comment.line + 1}) - ${this.comment.priority.toUpperCase()}`;
 
-    this.contextValue = 'taskioComment';
+    this.contextValue = this.comment.syncStatus === 'synced' 
+    ? 'taskioCommentSynced' 
+    : 'taskioComment';
 
     this.command = {
       command: 'taskio.RevealComment',

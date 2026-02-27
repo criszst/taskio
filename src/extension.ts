@@ -16,19 +16,20 @@ export async function activate(context: vscode.ExtensionContext) {
   const deps = createDeps(context);
 
   const savedComments = context.workspaceState.get<TaskioComment[]>("taskio.comments", []);
-  
-  if (savedComments.length > 0) {
-    const recoveredComments = savedComments.map(c => ({
-      ...c,
-      uri: vscode.Uri.parse((c.uri as any).external || c.uri.toString())
-    }));
+  const syncCache = new Map<string, TaskioComment>();
 
-    deps.store.setMany(recoveredComments);
-  }
+  savedComments.forEach(c => {
+    if (c.syncStatus === "synced") {
+      const uriStr = vscode.Uri.parse((c.uri as any).external || c.uri.toString()).toString();
+      
+      syncCache.set(`${uriStr}|${c.text}`, c);
+    }
+  });
 
-  const eventManager = new EventManager();
-  await verifyWorkspaceChanges(deps);
-  
+  await verifyWorkspaceChanges(deps, syncCache);
+
+    const eventManager = new EventManager();
+
   registerEditorHandler(eventManager, deps);
 
   registerDocumentHandler(eventManager, deps);

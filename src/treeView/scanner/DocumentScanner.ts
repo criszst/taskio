@@ -61,7 +61,7 @@ export default function ScanDocument(document: vscode.TextDocument): TaskioComme
         text: fullText,
         displayText: displayText,
         priority: priority,
-        syncStatus: 'local'
+        syncStatus: 'local',
       });
     }
   }

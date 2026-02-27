@@ -1,7 +1,6 @@
 import { TreeView } from 'vscode';
 
 import { CommentStore } from '../store/CommentStore';
-import { TreeProvider } from '../treeView/TreeProvider';
 
 export default function updateTreeTitle(treeView: TreeView<any>, store: CommentStore, title?: string): void {
   const count = store.getAll().length;

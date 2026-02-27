@@ -12,6 +12,19 @@ https://github.com/user-attachments/assets/e061bb14-9a16-4d05-b854-9f49bc164f8a
 
 ---
 
+## How It Works
+
+Taskio continuously scans your workspace for comment keywords and keeps them organized in a task tree.
+
+No setup required — install and start writing TODOs.
+
+<img width="1205" height="346" alt="image" src="https://github.com/user-attachments/assets/fc3c59ee-4ee2-4c12-9dc4-58e6a55d1240" />
+
+
+
+
+---
+
 ## Features
 
 - Automatically detects TODO, FIXME and BUG comments
@@ -19,17 +32,9 @@ https://github.com/user-attachments/assets/e061bb14-9a16-4d05-b854-9f49bc164f8a
 - Fast search across tasks
 - Task priorities using markers (!, !!, !!!)
 - Priority-based task ordering (high → low)
-- Export tasks to JSON and Markdown
+- Export tasks JSON, Markdown or TXT
 - Customizable highlight colors and behavior
 - Lightweight and fast (no performance impact)
-
----
-
-## How It Works
-
-Taskio continuously scans your workspace for comment keywords and keeps them organized in a task tree.
-
-No setup required — install and start writing TODOs.
 
 ---
 
@@ -37,14 +42,15 @@ No setup required — install and start writing TODOs.
 
 The Taskio Tree View provides quick actions via built-in VS Code icons:
 
-- $(search) Search  
-  Quickly search tasks across the workspace.
+- Search quickly tasks across the workspace.
 
-- $(list-unordered) Organize  
-  Organize tasks by priority, file or folder.
+- Refresh all Tree View
 
-- $(export) Export  
-  Export tasks to JSON or Markdown.
+- Organize tasks by priority, file or folder.
+
+- Export tasks JSON, Markdown or TXT
+
+- Trello Configurations can manage Trello Integration which can change Board/List integrate, synchronize all tasks and so on.
 
 ---
 
@@ -103,8 +109,9 @@ Higher priority tasks are visually distinguished in the task tree and search res
 
 Taskio supports exporting tasks for documentation or reporting:
 
-- JSON export for integrations and tooling
-- Markdown export for README files and reports
+- JSON export for integrations and tooling;
+- Markdown (MD) export for README files and reports;
+- TXT export just because yes.
 
 Exported tasks include file path, line number, priority and clean descriptions.
 

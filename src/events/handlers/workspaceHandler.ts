@@ -7,6 +7,7 @@ import shouldIgnoreDocument from '../../config/IgnoredFiles';
 import { TaskioDependencies } from '../../types/TaskioDependencies';
 
 import EventManager from '../EventManager';
+import TaskioComment from '../../types/TaskioComment';
 
 
 export function registerWorkspaceHandler(manager: EventManager, deps: TaskioDependencies): void {
@@ -56,11 +57,30 @@ export function registerWorkspaceHandler(manager: EventManager, deps: TaskioDepe
 
 }
 
-export async function verifyWorkspaceChanges(deps: TaskioDependencies): Promise<void> {
+export async function verifyWorkspaceChanges(deps: TaskioDependencies, syncCache?: Map<string, TaskioComment>): Promise<void> {
   if (!vscode.workspace.workspaceFolders) return;
+
+  deps.store.clear();
 
 
   await ScanWorkspace(deps.store);
+
+  if (syncCache) {
+    const currentComments = deps.store.getAll();
+    for (const comment of currentComments) {
+      const key = `${comment.uri.toString()}|${comment.text}`;
+      const cached = syncCache.get(key);
+
+      if (cached) {
+        comment.syncStatus = "synced";
+        comment.trelloCardId = cached.trelloCardId;
+        comment.priority = cached.priority;
+      }
+    }
+  }
+
+
+  await deps.context.workspaceState.update("taskio.comments", deps.store.getAll());
 
   deps.treeProvider.refresh();
   deps.updateTreeTitle(deps.treeView, deps.store);
@@ -70,4 +90,5 @@ export async function verifyWorkspaceChanges(deps: TaskioDependencies): Promise<
       deps.applyDecorators(editor, deps.store);
     }
   }
+
 }

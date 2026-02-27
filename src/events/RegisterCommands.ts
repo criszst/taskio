@@ -1,4 +1,4 @@
-import { ExtensionContext, commands, window } from 'vscode';
+import { ExtensionContext, Uri, commands, env, window } from 'vscode';
 
 import TreeViewMode from '../types/TreeViewMode';
 
@@ -12,7 +12,8 @@ import { TaskioDependencies } from '../types/TaskioDependencies';
 import ExportTasks from '../commands/ExportTasks';
 import { CommentNode } from '../treeView/TreeNode';
 import SendTask from '../integrations/trello/commands/SendTask';
-import { setupTrello } from '../integrations/trello/commands/SetupTrello';
+import { setupTrello } from '../integrations/trello/commands/configs/SetupTrello';
+import ManageIntegration from '../integrations/trello/commands/configs/ManageIntegration';
 
 export function registerCommands(context: ExtensionContext, deps: TaskioDependencies) {
   context.subscriptions.push(
@@ -78,9 +79,16 @@ export function registerCommands(context: ExtensionContext, deps: TaskioDependen
       () => deps.treeProvider.refresh()
     ),
 
+
+    //#region TRELLO COMMANDS
+
+    commands.registerCommand('taskio.trello.ManageIntegration', async () => {
+      await ManageIntegration(deps);
+    }),
+
     commands.registerCommand('taskio.trello.SetupIntegration',
       async () => {
-        setupTrello(deps.secretStore);
+        setupTrello(deps.secretStore, deps);
       }
     ),
 
@@ -89,6 +97,16 @@ export function registerCommands(context: ExtensionContext, deps: TaskioDependen
         await SendTask(node, deps);
       }
     ),
+
+    commands.registerCommand('taskio.trello.OpenCard', async (node: CommentNode) => {
+      if (node.comment.trelloCardId) {
+        const url = `https://trello.com/c/${node.comment.trelloCardId}`;
+        env.openExternal(Uri.parse(url));
+      }
+    }
+    ),
+
+    //#endregion TRELLO COMMANDS
 
   );
 }
