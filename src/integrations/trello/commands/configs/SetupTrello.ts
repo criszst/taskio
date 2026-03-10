@@ -7,6 +7,19 @@ import { TaskioDependencies } from "../../../../types/TaskioDependencies";
 export async function setupTrello(secretStore: SecretStore, deps: TaskioDependencies) {
   const { context } = deps;
 
+  const getTrelloCreds = await secretStore.getTrelloCredentials();
+
+  if (getTrelloCreds) {
+    const trello = new TrelloService(secretStore);
+    const valid = await trello.validate();
+
+    if (valid) {
+      await SelectBoardList(trello, context);
+      return;
+    }
+  }
+
+  // yes its to be intended public
   const API_KEY = "4edfd07cbe84b5604acc8b00782358e5";
 
   const authUrl = `https://trello.com/1/authorize?expiration=never&name=Taskio&scope=read,write&response_type=token&key=${API_KEY}`;
@@ -15,7 +28,7 @@ export async function setupTrello(secretStore: SecretStore, deps: TaskioDependen
 
   const token = await vscode.window.showInputBox({
     title: "Trello Token",
-    prompt: "Paste your generated Trello token",
+    prompt: "Paste your generated Trello token. Allow some seconds after authorizing to generate the token.",
     ignoreFocusOut: true,
   });
 

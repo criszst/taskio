@@ -36,14 +36,29 @@ export async function ProcessIndividualSync(commentData: TaskioComment, deps: Ta
 
   store.update(commentData);
   await context.workspaceState.update("taskio.comments", store.getAll());
-}
+} 
 
-export async function DesyncIndividualTask(commentData: TaskioComment, deps: TaskioDependencies) {
-  const { store, context } = deps;
+export async function DesyncAllTasks(commentData: TaskioComment, deps: TaskioDependencies) {
+  const { store, context, treeProvider } = deps;
+  const trello = new TrelloService(deps.secretStore);
 
-  commentData.trelloCardId = undefined;
-  commentData.syncStatus = "local";
+  const cardId = commentData.trelloCardId;
+
+  if (!cardId) {
+    console.warn(`Task "${commentData.text}" is marked as synced but has no Trello card ID. Skipping desync.`);
+    return;
+  }
+
+ for (const cards of store.getAll().filter(c => c.trelloCardId === cardId)) {
+    cards.trelloCardId = undefined;
+    cards.syncStatus = "local";
+
+    await trello.deleteCard(cardId);
+    
+  }
   
   store.update(commentData);
+  treeProvider.refresh();
+
   await context.workspaceState.update("taskio.comments", store.getAll());
 }

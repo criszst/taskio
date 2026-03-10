@@ -1,4 +1,4 @@
-import { commands, env, ProgressLocation, Uri, window } from "vscode";
+import { env, ProgressLocation, Uri, window } from "vscode";
 
 import { TaskioDependencies } from "../../../../types/TaskioDependencies";
 import { setupTrello } from "../configs/SetupTrello";
@@ -6,9 +6,9 @@ import { TrelloService } from "../../TrelloService";
 
 import SelectBoardList from "../SelectBoardList";
 import DisconnectTrello from "./DisconnectTrello";
+
 import SendALLTasks from "../SyncAllTasks";
-import { all } from "axios";
-import { DesyncIndividualTask } from "../../SyncUtils";
+import { DesyncAllTasks } from "../../SyncUtils";
 
 export default async function ManageIntegration(deps: TaskioDependencies): Promise<void> {
   const creds = await deps.secretStore.getTrelloCredentials();
@@ -98,7 +98,7 @@ export default async function ManageIntegration(deps: TaskioDependencies): Promi
 
     }, async (progress) => {
        for (const comment of allCommentsSynced) {
-        DesyncIndividualTask(comment, deps);
+        DesyncAllTasks(comment, deps);
         progress.report({ increment: (100 / allCommentsSynced.length) });
       }
     });

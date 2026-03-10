@@ -24,7 +24,7 @@ export function getIconByKeyword(comment: TaskioComment): ThemeIcon {
 
   const keyword = comment.keyword
 
-  // FIXME: getIconByKeyword (bug, fixme...) not working correctly, bc the ScanDocumment returns the keyword + comment block (like // BUG instead only "BUG")
+  // FIXME: getIconByKeyword (bug, fixme...) not working correctly, bc the ScanDocumment returns the keyword + comment block
   // in certain files like jsx, ts and so on, work perfectly. But in python with the comment block like #, just turn into awfull code
 
   // just a POG (programacao orientada a gambiarra)

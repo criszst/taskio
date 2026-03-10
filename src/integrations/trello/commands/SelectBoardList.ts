@@ -17,14 +17,13 @@ export default async function SelectBoardList(trello: TrelloService, context: vs
     })),
     { 
         placeHolder: "Step 1/2: Select a Trello Board",
+        prompt: "You can only select one board at the moment, but you can change it later in the settings. Press ESC to exit.",
         ignoreFocusOut: true 
     }
   );
 
-  if (!boardPick) return;
-
-
-
+  if (!boardPick) return vscode.window.showWarningMessage("No board selected.");
+  
 
   const lists = await trello.getLists(boardPick.boardId);
   
@@ -36,11 +35,12 @@ export default async function SelectBoardList(trello: TrelloService, context: vs
     })),
     { 
         placeHolder: "Step 2/2: Select a Target List for Tasks",
+        prompt: "This is the list where your tasks will be sent. You can change it later in the settings. Press ESC to exit.",
         ignoreFocusOut: true 
     }
   );
 
-  if (!listPick) return;
+  if (!listPick) return vscode.window.showWarningMessage("No list selected.");
 
   await context.workspaceState.update("taskio.trello.boardId", boardPick.boardId);
   await context.workspaceState.update("taskio.trello.boardName", boardPick.label);

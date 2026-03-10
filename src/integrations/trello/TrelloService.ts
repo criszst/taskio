@@ -73,5 +73,13 @@ export class TrelloService {
 
     return res.json();
   }
+
+  async deleteCard(cardId: string): Promise<unknown> {
+    const { apiKey, token } = await this.getCredentials();
+
+    const res = await fetch(`${this.baseUrl}/cards/${cardId}?key=${apiKey}&token=${token}`, { method: "DELETE" });
+
+    return res.json();
+  }
 }
 
