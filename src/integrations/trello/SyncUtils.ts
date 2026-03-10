@@ -49,15 +49,14 @@ export async function DesyncAllTasks(commentData: TaskioComment, deps: TaskioDep
     return;
   }
 
- for (const cards of store.getAll().filter(c => c.trelloCardId === cardId)) {
-    cards.trelloCardId = undefined;
-    cards.syncStatus = "local";
+    commentData.trelloCardId = undefined;
+    commentData.syncStatus = "local";
 
     await trello.deleteCard(cardId);
     
-  }
   
   store.update(commentData);
+  store.setMany(store.getAll().filter(c => c.trelloCardId !== cardId));
   treeProvider.refresh();
 
   await context.workspaceState.update("taskio.comments", store.getAll());
