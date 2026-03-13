@@ -3,8 +3,6 @@ import { ProgressLocation, window } from "vscode";
 import TaskioComment from "../../../types/TaskioComment";
 import { TaskioDependencies } from "../../../types/TaskioDependencies";
 
-import { TrelloService } from "../TrelloService";
-
 import { CommentNode } from "../../../treeView/TreeNode";
 import { ProcessIndividualSync } from "../SyncUtils";
 

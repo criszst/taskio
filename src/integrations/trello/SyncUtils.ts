@@ -1,4 +1,5 @@
-import { window } from 'vscode';
+import { ProgressLocation, window } from 'vscode';
+
 import TaskioComment from '../../types/TaskioComment';
 import { TaskioDependencies } from '../../types/TaskioDependencies';
 import { TrelloService } from './TrelloService';
@@ -36,27 +37,53 @@ export async function ProcessIndividualSync(commentData: TaskioComment, deps: Ta
 
   store.update(commentData);
   await context.workspaceState.update("taskio.comments", store.getAll());
-} 
+}
 
-export async function DesyncAllTasks(commentData: TaskioComment, deps: TaskioDependencies) {
+export async function DesyncAllTasks(deps: TaskioDependencies) {
   const { store, context, treeProvider } = deps;
+
   const trello = new TrelloService(deps.secretStore);
 
-  const cardId = commentData.trelloCardId;
 
-  if (!cardId) {
-    console.warn(`Task "${commentData.text}" is marked as synced but has no Trello card ID. Skipping desync.`);
-    return;
-  }
+  const allCommentsSynced = deps.store.getAll().filter(comment => comment.syncStatus === "synced");
 
-    commentData.trelloCardId = undefined;
-    commentData.syncStatus = "local";
+  if (allCommentsSynced.length === 0) return window.showInformationMessage("No tasks to desync.");
 
-    await trello.deleteCard(cardId);
-    
-  
-  store.update(commentData);
-  store.setMany(store.getAll().filter(c => c.trelloCardId !== cardId));
+
+  const confirmation = await window.showWarningMessage(
+    `Are you sure you want to desync all ${allCommentsSynced.length} tasks from Trello?`,
+    { modal: true },
+    "Yes",
+    "No"
+  )
+
+  if (confirmation !== "Yes") return;
+
+  await window.withProgress({
+    location: ProgressLocation.Notification,
+    title: "Desyncing all tasks...",
+    cancellable: false
+  }, async (progress) => {
+
+    for (const comment of allCommentsSynced) {
+      if (!comment.trelloCardId) {
+        console.warn(`Task "${comment.text}" is marked as synced but has no Trello card ID. Skipping desync.`);
+        continue;
+      }
+
+      await trello.deleteCard(comment.trelloCardId);
+      comment.trelloCardId = undefined;
+      comment.syncStatus = "local";
+
+      store.update(comment);
+
+      progress.report({ increment: (100 / allCommentsSynced.length) });
+
+    }
+  });
+
+  window.showInformationMessage(`Successfully desynced ${allCommentsSynced.length} tasks.`);
+
   treeProvider.refresh();
 
   await context.workspaceState.update("taskio.comments", store.getAll());

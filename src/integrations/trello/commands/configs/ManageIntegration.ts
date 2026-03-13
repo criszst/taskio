@@ -1,4 +1,4 @@
-import { env, ProgressLocation, Uri, window } from "vscode";
+import { env, Uri, window } from "vscode";
 
 import { TaskioDependencies } from "../../../../types/TaskioDependencies";
 import { setupTrello } from "../configs/SetupTrello";
@@ -76,35 +76,7 @@ export default async function ManageIntegration(deps: TaskioDependencies): Promi
       break;
 
     case 'desync_all':
-      const allCommentsSynced = deps.store.getAll().filter(comment => comment.syncStatus === "synced");
-
-      if (allCommentsSynced.length === 0) window.showInformationMessage("No tasks to desync.");
-      
-
-      const confirmation = await window.showWarningMessage(
-        `Are you sure you want to desync all ${allCommentsSynced.length} tasks from Trello?`,
-        { modal: true },
-        "Yes",
-        "No"
-      )
-
-      if (confirmation !== "Yes") return;
-
-    await window.withProgress({
-      
-        location: ProgressLocation.Notification,
-        title: "Desyncing all tasks...",
-        cancellable: false
-
-    }, async (progress) => {
-       for (const comment of allCommentsSynced) {
-        DesyncAllTasks(comment, deps);
-        progress.report({ increment: (100 / allCommentsSynced.length) });
-      }
-    });
-
-      window.showInformationMessage(`Successfully desynced ${allCommentsSynced.length} tasks.`);
-      deps.treeProvider.refresh();
+      await DesyncAllTasks(deps);
       break;
 
     case 'open_trello':
