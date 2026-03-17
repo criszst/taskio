@@ -1,7 +1,7 @@
-import SecretStore from "./SecretStorage";
-import TrelloBoard from "./types/Board";
-import TrelloCard from "./types/Card";
-import { TrelloList } from "./types/List";
+import SecretStore from "../SecretStorage";
+import TrelloBoard from "../types/Board";
+import TrelloCard from "../types/Card";
+import { TrelloList } from "../types/List";
 
 
 export class TrelloService {

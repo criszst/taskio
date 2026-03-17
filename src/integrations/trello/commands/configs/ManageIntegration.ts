@@ -2,17 +2,19 @@ import { env, Uri, window } from "vscode";
 
 import { TaskioDependencies } from "../../../../types/TaskioDependencies";
 import { setupTrello } from "../configs/SetupTrello";
-import { TrelloService } from "../../TrelloService";
+import { TrelloService } from "../../services/TrelloService";
 
 import SelectBoardList from "../SelectBoardList";
 import DisconnectTrello from "./DisconnectTrello";
 
-import SendALLTasks from "../SyncAllTasks";
-import { DesyncAllTasks } from "../../SyncUtils";
+
+import SyncService from "../../services/SyncService";
 
 export default async function ManageIntegration(deps: TaskioDependencies): Promise<void> {
   const creds = await deps.secretStore.getTrelloCredentials();
   const listId = deps.context.workspaceState.get("taskio.trello.listId");
+
+  const syncService = new SyncService(new TrelloService(deps.secretStore));
 
 
   if (!creds || !listId) {
@@ -72,15 +74,19 @@ export default async function ManageIntegration(deps: TaskioDependencies): Promi
       break;
 
     case 'sync_all':
-      await SendALLTasks(deps);
-      break;
-
-    case 'desync_all':
-      await DesyncAllTasks(deps);
+      const toSync = deps.store.getAll().filter(c => c.syncStatus !== 'synced');
+      await syncService.processTasks(toSync, deps, 'sync');
+      deps.treeProvider.refresh();
       break;
 
     case 'open_trello':
       env.openExternal(Uri.parse(`https://trello.com/b/${boardId}/${boardName}`));
+      break;
+      
+    case 'desync_all':
+      const toDesync = deps.store.getAll().filter(c => c.syncStatus === 'synced');
+      await syncService.processTasks(toDesync, deps, 'desync');
+      deps.treeProvider.refresh();
       break;
 
     case 'disconnect':

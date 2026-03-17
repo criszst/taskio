@@ -61,7 +61,6 @@ export default class TreeMode {
         const parts = relative.split(path.sep);
 
         if (parts.length === 1) {
-          // arquivo direto no workspace
           nodes.set(
             c.uri.fsPath,
             new FileNode(c.uri, parts[0])
@@ -69,7 +68,6 @@ export default class TreeMode {
         }
 
         else if (parts.length === 2) {
-          // arquivo dentro de pasta principal (mantém ela)
           const folderName = parts[0];
           const folderPath = path.join(workspace, folderName);
 
@@ -80,7 +78,6 @@ export default class TreeMode {
         }
 
         else {
-          // arquivo em subpasta profunda → sobe apenas a última pasta
           const folderName = parts[parts.length - 2];
           const folderPath = path.join(workspace, folderName);
 
@@ -104,11 +101,11 @@ export default class TreeMode {
           if (parts.length === 1) return false;
 
           if (parts.length === 2) {
-            // arquivo pertence à pasta principal
+
             return parts[0] === element.label;
           }
 
-          // arquivo pertence à subpasta elevada
+        
           return parts[parts.length - 2] === element.label;
         })
         .sort((a, b) => this.order[a.priority] - this.order[b.priority])

@@ -4,10 +4,13 @@ import TaskioComment from "../../../types/TaskioComment";
 import { TaskioDependencies } from "../../../types/TaskioDependencies";
 
 import { CommentNode } from "../../../treeView/TreeNode";
-import { ProcessIndividualSync } from "../SyncUtils";
+import SyncService from "../services/SyncService";
+import { TrelloService } from "../services/TrelloService";
 
 export default async function SendTask(comment: CommentNode, deps: TaskioDependencies) {
   const { store, treeProvider, secretStore, context } = deps;
+
+  const syncService = new SyncService(new TrelloService(secretStore));
 
   const commentData: TaskioComment = comment.comment;
 
@@ -32,13 +35,13 @@ export default async function SendTask(comment: CommentNode, deps: TaskioDepende
         title: `Syncing ${commentData.text} to Trello...`,
       },
       async () => {
-        await ProcessIndividualSync(commentData, deps);
+        await syncService.processTasks(commentData, deps, 'sync');
       }
     );
 
     treeProvider.refresh();
 
-    window.showInformationMessage("Task sent to Trello ✅");
+    window.showInformationMessage("Task sent to Trello!");
 
   } catch (error) {
 

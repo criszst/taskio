@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import SecretStore from "../../SecretStorage";
-import { TrelloService } from "../../TrelloService";
+import { TrelloService } from "../../services/TrelloService";
 import SelectBoardList from "../SelectBoardList";
 import { TaskioDependencies } from "../../../../types/TaskioDependencies";
 

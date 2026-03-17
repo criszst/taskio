@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 
-import { TrelloService } from "../TrelloService";
+import { TrelloService } from "../services/TrelloService";
 
 export default async function SelectBoardList(trello: TrelloService, context: vscode.ExtensionContext) {
 
