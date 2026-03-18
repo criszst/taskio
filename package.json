@@ -10,7 +10,7 @@
   "icon": "assets/taskio-icon.png",
   "repository": {
     "type": "git",
-    "url": "https://github.com/criszst/taskio.git"
+    "url": "https://github.com/criszst/taskio.git"  
   },
   "categories": [
     "Visualization",
@@ -137,48 +137,59 @@
       "type": "object",
       "title": "Taskio Configuration",
       "properties": {
+
         "taskio.keywords": {
+          "description": "Keywords recognized by Taskio inside comments",
+          "items": {
+            "type": "string"
+          },
+
           "type": "array",
           "default": [
             "TODO",
             "FIXME",
             "BUG"
-          ],
-          "description": "Keywords recognized by Taskio inside comments"
+          ]
         },
+
         "taskio.color": {
+          "description": "Highlight color for Taskio tasks (in hex format).",
           "type": "string",
-          "default": "#6042f5",
-          "description": "Highlight color for Taskio tasks (in hex format)."
+          "default": "#6042f5"
         },
         "taskio.enhanceAllText": {
+          "description": "Enhance all text comment after TODO (or other keywords).",
           "type": "boolean",
-          "default": false,
-          "description": "Enhance all text comment after TODO (or other keywords)."
+          "default": false
         },
+
         "taskio.priorityMarkers": {
+          "description": "Priority markers based on repeated characters after the keyword",
+
           "type": "object",
           "default": {
             "high": "!!!",
             "medium": "!!",
             "low": "!"
-          },
-          "description": "Priority markers based on repeated characters after the keyword"
+          }
         },
+
+        
         "taskio.trello.boardName": {
-          "type": "string",
-          "default": "",
           "description": "Name of the board setup on Trello Integration",
-          "markdownDescription": "⚠️ **Read-only**. This is managed by the 'Setup Trello' command.",
+          "type": "string",
+          "readOnly": true,
+          "markdownDescription": "**AUTO-MANAGED**: Do not edit this manually. Use the `Configure Trello Connection` command to update this value.",
           "scope": "resource"
         },
         "taskio.trello.listName": {
-          "type": "string",
-          "default": "",
           "description": "Name of the list setup on Trello Integration",
-          "markdownDescription": "⚠️ **Read-only**. This is managed by the 'Setup Trello' command.",
+          "type": "string",
+          "readOnly": true,
+          "markdownDescription": "**AUTO-MANAGED**: Do not edit this manually. Use the `Configure Trello Connection` command to update this value.",
           "scope": "resource"
         }
+
       }
     },
     "commands": [

@@ -6,22 +6,22 @@ Taskio scans your codebase for TODO-style comments and transforms them into a ce
 
 <div align="center">
 
-https://github.com/user-attachments/assets/e061bb14-9a16-4d05-b854-9f49bc164f8a
+  <p align="center">
+    <img src="https://github.com/user-attachments/assets/1aab439b-4af8-4d04-bae5-411a67b56a3f" width="900">
+  </p>
+
 
 </div>
 
 ---
 
-## How It Works
-
 Taskio continuously scans your workspace for comment keywords and keeps them organized in a task tree.
 
 No setup required — install and start writing TODOs.
 
-<img width="1205" height="346" alt="image" src="https://github.com/user-attachments/assets/fc3c59ee-4ee2-4c12-9dc4-58e6a55d1240" />
-
-
-
+<div align="center">
+  <img width="1205" height="346" src="https://github.com/user-attachments/assets/fc3c59ee-4ee2-4c12-9dc4-58e6a55d1240" />
+</div>
 
 ---
 
