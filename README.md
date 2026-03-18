@@ -20,7 +20,7 @@ Taskio continuously scans your workspace for comment keywords and keeps them org
 No setup required — install and start writing TODOs.
 
 <div align="center">
-  <img width="1205" height="346" src="https://github.com/user-attachments/assets/fc3c59ee-4ee2-4c12-9dc4-58e6a55d1240" />
+  <img width="1205" height="346" src="https://raw.githubusercontent.com/criszst/taskio/master/assets/demonstration.png" />
 </div>
 
 ---
