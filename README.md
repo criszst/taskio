@@ -7,7 +7,7 @@ Taskio scans your codebase for TODO-style comments and transforms them into a ce
 <div align="center">
 
   <p align="center">
-    <img src="https://github.com/user-attachments/assets/1aab439b-4af8-4d04-bae5-411a67b56a3f" width="900">
+    <img src="https://raw.githubusercontent.com/criszst/taskio/master/assets/mk.gif" width="900">
   </p>
 
 

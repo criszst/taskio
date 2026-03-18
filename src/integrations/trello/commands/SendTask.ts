@@ -55,6 +55,6 @@ export default async function SendTask(comment: CommentNode, deps: TaskioDepende
 
     treeProvider.refresh();
 
-    window.showErrorMessage("Failed to send task to Trello ❌");
+    window.showErrorMessage("❌ | Failed to send task to Trello");
   }
 }

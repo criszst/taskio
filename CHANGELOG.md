@@ -4,7 +4,48 @@ All notable changes to the "taskio" extension will be documented in this file.
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [0.1.5] – 2026-03-18
+
+### Added
+- Almost Full Trello integration management via `ManageIntegration` command
+- Options to:
+  - Change Board and List dynamically
+  - Sync all unsynced tasks to Trello
+  - Desync all synced tasks from Trello (including card deletion)
+  - Open current Trello board in browser
+  - Disconnect Trello integration
+- Centralized SyncService for handling sync/desync operations
+
+### Improved
+- Refactored Trello integration flow for better modularity and scalability
+- Improved Quick Pick UX for integration management
+- Better separation of concerns between services (TrelloService, SyncService)
+
+### Fixed
+- Inconsistencies between local task state and Trello sync status
+- Edge cases where tasks remained marked as synced after deletion
+
 ---
+
+## [0.1.4] – 2026-02-26
+
+### Added
+- Initial Trello integration
+- Secure storage of Trello credentials using SecretStorage
+- Board and List selection during setup
+- Sync individual tasks to Trello
+- Persistent workspace configuration for:
+  - Board ID
+  - Board Name
+  - List ID
+  - List Name
+
+### Improved
+- Internal architecture prepared for external integrations (Trello-first approach)
+- Task model extended with `syncStatus`
+
+---
+
 ## [0.1.3] - 2026-02-13
 
 ### Added
