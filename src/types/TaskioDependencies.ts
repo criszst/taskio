@@ -4,7 +4,7 @@ import { ApplyDecorators } from "../decoration/ApplyDecorators";
 import { CommentStore } from "../store/CommentStore";
 import { TreeProvider } from "../treeView/TreeProvider";
 import updateTreeTitle from "../utils/TreeTitle";
-import SecretStore from '../integrations/trello/SecretStorage';
+import SecretStore from '../integrations/trello/services/SecretStorage';
 
 export type TaskioDependencies = {
   store: CommentStore;

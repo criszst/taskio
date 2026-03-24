@@ -8,7 +8,7 @@ import { registerWorkspaceHandler, verifyWorkspaceChanges } from './events/handl
 import { registerEditorHandler } from './events/handlers/editorHandler';
 
 import { registerCommands } from './events/RegisterCommands';
-import SecretStore from './integrations/trello/SecretStorage';
+import SecretStore from './integrations/trello/services/SecretStorage';
 import TaskioComment from './types/TaskioComment';
 
 

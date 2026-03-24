@@ -4,11 +4,15 @@ import { TaskioDependencies } from "../../../../types/TaskioDependencies";
 import { setupTrello } from "../configs/SetupTrello";
 import { TrelloService } from "../../services/TrelloService";
 
-import SelectBoardList from "../SelectBoardList";
+import SelectBoardList from "../manager/SelectBoardList";
 import DisconnectTrello from "./DisconnectTrello";
+
+import { QuickPickItemKind } from "vscode";
 
 
 import SyncService from "../../services/SyncService";
+import SelectSyncMode from "../manager/SyncSettings";
+import SyncSettings from "../manager/SyncSettings";
 
 export default async function ManageIntegration(deps: TaskioDependencies): Promise<void> {
   const creds = await deps.secretStore.getTrelloCredentials();
@@ -35,26 +39,36 @@ export default async function ManageIntegration(deps: TaskioDependencies): Promi
 
   const listName = deps.context.workspaceState.get("taskio.trello.listName") || "Unknown List";
 
+
+
   const pick = await window.showQuickPick([
+    {
+      label: "Configuration",
+      kind: QuickPickItemKind.Separator
+    },
     {
       label: "$(gear) Change Board or List",
       description: `Current: ${boardName} > ${listName}`,
       action: 'change'
     },
+
     {
-      label: "$(cloud-upload) Sync All Tasks",
-      description: "Send all unsynced tasks in workspace to Trello",
-      action: 'sync_all'
+      label: "Sync",
+      kind: QuickPickItemKind.Separator
+    },
+    {
+      label: "$(cloud-upload) Manage Sync Settings",
+      description: "Customize how tasks are synced with Trello",
+      action: 'configure_sync'
+    },
+
+    {
+      label: "Utilities",
+      kind: QuickPickItemKind.Separator
     },
     {
       label: "$(browser) Open Current Board in Browser",
       action: 'open_trello'
-    },
-
-    {
-      label: "$(cloud-download) Desync All Tasks",
-      description: "Delete all synced tasks in workspace from Trello",
-      action: 'desync_all'
     },
     {
       label: "$(plug) Disconnect Trello",
@@ -73,20 +87,12 @@ export default async function ManageIntegration(deps: TaskioDependencies): Promi
       await SelectBoardList(trello, deps.context);
       break;
 
-    case 'sync_all':
-      const toSync = deps.store.getAll().filter(c => c.syncStatus !== 'synced');
-      await syncService.processTasks(toSync, deps, 'sync');
-      deps.treeProvider.refresh();
+    case 'configure_sync':
+      await SyncSettings(deps);
       break;
 
     case 'open_trello':
       env.openExternal(Uri.parse(`https://trello.com/b/${boardId}/${boardName}`));
-      break;
-      
-    case 'desync_all':
-      const toDesync = deps.store.getAll().filter(c => c.syncStatus === 'synced');
-      await syncService.processTasks(toDesync, deps, 'desync');
-      deps.treeProvider.refresh();
       break;
 
     case 'disconnect':

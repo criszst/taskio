@@ -13,5 +13,8 @@ vsc-extension-quickstart.md
 **/*.ts
 **/.vscode-test.*
 media/**
+
 assets/mk.gif
+assets/demonstration.png
+
 *.mp4

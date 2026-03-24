@@ -15,7 +15,7 @@ export function getIconByPriority(priority: TaskioPriority): ThemeIcon {
       return new ThemeIcon('circle-filled', new ThemeColor('charts.green'));
 
     default:
-      return new ThemeIcon('circle-outline');
+      return new ThemeIcon('circle-filled', new ThemeColor('charts.grey'));
   }
 }
 
@@ -69,7 +69,7 @@ export function getIconBySynced(status: "synced" | "error" | "local", priority: 
         "high": new ThemeColor("charts.red"),
         "medium": new ThemeColor("charts.yellow"),
         "low": new ThemeColor("charts.green"),
-        "default": new ThemeColor("charts"),
+        "default": new ThemeColor("charts.grey"),
       }
 
       return new ThemeIcon("pass-filled", priorityColors[priority]);

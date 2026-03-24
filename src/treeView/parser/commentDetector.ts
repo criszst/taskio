@@ -21,8 +21,8 @@ function CommentDetector(line: string): string | null {
 
   // To react files like jsx/tsx
  if (trimmed.includes('/*')) {
-    const startIndex = line.indexOf('/*');
-    return line.slice(startIndex); 
+    const blockCommentStart = trimmed.indexOf('/*');
+    return trimmed.slice(blockCommentStart);
   }
 
   // Python, Shell

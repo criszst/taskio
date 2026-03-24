@@ -8,7 +8,7 @@ import { CommentStore } from '../store/CommentStore';
 import { ApplyDecorators } from '../decoration/ApplyDecorators';
 
 import { TaskioDependencies } from '../types/TaskioDependencies';
-import SecretStore from '../integrations/trello/SecretStorage';
+import SecretStore from '../integrations/trello/services/SecretStorage';
 
 export default function createDeps(context: vscode.ExtensionContext): TaskioDependencies {
   const store = new CommentStore();

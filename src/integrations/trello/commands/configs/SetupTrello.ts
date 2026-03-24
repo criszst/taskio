@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
-import SecretStore from "../../SecretStorage";
+import SecretStore from "../../services/SecretStorage";
 import { TrelloService } from "../../services/TrelloService";
-import SelectBoardList from "../SelectBoardList";
+import SelectBoardList from "../manager/SelectBoardList";
 import { TaskioDependencies } from "../../../../types/TaskioDependencies";
 
 export async function setupTrello(secretStore: SecretStore, deps: TaskioDependencies) {

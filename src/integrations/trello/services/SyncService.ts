@@ -96,4 +96,5 @@ export default class SyncService {
     comment.trelloCardId = undefined;
     deps.store.update(comment);
   }
+
 }
