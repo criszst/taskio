@@ -67,7 +67,8 @@ export function registerCommands(context: ExtensionContext, deps: TaskioDependen
         const result = await RemoveTask(node.comment, deps.store);
 
         if (!result.ok) {
-          window.showErrorMessage(`Taskio failed to remove task: ${result.error}`);
+          window.showErrorMessage(`Taskio: Failed to remove task — ${result.error}`);
+          return;
         }
 
         deps.treeProvider.refresh();

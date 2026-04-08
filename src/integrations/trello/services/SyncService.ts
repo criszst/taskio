@@ -1,89 +1,89 @@
-import { ProgressLocation, window, Progress } from 'vscode';
+import { ProgressLocation, window } from 'vscode';
 import TaskioComment from '../../../types/TaskioComment';
 import { TaskioDependencies } from '../../../types/TaskioDependencies';
 import { TrelloService } from './TrelloService';
 
 export default class SyncService {
-  private trello: TrelloService;
-
-  constructor(trello: TrelloService) {
-    this.trello = trello;
-  }
+  constructor(private trello: TrelloService) { }
 
 
   async processTasks(input: TaskioComment | TaskioComment[], deps: TaskioDependencies, mode: 'sync' | 'desync'): Promise<void> {
     const comments = Array.isArray(input) ? input : [input];
 
-    if (comments.length === 0) {
-      window.showInformationMessage("No tasks to process.");
-      return;
-    }
+    if (comments.length === 0)
+      return void window.showInformationMessage("No tasks to process.");
 
-    if (comments.every(c => c.syncStatus === 'synced') && mode === 'sync') {
-      window.showWarningMessage("All tasks are already synced.");
-      return;
-    }
+    if (mode === 'sync' && comments.every(c => c.syncStatus === 'synced'))
+      return void window.showWarningMessage("All tasks are already synced.");
 
-    if (comments.every(c => c.syncStatus === 'local') && mode === 'desync') {
-      window.showWarningMessage("No tasks are currently synced.");
-      return;
-    }
+    if (mode === 'desync' && comments.every(c => c.syncStatus === 'local'))
+      return void window.showWarningMessage("No tasks are currently synced.");
 
-    const title = mode === 'sync' ? "Syncing tasks" : "Desyncing tasks";
 
-    const confirmation = await window.showWarningMessage(
-        `Are you sure you want to ${mode} ${comments.length} tasks to Trello?`,
-        { modal: true },
-        "Yes",
-        "No"
-      );
+    const confirmed = await window.showWarningMessage(
+      `Are you sure you want to ${mode} ${comments.length} task(s) to Trello?`,
+      { modal: true }, "Yes", "No"
+    );
 
-    if (confirmation !== "Yes") {
-      window.showInformationMessage("Operation cancelled.");
-      return;
-    }
+    if (confirmed !== "Yes") return void window.showInformationMessage("Operation cancelled.");
 
-    await window.withProgress({
-      location: ProgressLocation.Notification,
-      title,
-      cancellable: false,
-    }, async (progress) => {
+    const label = mode === 'sync' ? "Syncing tasks" : "Desyncing tasks";
 
-      const incrementUnit = 100 / comments.length;
+    await window.withProgress({ location: ProgressLocation.Notification, title: label, cancellable: false },
+      async (progress) => {
+        const step = 100 / comments.length;
 
-      for (const comment of comments) {
-        try {
-          if (mode === 'sync') {
-             await this.syncOne(comment, deps);
-          } else {
-            await this.desyncOne(comment, deps);
+        for (const comment of comments) {
+          try {
+            mode === 'sync' ? await this.syncOne(comment, deps) : await this.desyncOne(comment, deps);
+          } catch (error) {
+            console.error(`[Taskio] Failed to process "${comment.text}":`, error);
+            window.showErrorMessage(`Failed to process "${comment.text}". Error: ${error}`);
           }
-        } catch (error) {
-          console.error(`Failed to process task ${comment.text}:`, error);
-          window.showErrorMessage(`Failed to process task "${comment.text}". Please try again.\n Error: ${error}`);
-        } finally {
-          progress.report({ increment: incrementUnit, message: `"${comment.displayText}"` });
+
+          progress.report({ increment: step, message: `"${comment.displayText ?? comment.text}"` });
         }
       }
-    });
+    );
   }
 
+
+  // for automatic sync on save/startup without showing progress or messages
+  async processTasksSilent(comments: TaskioComment[], deps: TaskioDependencies, mode: 'sync' | 'desync'): Promise<void> {
+
+    for (const comment of comments) {
+      try {
+        mode === 'sync' ? await this.syncOne(comment, deps) : await this.desyncOne(comment, deps);
+      } catch (error) {
+        console.error(`[Taskio] Failed to auto-${mode} task "${comment.text}":`, error);
+      }
+    }
+  }
+  
   private async syncOne(comment: TaskioComment, deps: TaskioDependencies): Promise<void> {
     const listId = deps.context.workspaceState.get<string>("taskio.trello.listId");
+
     if (!listId) throw new Error("No Trello list configured.");
 
     const filePath = comment.uri.fsPath.replace(/\\/g, '/');
-    const description = `**File:** \`${filePath}\`\n**Position:** Line ${comment.line + 1}`;
 
-    const card = await this.trello.createCard({
-      listId,
-      name: comment.displayText ?? comment.text,
-      description,
-      priority: comment.priority,
-    });
+    const name = comment.displayText ?? comment.text;
+    const description = `**File:** \`${filePath}\`\n**Line:** ${comment.line + 1}`;
+
+
+
+    if (comment.syncStatus === 'synced' && comment.trelloCardId) {
+      await this.trello.updateCard(comment.trelloCardId, { name, description });
+      deps.store.update(comment);
+
+      return;
+    }
+
+    const card = await this.trello.createCard({ listId, name, description, priority: comment.priority });
 
     comment.syncStatus = 'synced';
     comment.trelloCardId = card.id;
+
     deps.store.update(comment);
   }
 
@@ -94,7 +94,7 @@ export default class SyncService {
 
     comment.syncStatus = 'local';
     comment.trelloCardId = undefined;
+
     deps.store.update(comment);
   }
-
 }

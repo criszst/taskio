@@ -3,14 +3,7 @@ import { window, workspace, WorkspaceEdit } from "vscode";
 import { CommentStore } from "../store/CommentStore";
 import TaskioComment from "../types/TaskioComment";
 
-
-// TODO!: Refactor this to return a Result type instead of showing error messages directly, so the caller can decide how to handle errors
-type Result<Sucess, Error> = { ok: true, value: Sucess } | { ok: false, error: Error };
-
-const Ok = <Sucess, Error>(value: Sucess): Result<Sucess, Error> => ({ ok: true, value });
-const Err = <Sucess, Error>(value: Error): Result<Sucess, Error> => ({ ok: false, error: value });
-
-type AsyncResult<Sucess, Error> = Promise<Result<Sucess, Error>>;
+import { AsyncResult, Err, Ok } from "../utils/AsyncResult";
 
 export default async function RemoveTask(comment: TaskioComment, store: CommentStore): AsyncResult<void, string> {
   if (!comment.id) {
@@ -20,12 +13,13 @@ export default async function RemoveTask(comment: TaskioComment, store: CommentS
   const confirm = await window.showWarningMessage(
     'Are you sure you want to remove this task?',
     { modal: true },
-    'Yes'
+    'Yes',
+    'No'
   );
 
   if (confirm !== 'Yes') {
-    return Ok(undefined);
-  }
+    return Err('Operation cancelled');
+  } 
 
   try {
     store.remove(comment.id);
@@ -47,7 +41,7 @@ export default async function RemoveTask(comment: TaskioComment, store: CommentS
     await doc.save();
 
 
-    return Ok(undefined);
+    return Ok(void 0);
 
   } catch (error) {
     return Err('Unexpected error while removing task');

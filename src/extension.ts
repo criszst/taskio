@@ -1,5 +1,7 @@
 import * as vscode from 'vscode';
 
+import TaskioComment from './types/TaskioComment';
+
 import EventManager from './events/EventManager';
 import createDeps from './events/CreateDeps';
 
@@ -8,8 +10,8 @@ import { registerWorkspaceHandler, verifyWorkspaceChanges } from './events/handl
 import { registerEditorHandler } from './events/handlers/editorHandler';
 
 import { registerCommands } from './events/RegisterCommands';
-import SecretStore from './integrations/trello/services/SecretStorage';
-import TaskioComment from './types/TaskioComment';
+
+import { syncOnStartup } from './integrations/trello/events/OnStartup';
 
 
 export async function activate(context: vscode.ExtensionContext) {
@@ -21,14 +23,15 @@ export async function activate(context: vscode.ExtensionContext) {
   savedComments.forEach(c => {
     if (c.syncStatus === "synced") {
       const uriStr = vscode.Uri.parse((c.uri as any).external || c.uri.toString()).toString();
-      
+
       syncCache.set(`${uriStr}|${c.text}`, c);
     }
   });
 
   await verifyWorkspaceChanges(deps, syncCache);
+  await syncOnStartup(deps);
 
-    const eventManager = new EventManager();
+  const eventManager = new EventManager();
 
   registerEditorHandler(eventManager, deps);
 

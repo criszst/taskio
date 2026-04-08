@@ -1,33 +1,34 @@
-import * as vscode from "vscode";
+import {ExtensionContext, ProgressLocation, window} from "vscode";
 
 import { TrelloService } from "../../services/TrelloService";
 
-export default async function SelectBoardList(trello: TrelloService, context: vscode.ExtensionContext) {
+export default async function SelectBoardList(trello: TrelloService, context: ExtensionContext) {
 
-  const boards = await vscode.window.withProgress(
-    { location: vscode.ProgressLocation.Window, title: "Fetching Trello Boards..." },
+  const boards = await window.withProgress(
+    { location: ProgressLocation.Window, title: "Fetching Trello Boards..." },
     () => trello.getBoards()
   );
 
-  const boardPick = await vscode.window.showQuickPick(
+  const boardPick = await window.showQuickPick(
     boards.map(b => ({
       label: b.name,
       description: `ID: ${b.id}`,
-      boardId: b.id
+      boardId: b.id,
     })),
     { 
         placeHolder: "Step 1/2: Select a Trello Board",
         prompt: "You can only select one board at the moment, but you can change it later in the settings. Press ESC to exit.",
-        ignoreFocusOut: true 
+        ignoreFocusOut: true,
     }
   );
 
-  if (!boardPick) return vscode.window.showWarningMessage("No board selected.");
+
+  if (!boardPick) return window.showWarningMessage("No board selected.");
   
 
   const lists = await trello.getLists(boardPick.boardId);
   
-  const listPick = await vscode.window.showQuickPick(
+  const listPick = await window.showQuickPick(
     lists.map(l => ({
       label: l.name,
       description: `Current Board: ${boardPick.label}`,
@@ -40,7 +41,7 @@ export default async function SelectBoardList(trello: TrelloService, context: vs
     }
   );
 
-  if (!listPick) return vscode.window.showWarningMessage("No list selected.");
+  if (!listPick) return window.showWarningMessage("No list selected.");
 
   await context.workspaceState.update("taskio.trello.boardId", boardPick.boardId);
   await context.workspaceState.update("taskio.trello.boardName", boardPick.label);
@@ -48,5 +49,5 @@ export default async function SelectBoardList(trello: TrelloService, context: vs
   await context.workspaceState.update("taskio.trello.listId", listPick.listId);
   await context.workspaceState.update("taskio.trello.listName", listPick.label);
 
-  vscode.window.showInformationMessage(`Tasks will now be sent to: ${boardPick.label} > ${listPick.label}`);
+  window.showInformationMessage(`Tasks will now be sent to: ${boardPick.label} > ${listPick.label}`);
 }

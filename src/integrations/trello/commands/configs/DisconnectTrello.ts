@@ -14,6 +14,11 @@ export default async function DisconnectTrello(deps: TaskioDependencies): Promis
         await deps.secretStore.removeTrelloCredentials();
         await context.workspaceState.update("taskio.trello.listId", undefined);
         await context.workspaceState.update("taskio.trello.boardId", undefined);
+        await context.workspaceState.update("taskio.trello.boardName", undefined);
+        await context.workspaceState.update("taskio.trello.listName", undefined);
+
+        await context.workspaceState.update("taskio.trello.syncOnSave", undefined);
+        await context.workspaceState.update("taskio.trello.syncOnStartup", undefined);
 
         const allSynced = deps.store.getAll().filter(comment => comment.syncStatus === "synced");
 

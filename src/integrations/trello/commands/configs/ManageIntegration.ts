@@ -42,46 +42,58 @@ export default async function ManageIntegration(deps: TaskioDependencies): Promi
 
 
   const pick = await window.showQuickPick([
-    {
-      label: "Configuration",
-      kind: QuickPickItemKind.Separator
-    },
-    {
-      label: "$(gear) Change Board or List",
-      description: `Current: ${boardName} > ${listName}`,
-      action: 'change'
-    },
+    { label: "Configuration", kind: QuickPickItemKind.Separator },
 
     {
-      label: "Sync",
-      kind: QuickPickItemKind.Separator
+      label: "$(gear) Change Board or List",
+      description: `${boardName} › ${listName}`,
+      detail: "Switch which Trello board or list receives your tasks",
+      action: 'change'
     },
     {
-      label: "$(cloud-upload) Manage Sync Settings",
-      description: "Customize how tasks are synced with Trello",
+      label: "$(settings) Sync Settings",
+      description: "Auto-sync, startup sync",
+      detail: "Customize when and how tasks are sent to Trello",
       action: 'configure_sync'
     },
 
+
+    { label: "Sync", kind: QuickPickItemKind.Separator},
+
     {
-      label: "Utilities",
-      kind: QuickPickItemKind.Separator
+      label: "$(sync) Sync All Tasks",
+      detail: "Send all unsynced tasks to Trello now",
+      action: 'sync_all'
     },
     {
-      label: "$(browser) Open Current Board in Browser",
+      label: "$(trash) Desync All Tasks",
+      detail: "Remove all tasks from Trello — they stay in VS Code",
+      action: 'desync_all'
+    },
+    
+
+    { label: "More", kind: QuickPickItemKind.Separator},
+
+    {
+      label: "$(browser) Open Board in Browser",
       action: 'open_trello'
     },
     {
       label: "$(plug) Disconnect Trello",
-      description: "Remove API keys and workspace settings",
+      detail: "Remove API keys and reset workspace settings",
       action: 'disconnect'
     }
+
   ], {
-    placeHolder: "Trello Integration Management"
+    placeHolder: "Manage Trello Integration",
+    matchOnDescription: true,
+    matchOnDetail: true
   });
 
   if (!pick) return;
 
   switch (pick.action) {
+    // CONFIG ACTIONS
     case 'change':
       const trello = new TrelloService(deps.secretStore);
       await SelectBoardList(trello, deps.context);
@@ -90,6 +102,19 @@ export default async function ManageIntegration(deps: TaskioDependencies): Promi
     case 'configure_sync':
       await SyncSettings(deps);
       break;
+
+
+    // SYNC ACTIONS
+    case 'sync_all':
+      await syncService.processTasks(deps.store.getAll(), deps, 'sync');
+      break;
+
+    case 'desync_all':
+      await syncService.processTasks(deps.store.getAll(), deps, 'desync');
+      break;
+
+
+    // UTILITIES ACTIONS
 
     case 'open_trello':
       env.openExternal(Uri.parse(`https://trello.com/b/${boardId}/${boardName}`));
