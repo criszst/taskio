@@ -40,9 +40,12 @@ export class TrelloService {
 
 
   async validate() {
-    const request = await this.request("/members/me");
-
-    return true ? request : false;
+    try {
+      await this.request("/members/me");
+      return true;
+    } catch {
+      return false;
+    }
   }
 
   async getBoards(): Promise<TrelloBoard[]> {

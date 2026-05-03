@@ -33,7 +33,8 @@
     "vscode tasks"
   ],
   "activationEvents": [
-    "onStartupFinished"
+    "onStartupFinished",
+    "onUri"
   ],
   "main": "./dist/extension.js",
   "contributes": {
@@ -184,6 +185,12 @@
           "description": "Automatically sync tasks with Trello when VSCode starts",
           "type": "boolean",
           "default": false
+        },
+
+        "taskio.trello.authReturnUrl": {
+          "description": "Return URL used by Trello to redirect back with the token (callback_method=fragment). This URL must match the Trello API key 'Allowed Origins' and must host a static page that reads location.hash and redirects to vscode://taskio.taskio/trello-auth with token and state. Avoid query params in this URL to keep static hosts happy.",
+          "type": "string",
+          "default": "https://taskio.com/auth/trello"
         },
 
         

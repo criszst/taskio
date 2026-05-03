@@ -89,7 +89,7 @@ export function registerCommands(context: ExtensionContext, deps: TaskioDependen
 
     commands.registerCommand('taskio.trello.SetupIntegration',
       async () => {
-        setupTrello(deps.secretStore, deps);
+        await setupTrello(deps.secretStore, deps);
       }
     ),
 
