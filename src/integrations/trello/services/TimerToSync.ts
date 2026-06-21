@@ -13,8 +13,6 @@ const START = "[Taskio]";
 const END = "[/Taskio]";
 const CACHE_KEY = "taskio.trello.syncCache.v1";
 const TIMER_KEY = "timerToSync";
-const LEGACY_TIMER_KEY = "syncOnSave";
-const FALLBACK_TIMER_MINUTES = 2;
 const scheduledTimers = new Map<string, ReturnType<typeof setTimeout>>();
 
 export function renderTaskioBlock(comment: TaskioComment, docUri: Uri): string {
@@ -85,19 +83,11 @@ function normalizeAutoSyncSetting(value: unknown): TrelloAutoSyncSetting | undef
 }
 
 export function getTrelloAutoSyncSetting(): TrelloAutoSyncSetting {
-  const configured = loadTrelloAutoSyncSetting();
-  if (configured !== undefined) return configured;
-
-  const legacyEnabled = loadLegacySyncOnSaveSetting();
-  return legacyEnabled ? FALLBACK_TIMER_MINUTES : false;
+  return loadTrelloAutoSyncSetting() ?? false;
 }
 
 function loadTrelloAutoSyncSetting(): TrelloAutoSyncSetting | undefined {
   return normalizeAutoSyncSetting(workspace.getConfiguration("taskio.trello").get<unknown>(TIMER_KEY));
-}
-
-function loadLegacySyncOnSaveSetting(): boolean {
-  return workspace.getConfiguration("taskio.trello").get<boolean>(LEGACY_TIMER_KEY) ?? false;
 }
 
 export function describeTrelloAutoSyncSetting(setting: TrelloAutoSyncSetting): string {

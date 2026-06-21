@@ -25,46 +25,55 @@ export default async function SendTask(comment: CommentNode, deps: TaskioDepende
   }
 
   try {
-    const listId = context.workspaceState.get<string>("taskio.trello.listId");
-
-    if (!listId) {
+    if (!hasConfiguredList(context)) {
       window.showErrorMessage("No Trello list configured. Please run the 'Setup Trello Integration' command first.");
       return;
     }
 
-    await window.withProgress(
+    const syncResult = await window.withProgress(
       {
         location: ProgressLocation.Notification,
         title: `Syncing ${commentData.text} to Trello...`,
       },
-      async () => {
-        const result = await syncService.processTasks(commentData, deps, "sync");
-
-        if (result.failureCount > 0) {
-          commentData.syncStatus = "error";
-          store.update(commentData);
-        }
-      }
+      async () => syncService.processTasks(commentData, deps, "sync")
     );
 
-    await context.workspaceState.update("taskio.comments", store.getAll());
+    const hasPartialFailure = syncResult.failureCount > 0;
+
+    if (hasPartialFailure) {
+      markTaskAsFailed(commentData, store);
+    }
+
+    await persistComments(context, store);
 
     treeProvider.refresh();
 
-    if (commentData.syncStatus === "error") {
+    if (hasPartialFailure) {
       window.showErrorMessage("Failed to send task to Trello");
       return;
     }
 
     window.showInformationMessage("Task sent to Trello!");
   } catch {
-    commentData.syncStatus = "error";
-    store.update(commentData);
-
-    await context.workspaceState.update("taskio.comments", store.getAll());
-
+    markTaskAsFailed(commentData, store);
+    await persistComments(context, store);
     treeProvider.refresh();
-
     window.showErrorMessage("Failed to send task to Trello");
   }
+}
+
+function hasConfiguredList(context: TaskioDependencies["context"]): boolean {
+  return Boolean(context.workspaceState.get<string>("taskio.trello.listId"));
+}
+
+function markTaskAsFailed(commentData: TaskioComment, store: TaskioDependencies["store"]): void {
+  commentData.syncStatus = "error";
+  store.update(commentData);
+}
+
+async function persistComments(
+  context: TaskioDependencies["context"],
+  store: TaskioDependencies["store"],
+): Promise<void> {
+  await context.workspaceState.update("taskio.comments", store.getAll());
 }

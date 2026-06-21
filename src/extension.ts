@@ -20,10 +20,13 @@ export async function activate(context: vscode.ExtensionContext) {
   const deps = createDeps(context);
   context.subscriptions.push(registerTrelloUriHandler());
   context.subscriptions.push(vscode.workspace.onDidChangeConfiguration((event) => {
-    if (event.affectsConfiguration('taskio.trello.timerToSync') || event.affectsConfiguration('taskio.trello.syncOnSave')) {
+
+    if (event.affectsConfiguration('taskio.trello.timerToSync')) {
       clearAllTrelloAutoSyncTimers();
     }
+    
   }));
+
   context.subscriptions.push({ dispose: clearAllTrelloAutoSyncTimers });
 
   const savedComments = context.workspaceState.get<TaskioComment[]>("taskio.comments", []);

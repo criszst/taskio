@@ -60,7 +60,7 @@ export async function setupTrello(secretStore: SecretStore, deps: TaskioDependen
     token = await vscode.window.withProgress(
       {
         location: vscode.ProgressLocation.Notification,
-        title: "Taskio: Waiting for Trello authorization in your browser…",
+        title: "Taskio: Waiting for Trello authorization in your browser...",
         cancellable: true,
       },
       async (_progress, cancel) => {
@@ -100,7 +100,7 @@ export async function setupTrello(secretStore: SecretStore, deps: TaskioDependen
     return;
   }
 
-  vscode.window.showInformationMessage("Trello connected successfully 🚀");
+  vscode.window.showInformationMessage("Trello connected successfully.");
 
   await SelectBoardList(trello, context);
 }
