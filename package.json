@@ -175,9 +175,13 @@
           }
         },
 
-        "taskio.trello.syncOnSave": {
-          "description": "Automatically sync tasks with Trello when saving a file",
-          "type": "boolean",
+        "taskio.trello.timerToSync": {
+          "description": "Automatically sync saved tasks with Trello after X minutes",
+          "type": [
+            "number",
+            "boolean"
+          ],
+          "minimum": 1,
           "default": false
         },
 

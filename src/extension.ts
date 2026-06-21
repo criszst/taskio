@@ -13,11 +13,18 @@ import { registerCommands } from './events/RegisterCommands';
 
 import { syncOnStartup } from './integrations/trello/events/OnStartup';
 import { registerTrelloUriHandler } from './integrations/trello/services/TrelloAuthUri';
+import { clearAllTrelloAutoSyncTimers } from './integrations/trello/services/TimerToSync';
 
 
 export async function activate(context: vscode.ExtensionContext) {
   const deps = createDeps(context);
   context.subscriptions.push(registerTrelloUriHandler());
+  context.subscriptions.push(vscode.workspace.onDidChangeConfiguration((event) => {
+    if (event.affectsConfiguration('taskio.trello.timerToSync') || event.affectsConfiguration('taskio.trello.syncOnSave')) {
+      clearAllTrelloAutoSyncTimers();
+    }
+  }));
+  context.subscriptions.push({ dispose: clearAllTrelloAutoSyncTimers });
 
   const savedComments = context.workspaceState.get<TaskioComment[]>("taskio.comments", []);
   const syncCache = new Map<string, TaskioComment>();

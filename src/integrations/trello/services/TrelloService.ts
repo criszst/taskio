@@ -1,9 +1,25 @@
 import SecretStore from "./SecretStorage";
 
 import TrelloBoard from "../types/Board";
+import TrelloApiCard from "../types/TrelloApiCard";
 import TrelloCard from "../types/Card";
 
 import { TrelloList } from "../types/List";
+
+export class TrelloHttpError extends Error {
+  constructor(
+    message: string,
+    public readonly status: number,
+    public readonly responseBody?: string,
+  ) {
+    super(message);
+    this.name = "TrelloHttpError";
+  }
+}
+
+export type TrelloValidationResult =
+  | { ok: true }
+  | { ok: false; reason: "unauthorized" | "network" | "service" };
 
 
 
@@ -33,18 +49,44 @@ export class TrelloService {
 
     const res = await fetch(`${this.baseUrl}${path}${separator}key=${apiKey}&token=${token}`, options);
 
-    if (!res.ok) throw new Error(`Trello API error: ${res.status} ${res.statusText}`);
+    if (!res.ok) {
+      let details = "";
+      try {
+        const text = await res.text();
+        details = text ? ` - ${text}` : "";
+      } catch {
+        // ignore
+      }
+      throw new TrelloHttpError(`Trello API error: ${res.status} ${res.statusText}${details}`, res.status, details || undefined);
+    }
 
-    return res.json() as Promise<T>;
+    if (res.status === 204) return undefined as T;
+
+    const text = await res.text();
+    if (!text) return undefined as T;
+
+    try {
+      return JSON.parse(text) as T;
+    } catch {
+      return text as unknown as T;
+    }
   }
 
 
-  async validate() {
+  async validate(): Promise<TrelloValidationResult> {
     try {
       await this.request("/members/me");
-      return true;
-    } catch {
-      return false;
+      return { ok: true };
+    } catch (error) {
+      if (error instanceof TrelloHttpError) {
+        if (error.status === 401 || error.status === 403) {
+          return { ok: false, reason: "unauthorized" };
+        }
+
+        return { ok: false, reason: "service" };
+      }
+
+      return { ok: false, reason: "network" };
     }
   }
 
@@ -73,7 +115,14 @@ export class TrelloService {
     });
   }
 
+  async getCard(cardId: string, fields?: string[]): Promise<TrelloApiCard> {
+    const params = fields ? `?fields=${fields.join(",")}` : "";
+    return this.request(`/cards/${cardId}${params}`);
+  }
+
   async updateCard(cardId: string, body: Partial<TrelloCard>): Promise<any> {
+    if (!cardId) throw new Error("Missing Trello card id.");
+
     return this.request(`/cards/${cardId}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
@@ -82,11 +131,12 @@ export class TrelloService {
         desc: body.description,
       }),
     });
+
   }
 
 
   async deleteCard(cardId: string): Promise<void> {
     await this.request(`/cards/${cardId}`, { method: "DELETE" });
   }
-}
 
+}

@@ -14,12 +14,15 @@ export default async function SendTask(comment: CommentNode, deps: TaskioDepende
 
   const commentData: TaskioComment = comment.comment;
 
-  if (!commentData) return window.showWarningMessage('Taskio: No comment selected.');
+  if (!commentData) return window.showWarningMessage("Taskio: No comment selected.");
 
-  if (commentData.syncStatus === 'synced') return window.showInformationMessage('This task is already synced with Trello.');
+  if (commentData.syncStatus === "synced") {
+    return window.showInformationMessage("This task is already synced with Trello.");
+  }
 
-  if (!secretStore) return window.showErrorMessage('Trello integration not set up. Please run "Setup Trello Integration" command first.');
-  
+  if (!secretStore) {
+    return window.showErrorMessage('Trello integration not set up. Please run "Setup Trello Integration" command first.');
+  }
 
   try {
     const listId = context.workspaceState.get<string>("taskio.trello.listId");
@@ -29,32 +32,39 @@ export default async function SendTask(comment: CommentNode, deps: TaskioDepende
       return;
     }
 
-   await window.withProgress(
+    await window.withProgress(
       {
         location: ProgressLocation.Notification,
         title: `Syncing ${commentData.text} to Trello...`,
       },
       async () => {
-        await syncService.processTasks(commentData, deps, 'sync');
+        const result = await syncService.processTasks(commentData, deps, "sync");
+
+        if (result.failureCount > 0) {
+          commentData.syncStatus = "error";
+          store.update(commentData);
+        }
       }
     );
 
+    await context.workspaceState.update("taskio.comments", store.getAll());
+
     treeProvider.refresh();
 
+    if (commentData.syncStatus === "error") {
+      window.showErrorMessage("Failed to send task to Trello");
+      return;
+    }
+
     window.showInformationMessage("Task sent to Trello!");
-
-  } catch (error) {
-
+  } catch {
     commentData.syncStatus = "error";
     store.update(commentData);
 
-    await context.workspaceState.update(
-      "taskio.comments",
-      store.getAll()
-    );
+    await context.workspaceState.update("taskio.comments", store.getAll());
 
     treeProvider.refresh();
 
-    window.showErrorMessage("❌ | Failed to send task to Trello");
+    window.showErrorMessage("Failed to send task to Trello");
   }
 }

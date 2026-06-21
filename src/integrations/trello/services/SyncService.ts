@@ -3,21 +3,32 @@ import TaskioComment from '../../../types/TaskioComment';
 import { TaskioDependencies } from '../../../types/TaskioDependencies';
 import { TrelloService } from './TrelloService';
 
+export type SyncBatchResult = {
+  successCount: number;
+  failureCount: number;
+};
+
 export default class SyncService {
   constructor(private trello: TrelloService) { }
 
 
-  async processTasks(input: TaskioComment | TaskioComment[], deps: TaskioDependencies, mode: 'sync' | 'desync'): Promise<void> {
+  async processTasks(input: TaskioComment | TaskioComment[], deps: TaskioDependencies, mode: 'sync' | 'desync'): Promise<SyncBatchResult> {
     const comments = Array.isArray(input) ? input : [input];
 
-    if (comments.length === 0)
-      return void window.showInformationMessage("No tasks to process.");
+    if (comments.length === 0) {
+      await window.showInformationMessage("No tasks to process.");
+      return { successCount: 0, failureCount: 0 };
+    }
 
-    if (mode === 'sync' && comments.every(c => c.syncStatus === 'synced'))
-      return void window.showWarningMessage("All tasks are already synced.");
+    if (mode === 'sync' && comments.every(c => c.syncStatus === 'synced')) {
+      await window.showWarningMessage("All tasks are already synced.");
+      return { successCount: 0, failureCount: 0 };
+    }
 
-    if (mode === 'desync' && comments.every(c => c.syncStatus === 'local'))
-      return void window.showWarningMessage("No tasks are currently synced.");
+    if (mode === 'desync' && comments.every(c => c.syncStatus === 'local')) {
+      await window.showWarningMessage("No tasks are currently synced.");
+      return { successCount: 0, failureCount: 0 };
+    }
 
 
     const confirmed = await window.showWarningMessage(
@@ -25,26 +36,37 @@ export default class SyncService {
       { modal: true }, "Yes", "No"
     );
 
-    if (confirmed !== "Yes") return void window.showInformationMessage("Operation cancelled.");
+    if (confirmed !== "Yes") {
+      await window.showInformationMessage("Operation cancelled.");
+      return { successCount: 0, failureCount: 0 };
+    }
 
     const label = mode === 'sync' ? "Syncing tasks" : "Desyncing tasks";
 
-    await window.withProgress({ location: ProgressLocation.Notification, title: label, cancellable: false },
+    const result = await window.withProgress({ location: ProgressLocation.Notification, title: label, cancellable: false },
       async (progress) => {
         const step = 100 / comments.length;
+        let successCount = 0;
+        let failureCount = 0;
 
         for (const comment of comments) {
           try {
             mode === 'sync' ? await this.syncOne(comment, deps) : await this.desyncOne(comment, deps);
+            successCount += 1;
           } catch (error) {
+            failureCount += 1;
             console.error(`[Taskio] Failed to process "${comment.text}":`, error);
             window.showErrorMessage(`Failed to process "${comment.text}". Error: ${error}`);
           }
 
           progress.report({ increment: step, message: `"${comment.displayText ?? comment.text}"` });
         }
+
+        return { successCount, failureCount };
       }
     );
+
+    return result ?? { successCount: 0, failureCount: 0 };
   }
 
 

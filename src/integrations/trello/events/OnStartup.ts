@@ -2,7 +2,7 @@ import { workspace } from "vscode";
 
 import { TaskioDependencies } from "../../../types/TaskioDependencies";
 
-import SyncService from "../services/SyncService";
+import { syncCardsPatchOnlyOnSave } from "../services/TimerToSync";
 import { TrelloService } from "../services/TrelloService";
 
 export async function syncOnStartup(deps: TaskioDependencies): Promise<void> {
@@ -18,8 +18,11 @@ export async function syncOnStartup(deps: TaskioDependencies): Promise<void> {
 
   if (tasks.length === 0) return;
 
-  const syncService = new SyncService(new TrelloService(deps.secretStore));
-  await syncService.processTasksSilent(tasks, deps, 'sync');
+  const syncedTasks = tasks.filter(t => t.syncStatus === "synced" && t.trelloCardId);
+  if (syncedTasks.length === 0) return;
+
+  const trello = new TrelloService(deps.secretStore);
+  await syncCardsPatchOnlyOnSave(syncedTasks, deps, trello);
   
   await deps.context.workspaceState.update("taskio.comments", deps.store.getAll());
 

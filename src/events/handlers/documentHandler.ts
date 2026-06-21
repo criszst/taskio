@@ -9,13 +9,8 @@ import EventManager from '../EventManager';
 import OnUserSaveFile from '../../integrations/trello/events/OnUserSaveFile';
 
 
-import debounce from '../../utils/Debounce';
-
-
 export function registerDocumentHandler(manager: EventManager, deps: TaskioDependencies): void {
   const { store, applyDecorators } = deps;
-
-  manager.register(vscode.workspace.onDidOpenTextDocument(doc => syncDocument(doc, deps), 200));
 
   manager.register(vscode.workspace.onDidChangeTextDocument(e => syncDocument(e.document, deps)));
 
@@ -26,22 +21,23 @@ export function registerDocumentHandler(manager: EventManager, deps: TaskioDepen
         syncDocument(editor.document, deps)
         applyDecorators(editor, store);
       }
+
     }
 
   })
   )
 
-  manager.register(vscode.workspace.onDidSaveTextDocument(async (doc) => {
+  manager.register(vscode.workspace.onDidSaveTextDocument((doc) => {
 
     if (shouldIgnoreDocument(doc.uri)) return;
 
-    const debouncedSave = debounce(async (doc: vscode.TextDocument) => {
-      await new OnUserSaveFile(doc, deps).handle();
+    void (async () => {
+
+      await new OnUserSaveFile(doc, deps).SaveTasks();
       deps.treeProvider.refresh();
-    }, 1500);
 
+    })();
 
-    debouncedSave(doc);
   }));
 
 }
@@ -59,8 +55,8 @@ export const syncDocument = (doc: vscode.TextDocument, deps: TaskioDependencies)
   }
 
   const existing = store.getByUri(doc.uri);
-  const trelloMetaByText = new Map(
-    existing
+
+  const trelloMetaByText = new Map(existing
       .filter(c => c.syncStatus === 'synced' && c.trelloCardId)
       .map(c => [c.text, { trelloCardId: c.trelloCardId, syncStatus: c.syncStatus }])
   );

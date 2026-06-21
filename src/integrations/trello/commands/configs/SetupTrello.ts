@@ -14,12 +14,21 @@ export async function setupTrello(secretStore: SecretStore, deps: TaskioDependen
 
   if (getTrelloCreds) {
     const trello = new TrelloService(secretStore);
-    const valid = await trello.validate();
+    const validation = await trello.validate();
 
-    if (valid) {
+    if (validation.ok) {
       await SelectBoardList(trello, context);
       return;
     }
+
+    if (validation.reason === "unauthorized") {
+      await secretStore.removeTrelloCredentials();
+      vscode.window.showErrorMessage("Invalid Trello credentials.");
+      return;
+    }
+
+    vscode.window.showErrorMessage("Taskio: Could not verify Trello credentials right now. Please try again in a moment.");
+    return;
   }
 
   // yes its to be intended public
@@ -79,11 +88,15 @@ export async function setupTrello(secretStore: SecretStore, deps: TaskioDependen
   await secretStore.saveTrelloCredentials(API_KEY, token);
 
   const trello = new TrelloService(secretStore);
-  const valid = await trello.validate();
+  const validation = await trello.validate();
 
-  if (!valid) {
-    await secretStore.removeTrelloCredentials();
-    vscode.window.showErrorMessage("Invalid Trello credentials.");
+  if (!validation.ok) {
+    if (validation.reason === "unauthorized") {
+      await secretStore.removeTrelloCredentials();
+      vscode.window.showErrorMessage("Invalid Trello credentials.");
+    } else {
+      vscode.window.showErrorMessage("Taskio: Trello connected, but verification failed due to a network or service issue. Please try again.");
+    }
     return;
   }
 

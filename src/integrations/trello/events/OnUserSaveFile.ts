@@ -1,26 +1,29 @@
-import { TextDocument, workspace } from "vscode";
+import { TextDocument } from "vscode";
+
 import { TaskioDependencies } from "../../../types/TaskioDependencies";
-import SyncService from "../services/SyncService";
+
+import { clearTrelloAutoSyncTimer, getTrelloAutoSyncSetting, scheduleTrelloAutoSync } from "../services/TimerToSync";
 import { TrelloService } from "../services/TrelloService";
 
 export default class OnUserSaveFile {
-  private syncService: SyncService;
+  private trelloService: TrelloService;
 
   constructor(private doc: TextDocument, private deps: TaskioDependencies) {
-    this.syncService = new SyncService(new TrelloService(deps.secretStore));
+    this.trelloService = new TrelloService(deps.secretStore);
   }
 
-  public async handle(): Promise<void> {
-    const syncOnSave = workspace.getConfiguration('taskio.trello').get<boolean>('syncOnSave');
-    console.log("Sync on save is " + (syncOnSave ? "enabled" : "disabled"));
+  public async SaveTasks(): Promise<void> {
+    const timerToSync = getTrelloAutoSyncSetting();
+    const creds = await this.deps.secretStore.getTrelloCredentials();
+    const tasksInFile = this.deps.store.getByUri(this.doc.uri);
 
-    if (!syncOnSave) return;
-
-    const tasks = this.deps.store.getByUri(this.doc.uri);
-
-    if (tasks.length === 0) return;
-
-    await this.syncService.processTasksSilent(tasks, this.deps, 'sync');
     await this.deps.context.workspaceState.update("taskio.comments", this.deps.store.getAll());
+
+    if (!timerToSync || !creds) {
+      clearTrelloAutoSyncTimer(this.doc.uri);
+      return;
+    }
+
+    scheduleTrelloAutoSync(this.doc.uri, tasksInFile, this.deps, this.trelloService, timerToSync);
   }
 }

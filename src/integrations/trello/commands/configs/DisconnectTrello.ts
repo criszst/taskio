@@ -1,5 +1,6 @@
 import { window } from "vscode";
 import { TaskioDependencies } from "../../../../types/TaskioDependencies";
+import { clearAllTrelloAutoSyncTimers, clearTrelloSyncCache } from "../../services/TimerToSync";
 
 export default async function DisconnectTrello(deps: TaskioDependencies): Promise<void> {
   const {context} = deps;
@@ -16,15 +17,16 @@ export default async function DisconnectTrello(deps: TaskioDependencies): Promis
         await context.workspaceState.update("taskio.trello.boardId", undefined);
         await context.workspaceState.update("taskio.trello.boardName", undefined);
         await context.workspaceState.update("taskio.trello.listName", undefined);
-
-        await context.workspaceState.update("taskio.trello.syncOnSave", undefined);
         await context.workspaceState.update("taskio.trello.syncOnStartup", undefined);
+        clearAllTrelloAutoSyncTimers();
+        await clearTrelloSyncCache(deps);
 
-        const allSynced = deps.store.getAll().filter(comment => comment.syncStatus === "synced");
-
-        for (const comment of allSynced) {
+        for (const comment of deps.store.getAll()) {
             comment.syncStatus = "local";
+            comment.trelloCardId = undefined;
         }
+
+        await context.workspaceState.update("taskio.comments", deps.store.getAll());
 
         window.showInformationMessage("Trello disconnected.");
     }

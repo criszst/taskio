@@ -9,7 +9,7 @@ import { CommentNode, FileNode, FolderNode, TreeNode } from "./TreeNode";
 import { TreeProvider } from "./TreeProvider";
 
 export default class TreeMode {
-  readonly order = { high: 0, medium: 1, low: 2, default: 4 };
+  readonly order = { high: 0, medium: 1, low: 2, default: 3 };
 
   constructor(private store: CommentStore) { }
 
