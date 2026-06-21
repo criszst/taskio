@@ -1,13 +1,19 @@
 # Taskio
 
-Turn TODO, FIXME and BUG comments into an organized task board inside VS Code.
+Taskio is a lightweight task board for VS Code that turns `TODO`, `FIXME` and `BUG` comments into actionable work.
 
-Taskio helps you spot code comments that deserve attention, keep them grouped in one place, and act on them without leaving the editor.
+Instead of letting technical debt disappear inside source files, Taskio keeps those comments visible in a dedicated Tree View, where they can be searched, grouped, prioritized and exported in just a few clicks.
+
+It is designed for developers who already use code comments to mark future work and want a cleaner, faster way to track what still needs attention without switching tools.
+
+Taskio supports priority markers like `!`, `!!` and `!!!`, custom keywords, highlight colors, task export to JSON, Markdown or TXT, and optional Trello integration for teams that want a more connected workflow.
+
+No setup is required for the core workflow. Install Taskio and start organizing the comments already living in your codebase.
 
 <div align="center">
 
   <p align="center">
-    <img src="https://raw.githubusercontent.com/criszst/taskio/master/assets/mk.gif" width="900" alt="Taskio demo animation" />
+    <img width="900" src="https://raw.githubusercontent.com/criszst/taskio/master/assets/demonstration.png" alt="Taskio tree view screenshot" />
   </p>
 
 </div>
@@ -23,22 +29,10 @@ Taskio turns those comments into a visible workflow so you can find pending work
 If you already leave TODOs in your codebase, Taskio gives them a home.
 
 <div align="center">
-  <img width="1205" height="346" src="https://raw.githubusercontent.com/criszst/taskio/master/assets/demonstration.png" alt="Taskio tree view screenshot" />
+  <p align="center">
+    <img src="https://raw.githubusercontent.com/criszst/taskio/master/assets/mk.gif" width="900" alt="Taskio demo animation" />
+  </p>
 </div>
-
----
-
-## Marketplace Description
-
-Taskio is a lightweight task board for VS Code that turns `TODO`, `FIXME` and `BUG` comments into actionable work.
-
-Instead of letting technical debt disappear inside source files, Taskio keeps those comments visible in a dedicated Tree View, where they can be searched, grouped, prioritized and exported in just a few clicks.
-
-It is designed for developers who already use code comments to mark future work and want a cleaner, faster way to track what still needs attention without switching tools.
-
-Taskio supports priority markers like `!`, `!!` and `!!!`, custom keywords, highlight colors, task export to JSON, Markdown or TXT, and optional Trello integration for teams that want a more connected workflow.
-
-No setup is required for the core workflow. Install Taskio and start organizing the comments already living in your codebase.
 
 ---
 
@@ -63,21 +57,25 @@ No setup is required for the core workflow. Install Taskio and start organizing 
 
 ---
 
-## Screenshots Order
+### See what needs attention first.
 
-Use the images in this order in the README and Marketplace gallery:
+<div align="center">
+  <img width="900" src="https://raw.githubusercontent.com/criszst/taskio/master/assets/priority.png" alt="Taskio tree view screenshot" />
+</div>
 
-1. `Overview` - show the Taskio Tree View with several tasks already discovered.
-   - Caption: `Turn code comments into a visible task board.`
-2. `Priority` - show `!`, `!!` and `!!!` in the code and in the task list.
-   - Caption: `See what needs attention first.`
-3. `Search` - show the search command filtering tasks across the workspace.
-   - Caption: `Find tasks fast across the whole project.`
-4. `Grouping` - show tasks organized by priority, file or folder.
-   - Caption: `Keep technical debt organized your way.`
-5. `Trello` - show a task being sent or synced with Trello.
-   - Caption: `Move tasks into your existing workflow.`
 
+### Find tasks fast across the whole project.
+
+<div align="center">
+  <img width="900" src="https://raw.githubusercontent.com/criszst/taskio/master/assets/searchCommand.png" alt="Taskio tree view screenshot" />
+</div>
+
+
+### Move tasks into your existing workflow.
+
+<div align="center">
+  <img width="900" src="https://raw.githubusercontent.com/criszst/taskio/master/assets/trelloExample.png" alt="Taskio tree view screenshot" />
+</div>
 ---
 
 ## Commands
@@ -171,6 +169,10 @@ Taskio supports exporting tasks for documentation or reporting:
 - TXT for a quick plain-text export
 
 Exported tasks include file path, line number, priority and clean descriptions.
+
+<div align="center">
+  <img width="900" src="https://raw.githubusercontent.com/criszst/taskio/master/assets/exportExample.png" alt="Taskio tree view screenshot" />
+</div>
 
 ---
 
