@@ -6,7 +6,7 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ---
 
-## [0.1.7] - 2026-07-21
+## [0.1.7] - 2026-06-22
 
 ### Added
 - Added better examples for TODO, FIXME and BUG comments
