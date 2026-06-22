@@ -5,10 +5,9 @@ import { ScanWorkspace } from '../../treeView/scanner/WorkspaceScanner';
 
 import shouldIgnoreDocument from '../../config/IgnoredFiles';
 import { TaskioDependencies } from '../../types/TaskioDependencies';
-
-import EventManager from '../EventManager';
 import TaskioComment from '../../types/TaskioComment';
 
+import EventManager from '../EventManager';
 
 export function registerWorkspaceHandler(manager: EventManager, deps: TaskioDependencies): void {
   const { store, treeProvider, treeView, updateTreeTitle } = deps;
@@ -57,27 +56,17 @@ export function registerWorkspaceHandler(manager: EventManager, deps: TaskioDepe
 
 }
 
-export async function verifyWorkspaceChanges(deps: TaskioDependencies, syncCache?: Map<string, TaskioComment>): Promise<void> {
+export async function verifyWorkspaceChanges(deps: TaskioDependencies, previousComments: TaskioComment[] = []): Promise<void> {
   if (!vscode.workspace.workspaceFolders) return;
 
   deps.store.clear();
+  
+  if (previousComments.length > 0) {
+    deps.store.setMany(previousComments);
+  }
 
 
   await ScanWorkspace(deps.store);
-
-  if (syncCache) {
-    const currentComments = deps.store.getAll();
-    for (const comment of currentComments) {
-      const key = `${comment.uri.toString()}|${comment.text}`;
-      const cached = syncCache.get(key);
-
-      if (cached) {
-        comment.syncStatus = "synced";
-        comment.trelloCardId = cached.trelloCardId;
-        comment.priority = cached.priority;
-      }
-    }
-  }
 
 
   await deps.context.workspaceState.update("taskio.comments", deps.store.getAll());

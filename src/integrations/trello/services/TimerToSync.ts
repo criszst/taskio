@@ -1,10 +1,9 @@
-import crypto from 'crypto';
+import crypto from "crypto";
 
-import { Uri, workspace } from "vscode";
+import { Uri, window, workspace } from "vscode";
 
 import TaskioComment from "../../../types/TaskioComment";
 import { TaskioDependencies } from "../../../types/TaskioDependencies";
-import { TrelloSyncCache } from "../types/TrelloSyncCache";
 import { TrelloService } from "./TrelloService";
 
 export type TrelloAutoSyncSetting = number | false;
@@ -14,19 +13,23 @@ const END = "[/Taskio]";
 const CACHE_KEY = "taskio.trello.syncCache.v1";
 const TIMER_KEY = "timerToSync";
 const scheduledTimers = new Map<string, ReturnType<typeof setTimeout>>();
+const reconcileLocks = new Map<string, Promise<void>>();
 
 export function renderTaskioBlock(comment: TaskioComment, docUri: Uri): string {
   const filePath = docUri.fsPath.replace(/\\/g, "/");
   const line = comment.line + 1;
+  const title = comment.displayText ?? comment.text;
 
   return [
-    "[Taskio]",
+    START,
+    `LocalId: ${comment.localStableId}`,
     `File: ${filePath}`,
     `Line: ${line}`,
+    `Keyword: ${comment.keyword}`,
     comment.priority ? `Priority: ${comment.priority}` : undefined,
-    comment.displayText ? `Title: ${comment.displayText}` : undefined,
-    `Key: ${comment.trelloCardId ?? ""}`, // it just needs to be present for the hash, the actual value doesn't matter since we won't update the card if the name hasn't changed
-    "[/Taskio]",
+    title ? `Title: ${title}` : undefined,
+    `CardId: ${comment.trelloCardId ?? ""}`,
+    END,
   ].filter(Boolean).join("\n");
 }
 
@@ -41,7 +44,6 @@ export function upsertTaskioBlock(existingDesc: string, newBlock: string): strin
     return desc.replace(pattern, newBlock);
   }
 
-  // if no existing block, append the new block to the end of the description with a separator
   const prefix = desc.trimEnd().length ? `${desc.trimEnd()}\n\n---\n` : "";
   return `${prefix}${newBlock}\n---\n`;
 }
@@ -49,8 +51,6 @@ export function upsertTaskioBlock(existingDesc: string, newBlock: string): strin
 function escapeRegExp(s: string): string {
   return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
-
-
 
 export function normalizeForHash(input: string): string {
   return input.replace(/\r\n/g, "\n").trimEnd();
@@ -60,11 +60,11 @@ export function sha256Hex(input: string): string {
   return crypto.createHash("sha256").update(input, "utf8").digest("hex");
 }
 
-export function loadTrelloSyncCache(deps: TaskioDependencies): TrelloSyncCache {
-  return deps.context.workspaceState.get<TrelloSyncCache>(CACHE_KEY) ?? {};
+export function loadTrelloSyncCache(deps: TaskioDependencies) {
+  return deps.context.workspaceState.get<Record<string, unknown>>(CACHE_KEY) ?? {};
 }
 
-export async function saveTrelloSyncCache(deps: TaskioDependencies, cache: TrelloSyncCache): Promise<void> {
+export async function saveTrelloSyncCache(deps: TaskioDependencies, cache: Record<string, unknown>): Promise<void> {
   await deps.context.workspaceState.update(CACHE_KEY, cache);
 }
 
@@ -115,9 +115,35 @@ export function clearAllTrelloAutoSyncTimers(): void {
   scheduledTimers.clear();
 }
 
+export async function refreshAllTrelloAutoSyncTimers(deps: TaskioDependencies): Promise<void> {
+  clearAllTrelloAutoSyncTimers();
+
+  const minutes = getTrelloAutoSyncSetting();
+  if (!minutes) return;
+
+  const creds = await deps.secretStore.getTrelloCredentials();
+  if (!creds) return;
+
+  const listId = deps.context.workspaceState.get<string>("taskio.trello.listId");
+  if (!listId) return;
+
+  const trello = new TrelloService(deps.secretStore);
+  const byUri = new Map<string, TaskioComment[]>();
+
+  for (const comment of deps.store.getAll()) {
+    const key = comment.uri.toString();
+    const bucket = byUri.get(key) ?? [];
+    bucket.push(comment);
+    byUri.set(key, bucket);
+  }
+
+  for (const [uriStr] of byUri) {
+    scheduleTrelloAutoSync(Uri.parse(uriStr), deps, trello, minutes);
+  }
+}
+
 export function scheduleTrelloAutoSync(
   docUri: Uri,
-  tasks: TaskioComment[],
   deps: TaskioDependencies,
   trello: TrelloService,
   minutes: TrelloAutoSyncSetting,
@@ -126,78 +152,168 @@ export function scheduleTrelloAutoSync(
 
   if (!minutes) return;
 
-  const syncedTasks = tasks
-    .filter(task => task.syncStatus === "synced" && task.trelloCardId)
-    .map(task => ({ ...task }));
-
-  if (syncedTasks.length === 0) return;
-
   const key = docUri.toString();
   const timer = setTimeout(() => {
     scheduledTimers.delete(key);
 
-    void syncCardsPatchOnlyOnSave(syncedTasks, deps, trello).catch((error) => {
-      console.error(`[Taskio] Failed to auto-sync Trello tasks for ${key}:`, error);
-    });
+    const comments = deps.store.getByUri(docUri);
+    if (comments.length === 0) return;
+
+    void reconcileTrelloTasks(comments, deps, trello, "auto")
+      .catch((error) => {
+        console.error(`[Taskio] Failed to auto-sync Trello tasks for ${key}:`, error);
+      });
   }, minutes * 60 * 1000);
 
   scheduledTimers.set(key, timer);
+  console.info(`[Taskio] Auto-sync scheduled for ${key} in ${minutes} minute(s).`);
 }
 
-export async function syncCardsPatchOnlyOnSave(
+export type TrelloReconcileMode = "manual" | "startup" | "auto";
+
+export type TrelloReconcileResult = {
+  successCount: number;
+  failureCount: number;
+  skippedCount: number;
+};
+
+export async function reconcileTrelloTasks(
   tasks: TaskioComment[],
   deps: TaskioDependencies,
   trello: TrelloService,
-): Promise<void> {
-  if (tasks.length === 0) return;
+  mode: TrelloReconcileMode,
+): Promise<TrelloReconcileResult> {
+  if (tasks.length === 0) {
+    return { successCount: 0, failureCount: 0, skippedCount: 0 };
+  }
 
-  const cache = loadTrelloSyncCache(deps);
-  let cacheUpdated = false;
+  let successCount = 0;
+  let failureCount = 0;
+  let skippedCount = 0;
+  let storeChanged = false;
 
   for (const task of tasks) {
-    const cardId = task.trelloCardId;
-    if (!cardId) continue;
-
-    const desiredName = task.displayText ?? task.text;
-    const desiredBlock = renderTaskioBlock(task, task.uri);
-
-    const desiredNameHash = sha256Hex(normalizeForHash(desiredName));
-    const desiredBlockHash = sha256Hex(normalizeForHash(desiredBlock));
-
-    const previous = cache[cardId] ?? {};
-    const nameChanged = previous.nameHash !== desiredNameHash;
-    const blockChanged = previous.taskioBlockHash !== desiredBlockHash;
-
-    if (!nameChanged && !blockChanged) continue;
-
-    const patch: { name?: string; description?: string } = {};
-
-    if (nameChanged) patch.name = desiredName;
-
-    if (blockChanged) {
-      const card = await trello.getCard(cardId, ["desc"]);
-      const currentDesc = card.desc ?? "";
-      const merged = upsertTaskioBlock(currentDesc, desiredBlock);
-
-      if (normalizeForHash(merged) !== normalizeForHash(currentDesc)) {
-        patch.description = merged;
+    try {
+      const result = await reconcileSingleTask(task, deps, trello);
+      if (result === "skipped") {
+        skippedCount += 1;
+      } else {
+        successCount += 1;
+        storeChanged = true;
       }
+    } catch (error) {
+      failureCount += 1;
+      const message = error instanceof Error ? error.message : String(error);
+      task.syncStatus = "error";
+      task.lastError = message;
+      deps.store.update(task);
+      storeChanged = true;
+      console.error(`[Taskio] Failed to reconcile "${task.displayText ?? task.text}" (${mode}):`, error);
     }
-
-    if (patch.name || patch.description) {
-      await trello.updateCard(cardId, patch);
-    }
-
-    cache[cardId] = {
-      nameHash: desiredNameHash,
-      taskioBlockHash: desiredBlockHash,
-      lastSyncedAt: Date.now(),
-    };
-    cacheUpdated = true;
   }
 
-  if (cacheUpdated) {
-    await saveTrelloSyncCache(deps, cache);
-    await deps.context.workspaceState.update("taskio.comments", deps.store.getAll());
+  if (storeChanged) {
+    await persistTrelloComments(deps);
+    deps.treeProvider.refresh();
+    deps.updateTreeTitle(deps.treeView, deps.store);
+
+    for (const editor of window.visibleTextEditors) {
+      deps.applyDecorators(editor, deps.store);
+    }
   }
+
+  return { successCount, failureCount, skippedCount };
+}
+
+async function reconcileSingleTask(
+  task: TaskioComment,
+  deps: TaskioDependencies,
+  trello: TrelloService,
+): Promise<"updated" | "created" | "skipped"> {
+  const stableId = ensureStableIdentity(task);
+  const listId = deps.context.workspaceState.get<string>("taskio.trello.listId");
+
+  if (!listId) {
+    throw new Error("No Trello list configured.");
+  }
+
+  const desiredName = task.displayText ?? task.text;
+  const desiredBlock = renderTaskioBlock(task, task.uri);
+  const desiredBlockHash = sha256Hex(normalizeForHash(desiredBlock));
+  const currentBlockHash = desiredBlockHash;
+
+  const hasRemoteLink = Boolean(task.trelloCardId);
+  const hasLocalChanges =
+    task.lastSyncedText !== desiredName ||
+    task.lastSyncedMetadataHash !== currentBlockHash;
+
+  if (task.syncStatus === "synced" && hasRemoteLink && !hasLocalChanges) {
+    return "skipped";
+  }
+
+  const existing = reconcileLocks.get(stableId);
+  if (existing) {
+    await existing;
+    return "skipped";
+  }
+
+  const run = (async () => {
+    task.syncStatus = "syncing";
+    task.lastError = undefined;
+    deps.store.update(task);
+
+    if (hasRemoteLink) {
+      const currentCard = await trello.getCard(task.trelloCardId!, ["desc"]);
+      const currentDesc = currentCard.desc ?? "";
+      const mergedDesc = upsertTaskioBlock(currentDesc, desiredBlock);
+
+      if (
+        normalizeForHash(mergedDesc) !== normalizeForHash(currentDesc) ||
+        currentCard.name !== desiredName
+      ) {
+        await trello.updateCard(task.trelloCardId!, {
+          name: desiredName,
+          description: mergedDesc,
+        });
+      }
+    } else {
+      const card = await trello.createCard({
+        listId,
+        name: desiredName,
+        description: desiredBlock,
+        priority: task.priority,
+      });
+
+      task.trelloCardId = card.id;
+    }
+
+    task.localStableId = stableId;
+    task.lastSyncedText = desiredName;
+    task.lastSyncedMetadataHash = currentBlockHash;
+    task.syncStatus = "synced";
+    task.lastError = undefined;
+    deps.store.update(task);
+  })();
+
+  reconcileLocks.set(stableId, run);
+
+  try {
+    await run;
+  } finally {
+    reconcileLocks.delete(stableId);
+  }
+
+  return hasRemoteLink ? "updated" : "created";
+}
+
+function ensureStableIdentity(task: TaskioComment): string {
+  if (task.localStableId) return task.localStableId;
+
+  const stableId = task.id || crypto.randomUUID();
+  task.localStableId = stableId;
+  return stableId;
+}
+
+async function persistTrelloComments(deps: TaskioDependencies): Promise<void> {
+  await deps.context.workspaceState.update("taskio.comments", deps.store.getAll());
 }

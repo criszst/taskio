@@ -52,7 +52,7 @@ export class CommentNode extends vscode.TreeItem {
     this.description = `Line ${this.comment.line + 1} - ${this.comment.priority.toUpperCase()}`;
     this.tooltip = `${this.comment.displayText ?? this.comment.text} (Line ${this.comment.line + 1}) - ${this.comment.priority.toUpperCase()}`;
 
-    this.contextValue = this.comment.syncStatus === 'synced' 
+    this.contextValue = this.comment.trelloCardId 
     ? 'taskioCommentSynced' 
     : 'taskioComment';
 
@@ -68,7 +68,7 @@ export class CommentNode extends vscode.TreeItem {
   }
 
   private determineIcon() {
-    if (this.comment.syncStatus === 'synced') {
+    if (this.comment.syncStatus === 'synced' || this.comment.syncStatus === 'modified' || this.comment.syncStatus === 'syncing' || this.comment.syncStatus === 'error') {
       return getIconBySynced(this.comment.syncStatus, this.comment.priority);
     }
 

@@ -22,8 +22,11 @@ export default async function DisconnectTrello(deps: TaskioDependencies): Promis
         await clearTrelloSyncCache(deps);
 
         for (const comment of deps.store.getAll()) {
-            comment.syncStatus = "local";
+            comment.syncStatus = "never_synced";
             comment.trelloCardId = undefined;
+            comment.lastSyncedText = undefined;
+            comment.lastSyncedMetadataHash = undefined;
+            comment.lastError = undefined;
         }
 
         await context.workspaceState.update("taskio.comments", deps.store.getAll());

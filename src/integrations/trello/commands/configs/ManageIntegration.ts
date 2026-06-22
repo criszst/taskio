@@ -11,7 +11,6 @@ import { QuickPickItemKind } from "vscode";
 
 
 import SyncService from "../../services/SyncService";
-import SelectSyncMode from "../manager/SyncSettings";
 import SyncSettings from "../manager/SyncSettings";
 
 export default async function ManageIntegration(deps: TaskioDependencies): Promise<void> {
@@ -62,7 +61,7 @@ export default async function ManageIntegration(deps: TaskioDependencies): Promi
 
     {
       label: "$(sync) Sync All Tasks",
-      detail: "Send all unsynced tasks to Trello now",
+      detail: "Send all tasks to Trello now",
       action: 'sync_all'
     },
     {

@@ -16,10 +16,6 @@ export default async function SendTask(comment: CommentNode, deps: TaskioDepende
 
   if (!commentData) return window.showWarningMessage("Taskio: No comment selected.");
 
-  if (commentData.syncStatus === "synced") {
-    return window.showInformationMessage("This task is already synced with Trello.");
-  }
-
   if (!secretStore) {
     return window.showErrorMessage('Trello integration not set up. Please run "Setup Trello Integration" command first.');
   }

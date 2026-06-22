@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import { randomUUID } from 'crypto';
 import TaskioComment from '../../types/TaskioComment';
 import TaskioPriority from '../../types/TaskioPriority';
 import CommentDetector from '../parser/CommentDetector';
@@ -39,6 +40,7 @@ export default function ScanDocument(document: vscode.TextDocument): TaskioComme
       const priority = DetectPriority(suffix, priorityMarkers);
 
       const id = `${document.uri.toString()}:${line}:${match.index}`;
+      const localStableId = randomUUID();
 
       const fullText = commentText.slice(match.index);
 
@@ -54,6 +56,7 @@ export default function ScanDocument(document: vscode.TextDocument): TaskioComme
 
       results.push({
         id,
+        localStableId,
         uri: document.uri,
         line,
         character: charIndex,
@@ -61,7 +64,7 @@ export default function ScanDocument(document: vscode.TextDocument): TaskioComme
         text: fullText,
         displayText: displayText,
         priority: priority,
-        syncStatus: 'local',
+        syncStatus: 'never_synced',
       });
     }
   }

@@ -1,7 +1,7 @@
 import { ThemeColor, ThemeIcon } from "vscode";
 
 import TaskioPriority from "../types/TaskioPriority";
-import TaskioComment from "../types/TaskioComment";
+import TaskioComment, { TaskioSyncStatus } from "../types/TaskioComment";
 
 export function getIconByPriority(priority: TaskioPriority): ThemeIcon {
   switch (priority) {
@@ -62,7 +62,7 @@ export function getEmojiByPriority(priority: TaskioPriority): string {
 }
 
 
-export function getIconBySynced(status: "synced" | "error" | "local", priority: TaskioPriority): ThemeIcon | undefined {
+export function getIconBySynced(status: TaskioSyncStatus, priority: TaskioPriority): ThemeIcon | undefined {
   switch (status) {
     case "synced":
       const priorityColors = {
@@ -73,7 +73,12 @@ export function getIconBySynced(status: "synced" | "error" | "local", priority: 
       }
 
       return new ThemeIcon("pass-filled", priorityColors[priority]);
-      
+    case "modified":
+      return new ThemeIcon("warning", new ThemeColor("charts.yellow"));
+
+    case "syncing":
+      return new ThemeIcon("sync~spin", new ThemeColor("charts.blue"));
+
     case "error":
       return new ThemeIcon("error", new ThemeColor("charts.red"));
 

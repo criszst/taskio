@@ -2,7 +2,7 @@
   "name": "taskio",
   "displayName": "Taskio - TODO List",
   "description": "Lightweight VS Code task board that turns TODO, FIXME and BUG comments into actionable work",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "engines": {
     "vscode": "^1.70.0"
   },
@@ -20,6 +20,9 @@
     "todo",
     "todo comments",
     "todo tree",
+    "todo list",
+    "todo manager",
+    "todo tracker",
     "task",
     "tasks",
     "task list",
@@ -30,7 +33,12 @@
     "productivity",
     "developer productivity",
     "vscode todo",
-    "vscode tasks"
+    "vscode tasks",
+    "taskio",
+    "taskio vscode",
+    "taskio vscode extension",
+    "taskio todo",
+    "taskio todo list"
   ],
   "activationEvents": [
     "onStartupFinished",

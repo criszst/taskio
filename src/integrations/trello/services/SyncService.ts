@@ -2,6 +2,7 @@ import { ProgressLocation, window } from 'vscode';
 import TaskioComment from '../../../types/TaskioComment';
 import { TaskioDependencies } from '../../../types/TaskioDependencies';
 import { TrelloService } from './TrelloService';
+import { reconcileTrelloTasks } from './TimerToSync';
 
 export type SyncBatchResult = {
   successCount: number;
@@ -20,12 +21,12 @@ export default class SyncService {
       return { successCount: 0, failureCount: 0 };
     }
 
-    if (mode === 'sync' && comments.every(c => c.syncStatus === 'synced')) {
+    if (mode === 'sync' && comments.every(c => Boolean(c.syncStatus === 'synced' && c.trelloCardId))) {
       await window.showWarningMessage("All tasks are already synced.");
       return { successCount: 0, failureCount: 0 };
     }
 
-    if (mode === 'desync' && comments.every(c => c.syncStatus === 'local')) {
+    if (mode === 'desync' && comments.every(c => !c.trelloCardId)) {
       await window.showWarningMessage("No tasks are currently synced.");
       return { successCount: 0, failureCount: 0 };
     }
@@ -51,8 +52,14 @@ export default class SyncService {
 
         for (const comment of comments) {
           try {
-            mode === 'sync' ? await this.syncOne(comment, deps) : await this.desyncOne(comment, deps);
-            successCount += 1;
+            if (mode === 'sync') {
+              const syncResult = await reconcileTrelloTasks([comment], deps, this.trello, "manual");
+              successCount += syncResult.successCount + syncResult.skippedCount;
+              failureCount += syncResult.failureCount;
+            } else {
+              await this.desyncOne(comment, deps);
+              successCount += 1;
+            }
           } catch (error) {
             failureCount += 1;
             console.error(`[Taskio] Failed to process "${comment.text}":`, error);
@@ -75,38 +82,15 @@ export default class SyncService {
 
     for (const comment of comments) {
       try {
-        mode === 'sync' ? await this.syncOne(comment, deps) : await this.desyncOne(comment, deps);
+        if (mode === 'sync') {
+          await reconcileTrelloTasks([comment], deps, this.trello, "manual");
+        } else {
+          await this.desyncOne(comment, deps);
+        }
       } catch (error) {
         console.error(`[Taskio] Failed to auto-${mode} task "${comment.text}":`, error);
       }
     }
-  }
-  
-  private async syncOne(comment: TaskioComment, deps: TaskioDependencies): Promise<void> {
-    const listId = deps.context.workspaceState.get<string>("taskio.trello.listId");
-
-    if (!listId) throw new Error("No Trello list configured.");
-
-    const filePath = comment.uri.fsPath.replace(/\\/g, '/');
-
-    const name = comment.displayText ?? comment.text;
-    const description = `**File:** \`${filePath}\`\n**Line:** ${comment.line + 1}`;
-
-
-
-    if (comment.syncStatus === 'synced' && comment.trelloCardId) {
-      await this.trello.updateCard(comment.trelloCardId, { name, description });
-      deps.store.update(comment);
-
-      return;
-    }
-
-    const card = await this.trello.createCard({ listId, name, description, priority: comment.priority });
-
-    comment.syncStatus = 'synced';
-    comment.trelloCardId = card.id;
-
-    deps.store.update(comment);
   }
 
   private async desyncOne(comment: TaskioComment, deps: TaskioDependencies): Promise<void> {
@@ -114,8 +98,11 @@ export default class SyncService {
 
     await this.trello.deleteCard(comment.trelloCardId);
 
-    comment.syncStatus = 'local';
+    comment.syncStatus = 'never_synced';
     comment.trelloCardId = undefined;
+    comment.lastSyncedText = undefined;
+    comment.lastSyncedMetadataHash = undefined;
+    comment.lastError = undefined;
 
     deps.store.update(comment);
   }

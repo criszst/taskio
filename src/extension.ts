@@ -13,7 +13,7 @@ import { registerCommands } from './events/RegisterCommands';
 
 import { syncOnStartup } from './integrations/trello/events/OnStartup';
 import { registerTrelloUriHandler } from './integrations/trello/services/TrelloAuthUri';
-import { clearAllTrelloAutoSyncTimers } from './integrations/trello/services/TimerToSync';
+import { clearAllTrelloAutoSyncTimers, refreshAllTrelloAutoSyncTimers } from './integrations/trello/services/TimerToSync';
 
 
 export async function activate(context: vscode.ExtensionContext) {
@@ -22,7 +22,7 @@ export async function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(vscode.workspace.onDidChangeConfiguration((event) => {
 
     if (event.affectsConfiguration('taskio.trello.timerToSync')) {
-      clearAllTrelloAutoSyncTimers();
+      void refreshAllTrelloAutoSyncTimers(deps);
     }
     
   }));
@@ -30,17 +30,7 @@ export async function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push({ dispose: clearAllTrelloAutoSyncTimers });
 
   const savedComments = context.workspaceState.get<TaskioComment[]>("taskio.comments", []);
-  const syncCache = new Map<string, TaskioComment>();
-
-  savedComments.forEach(c => {
-    if (c.syncStatus === "synced") {
-      const uriStr = vscode.Uri.parse((c.uri as any).external || c.uri.toString()).toString();
-
-      syncCache.set(`${uriStr}|${c.text}`, c);
-    }
-  });
-
-  await verifyWorkspaceChanges(deps, syncCache);
+  await verifyWorkspaceChanges(deps, savedComments);
   await syncOnStartup(deps);
 
   const eventManager = new EventManager();

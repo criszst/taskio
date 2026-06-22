@@ -1,8 +1,11 @@
 import { Uri } from "vscode";
 import TaskioPriority from "./TaskioPriority";
 
+export type TaskioSyncStatus = "never_synced" | "synced" | "modified" | "syncing" | "error";
+
 interface TaskioComment {
   id: string;
+  localStableId: string;
   uri: Uri;
   line: number;
   character: number;
@@ -13,7 +16,10 @@ interface TaskioComment {
 
   // TRELLO
   trelloCardId?: string;
-  syncStatus: "local" | "synced" | "error";
+  lastSyncedText?: string;
+  lastSyncedMetadataHash?: string;
+  lastError?: string;
+  syncStatus: TaskioSyncStatus;
 }
 
 export default TaskioComment;

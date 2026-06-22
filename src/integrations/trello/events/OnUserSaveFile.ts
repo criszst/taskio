@@ -15,15 +15,16 @@ export default class OnUserSaveFile {
   public async SaveTasks(): Promise<void> {
     const timerToSync = getTrelloAutoSyncSetting();
     const creds = await this.deps.secretStore.getTrelloCredentials();
+    const listId = this.deps.context.workspaceState.get<string>("taskio.trello.listId");
     const tasksInFile = this.deps.store.getByUri(this.doc.uri);
 
     await this.deps.context.workspaceState.update("taskio.comments", this.deps.store.getAll());
 
-    if (!timerToSync || !creds) {
+    if (!timerToSync || !creds || !listId || tasksInFile.length === 0) {
       clearTrelloAutoSyncTimer(this.doc.uri);
       return;
     }
 
-    scheduleTrelloAutoSync(this.doc.uri, tasksInFile, this.deps, this.trelloService, timerToSync);
+    scheduleTrelloAutoSync(this.doc.uri, this.deps, this.trelloService, timerToSync);
   }
 }

@@ -54,19 +54,7 @@ export const syncDocument = (doc: vscode.TextDocument, deps: TaskioDependencies)
     return;
   }
 
-  const existing = store.getByUri(doc.uri);
-
-  const trelloMetaByText = new Map(existing
-      .filter(c => c.syncStatus === 'synced' && c.trelloCardId)
-      .map(c => [c.text, { trelloCardId: c.trelloCardId, syncStatus: c.syncStatus }])
-  );
-
-   const freshComments = ScanDocument(doc).map(c => {
-    const meta = trelloMetaByText.get(c.text);
-    return meta ? { ...c, ...meta } : c;
-  });
-
-
+  const freshComments = ScanDocument(doc);
   store.replaceByUri(doc.uri, freshComments);
 
   deps.context.workspaceState.update("taskio.comments", deps.store.getAll());

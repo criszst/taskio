@@ -4,6 +4,21 @@ All notable changes to the "taskio" extension will be documented in this file.
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [0.1.6] – 2026-06-21
+
+### Changed
+- Repositioned Taskio in the marketplace as a lightweight VS Code task board for TODO, FIXME and BUG comments
+- Refreshed the README copy to lead with value, proof and install intent
+- Added a screenshot/story flow for the marketplace gallery and README
+- Updated package description to better match the product positioning
+
+### Improved
+- Stronger first impression for new users landing on the extension page
+- Clearer messaging around priorities, search, export and Trello integration
+- More consistent terminology across marketplace-facing copy
+
+---
+
 ## [0.1.5] – 2026-03-18
 
 ### Added
