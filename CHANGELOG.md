@@ -4,22 +4,42 @@ All notable changes to the "taskio" extension will be documented in this file.
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
-## [0.1.6] – 2026-06-21
+## [0.1.6] - 2026-06-21
+
+### Added
+- Stable local IDs for TODOs, separated from parser-derived IDs
+- Explicit sync states: `never_synced`, `synced`, `modified`, `syncing`, and `error`
+- A shared reconcile engine for manual sync, auto-sync, and sync-on-startup
+- Remote card reuse/update logic to avoid duplicate Trello cards when a TODO changes text
+- Fallback lookup for remote cards using `LocalId` and Taskio metadata
+- Debounced document rescans to reduce churn while editing
 
 ### Changed
-- Repositioned Taskio in the marketplace as a lightweight VS Code task board for TODO, FIXME and BUG comments
-- Refreshed the README copy to lead with value, proof and install intent
-- Added a screenshot/story flow for the marketplace gallery and README
-- Updated package description to better match the product positioning
+- Manual "Send to Trello" now uses the same reconcile path as automatic sync
+- Sync confirmation only reports success when a real sync happened
+- Priority is now sent with both new cards and updates so the Trello label stays in sync
+- Taskio metadata stored in Trello descriptions was reduced to the minimum needed for reconciliation
+- Tree view rendering now reflects sync state more accurately instead of falling back to a generic marker
+- Document reconciliation is more conservative to prevent state leakage between nearby TODOs
+
+### Fixed
+- Auto-sync not consistently running on the configured interval
+- Sync-on-startup skipping the reconcile path in some cases
+- Duplicate Trello cards being created after editing an already synced TODO
+- Neighboring TODOs losing sync or priority state after inserting or editing a nearby TODO
+- "Task sent to Trello!" appearing after cancelling the confirmation dialog
+- Progress notifications appearing for cancelled or no-op sync attempts
+- Trello cards sometimes losing their priority label during updates
 
 ### Improved
-- Stronger first impression for new users landing on the extension page
-- Clearer messaging around priorities, search, export and Trello integration
-- More consistent terminology across marketplace-facing copy
+- Better persistence of sync state across workspace rescans and reloads
+- Stronger protection against accidental cross-item state reuse in the tree view
+- Cleaner Trello payloads with less redundant metadata
+- Better debugging signals for sync scheduling and reconcile failures
 
 ---
 
-## [0.1.5] – 2026-03-18
+## [0.1.5] - 2026-03-18
 
 ### Added
 - Almost Full Trello integration management via `ManageIntegration` command
@@ -42,7 +62,7 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ---
 
-## [0.1.4] – 2026-02-26
+## [0.1.4] - 2026-02-26
 
 ### Added
 - Initial Trello integration
@@ -68,7 +88,7 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 - Dynamic title update when switching between List, Files, Folders, and Tree modes
 - Added Remove Command and Refresh Command
 
-## [0.1.2] - 2026.04.02
+## [0.1.2] - 2026-04-02
 
 ## Fixed
 - Some files (after renaming them) did not appear in the initial scan.
@@ -76,19 +96,19 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ---
 
-## [0.1.1] – 2026.03.02
+## [0.1.1] - 2026-03-02
 
 ### Added
 - Export tasks to JSON
 - Export tasks to Markdown
 
 ### Improved
-- Task ordering by priority (high → low)
+- Task ordering by priority (high -> low)
 - Cleaner exported task descriptions
 
 ---
 
-## [0.1.0] – 2026.02.02
+## [0.1.0] - 2026-02-02
 
 ### Added
 - Due date support in tasks
@@ -101,7 +121,7 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ---
 
-## [0.0.9] – 2026.01.30
+## [0.0.9] - 2026-01-30
 
 ### Added
 - Task grouping by folder and file
@@ -112,25 +132,25 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ---
 
-## 0.0.8 - 2026.01.26
+## 0.0.8 - 2026-01-26
 - Updated README demo (media optimization)
 
 
-## [0.0.7] - 2026.01.26
+## [0.0.7] - 2026-01-26
 
 ### Added
 - Publicly accessible repository for the Taskio extension, containing the source code and build process.
 
 ---
 
-## [0.0.6] – 2026.01.26
+## [0.0.6] - 2026-01-26
 
 ### Improved
 - Improved Search action placement in the Taskio Tree View for better discoverability
 
 ---
 
-## [0.0.5] – 2026.01.25
+## [0.0.5] - 2026-01-25
 
 ### Added
 - Smart Copy command for tasks:
@@ -139,7 +159,6 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
   - Copy file name and line number
 - Priority emojis displayed in the Search / Quick Pick list
 - Context menu action to copy tasks directly from the Tree View
-
 
 ### Improved
 - Internal command structure for future copy-related features
@@ -151,7 +170,7 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ---
 
-## [0.0.4] – 2026.01.24
+## [0.0.4] - 2026-01-24
 
 ### Added
 - Copy action to copy only the task description (without keyword)
@@ -159,7 +178,7 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ---
 
-## [0.0.3] – 2026.01.24
+## [0.0.3] - 2026-01-24
 
 ### Added
 - Priority markers support using `!`, `!!` and `!!!`
@@ -177,7 +196,7 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ---
 
-## [0.0.2] – 2026.01.24
+## [0.0.2] - 2026-01-24
 
 ### Added
 - Configurable TODO keywords (`taskio.keywords`)
@@ -189,7 +208,7 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ---
 
-## [0.0.1] – 2026.01.24
+## [0.0.1] - 2026-01-24
 
 ### Added
 - Initial release
