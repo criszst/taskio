@@ -1,4 +1,4 @@
-import { ProgressLocation, window } from "vscode";
+import { window } from "vscode";
 
 import TaskioComment from "../../../types/TaskioComment";
 import { TaskioDependencies } from "../../../types/TaskioDependencies";
@@ -26,13 +26,7 @@ export default async function SendTask(comment: CommentNode, deps: TaskioDepende
       return;
     }
 
-    const syncResult = await window.withProgress(
-      {
-        location: ProgressLocation.Notification,
-        title: `Syncing ${commentData.text} to Trello...`,
-      },
-      async () => syncService.processTasks(commentData, deps, "sync")
-    );
+    const syncResult = await syncService.processTasks(commentData, deps, "sync");
 
     const hasPartialFailure = syncResult.failureCount > 0;
 
@@ -46,6 +40,10 @@ export default async function SendTask(comment: CommentNode, deps: TaskioDepende
 
     if (hasPartialFailure) {
       window.showErrorMessage("Failed to send task to Trello");
+      return;
+    }
+
+    if (syncResult.successCount === 0) {
       return;
     }
 

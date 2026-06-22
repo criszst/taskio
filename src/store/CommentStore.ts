@@ -42,33 +42,64 @@ export class CommentStore {
   }
 
   replaceByUri(uri: vscode.Uri, newComments: TaskioComment[]) {
-    const oldComments = this.getByUri(uri);
-    const remainingOldComments = [...oldComments];
+    const oldComments = this.getByUri(uri).sort(compareComments);
+    const orderedNewComments = [...newComments].sort(compareComments);
     const signatureBuckets = new Map<string, number[]>();
     const usedOldIndexes = new Set<number>();
+    const reconciledComments = new Array<TaskioComment>(orderedNewComments.length);
 
-    this.comments = new Map(
-      Array.from(this.comments.entries()).filter(
-        ([_, c]) => c.uri.toString() !== uri.toString()
-      )
-    );
-
-    for (let i = 0; i < remainingOldComments.length; i++) {
-      const old = remainingOldComments[i];
+    for (let i = 0; i < oldComments.length; i++) {
+      const old = oldComments[i];
       const key = getSignatureKey(old);
       const bucket = signatureBuckets.get(key) ?? [];
       bucket.push(i);
       signatureBuckets.set(key, bucket);
     }
 
-    for (const newC of newComments) {
-      const existingIndex = takeExactSignatureMatch(signatureBuckets, remainingOldComments, usedOldIndexes, newC)
-        ?? takeRelaxedSignatureMatch(remainingOldComments, usedOldIndexes, newC);
-      const existing = existingIndex >= 0 ? remainingOldComments[existingIndex] : undefined;
-      if (existingIndex >= 0) usedOldIndexes.add(existingIndex);
-      const merged = mergeCommentState(existing, newC);
-      this.comments.set(merged.id, merged);
+    for (let newIndex = 0; newIndex < orderedNewComments.length; newIndex++) {
+      const newC = orderedNewComments[newIndex];
+      const existingIndex = takeExactSignatureMatch(signatureBuckets, oldComments, usedOldIndexes, newC);
+
+      if (existingIndex === undefined) {
+        continue;
+      }
+
+      usedOldIndexes.add(existingIndex);
+      reconciledComments[newIndex] = mergeCommentState(oldComments[existingIndex], newC);
     }
+
+    const unmatchedOldByKeyword = new Map<string, TaskioComment[]>();
+
+    for (let i = 0; i < oldComments.length; i++) {
+      if (usedOldIndexes.has(i)) continue;
+
+      const old = oldComments[i];
+      const keyword = normalizeKeyword(old.keyword);
+      const bucket = unmatchedOldByKeyword.get(keyword) ?? [];
+      bucket.push(old);
+      unmatchedOldByKeyword.set(keyword, bucket);
+    }
+
+    for (let newIndex = 0; newIndex < orderedNewComments.length; newIndex++) {
+      if (reconciledComments[newIndex]) continue;
+
+      const newC = orderedNewComments[newIndex];
+      const keyword = normalizeKeyword(newC.keyword);
+      const bucket = unmatchedOldByKeyword.get(keyword);
+      const existing = bucket?.shift();
+
+      reconciledComments[newIndex] = mergeCommentState(existing, newC);
+    }
+
+    const nextComments = new Map<string, TaskioComment>(
+      Array.from(this.comments.entries()).filter(([_, c]) => c.uri.toString() !== uri.toString())
+    );
+
+    for (const comment of reconciledComments) {
+      nextComments.set(comment.id, normalizeStoredComment(comment));
+    }
+
+    this.comments = nextComments;
   }
 
 
@@ -145,25 +176,6 @@ function getSignatureKey(comment: TaskioComment): string {
   return `${normalizeKeyword(comment.keyword)}|${normalizeTaskText(comment)}`;
 }
 
-function tokenizeTaskText(comment: TaskioComment): string[] {
-  const tokens = normalizeTaskText(comment).match(/[a-z0-9]+/g) ?? [];
-  return tokens.filter(token => token.length > 1);
-}
-
-function tokenSimilarity(a: TaskioComment, b: TaskioComment): number {
-  const tokensA = new Set(tokenizeTaskText(a));
-  const tokensB = new Set(tokenizeTaskText(b));
-
-  if (tokensA.size === 0 || tokensB.size === 0) return 0;
-
-  let overlap = 0;
-  for (const token of tokensA) {
-    if (tokensB.has(token)) overlap += 1;
-  }
-
-  return overlap / Math.max(tokensA.size, tokensB.size);
-}
-
 function takeExactSignatureMatch(
   signatureBuckets: Map<string, number[]>,
   existingComments: TaskioComment[],
@@ -185,38 +197,6 @@ function takeExactSignatureMatch(
   }
 
   return undefined;
-}
-
-function takeRelaxedSignatureMatch(existingComments: TaskioComment[], usedOldIndexes: Set<number>, next: TaskioComment): number {
-  let bestIndex = -1;
-  let bestScore = 0;
-
-  for (let i = 0; i < existingComments.length; i++) {
-    const old = existingComments[i];
-    if (usedOldIndexes.has(i)) continue;
-    if (old.uri.fsPath !== next.uri.fsPath) continue;
-    if (normalizeKeyword(old.keyword) !== normalizeKeyword(next.keyword)) continue;
-
-    const similarity = tokenSimilarity(old, next);
-    const lineDistance = Math.abs(old.line - next.line);
-    const score = similarity - Math.min(lineDistance, 10) * 0.03;
-
-    if (similarity >= 0.8 && score > bestScore) {
-      bestScore = score;
-      bestIndex = i;
-    }
-  }
-
-  return bestIndex;
-}
-
-function findBestExistingMatch(existingComments: TaskioComment[], next: TaskioComment): TaskioComment | undefined {
-  const key = getSignatureKey(next);
-  const exact = existingComments.find(comment => getSignatureKey(comment) === key);
-  if (exact) return exact;
-
-  const index = takeRelaxedSignatureMatch(existingComments, new Set<number>(), next);
-  return index >= 0 ? existingComments[index] : undefined;
 }
 
 function mergeCommentState(existing: TaskioComment | undefined, incoming: TaskioComment): TaskioComment {
@@ -264,4 +244,10 @@ function normalizeStoredComment(comment: TaskioComment): TaskioComment {
     syncStatus: normalizeSyncStatus(comment.syncStatus),
     localStableId: comment.localStableId || comment.id || randomUUID(),
   };
+}
+
+function compareComments(a: TaskioComment, b: TaskioComment): number {
+  if (a.line !== b.line) return a.line - b.line;
+  if (a.character !== b.character) return a.character - b.character;
+  return a.id.localeCompare(b.id);
 }

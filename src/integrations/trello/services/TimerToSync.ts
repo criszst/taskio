@@ -18,16 +18,13 @@ const reconcileLocks = new Map<string, Promise<void>>();
 
 export function renderTaskioBlock(comment: TaskioComment, docUri: Uri): string {
   const filePath = docUri.fsPath.replace(/\\/g, "/");
-  const line = comment.line + 1;
   const title = comment.displayText ?? comment.text;
 
   return [
     START,
     `LocalId: ${comment.localStableId}`,
     `File: ${filePath}`,
-    `Line: ${line}`,
     `Keyword: ${comment.keyword}`,
-    comment.priority ? `Priority: ${comment.priority}` : undefined,
     title ? `Title: ${title}` : undefined,
     `CardId: ${comment.trelloCardId ?? ""}`,
     END,
@@ -284,6 +281,7 @@ async function reconcileSingleTask(
         await trello.updateCard(resolvedCardId!, {
           name: desiredName,
           description: mergedDesc,
+          priority: task.priority,
         });
       }
     } else {
@@ -331,9 +329,7 @@ async function persistTrelloComments(deps: TaskioDependencies): Promise<void> {
 type RemoteTaskioBlock = {
   localId?: string;
   file?: string;
-  line?: string;
   keyword?: string;
-  priority?: string;
   title?: string;
   cardId?: string;
 };
@@ -357,9 +353,7 @@ function parseTaskioBlock(desc: string | undefined): RemoteTaskioBlock | undefin
   return {
     localId: read("LocalId"),
     file: read("File"),
-    line: read("Line"),
     keyword: read("Keyword"),
-    priority: read("Priority"),
     title: read("Title"),
     cardId: read("CardId"),
   };

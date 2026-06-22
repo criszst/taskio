@@ -104,7 +104,7 @@ export class TrelloService {
   }
 
   async createCard(body: TrelloCard): Promise<any> {
-    const labelColor = body.priority ? this.PRIORITY_COLOR[body.priority.toLowerCase()] : undefined;
+    const labels = this.getPriorityLabels(body.priority) ?? body.labels;
 
     return this.request("/cards", {
       method: "POST",
@@ -114,7 +114,7 @@ export class TrelloService {
         idList: body.listId,
         name: body.name,
         desc: body.description,
-        labels: labelColor ? [labelColor] : [],
+        labels,
       }),
 
     });
@@ -127,6 +127,7 @@ export class TrelloService {
 
   async updateCard(cardId: string, body: Partial<TrelloCard>): Promise<any> {
     if (!cardId) throw new Error("Missing Trello card id.");
+    const labels = body.labels ?? this.getPriorityLabels(body.priority);
 
     return this.request(`/cards/${cardId}`, {
       method: "PUT",
@@ -134,6 +135,7 @@ export class TrelloService {
       body: JSON.stringify({
         name: body.name,
         desc: body.description,
+        labels,
       }),
     });
 
@@ -142,6 +144,13 @@ export class TrelloService {
 
   async deleteCard(cardId: string): Promise<void> {
     await this.request(`/cards/${cardId}`, { method: "DELETE" });
+  }
+
+  private getPriorityLabels(priority?: string): string[] | undefined {
+    if (!priority) return undefined;
+
+    const labelColor = this.PRIORITY_COLOR[priority.toLowerCase()];
+    return labelColor ? [labelColor] : undefined;
   }
 
 }

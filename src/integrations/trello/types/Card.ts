@@ -3,4 +3,5 @@ export default interface TrelloCard {
   name: string;
   description?: string;
   priority?: string;
+  labels?: string[];
 }
