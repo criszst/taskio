@@ -37,6 +37,7 @@ export async function ScanWorkspace(store: CommentStore) {
   );
 
   const flatFiles = allFiles.flat();
+  const seenUris = new Set<string>();
 
   for (const file of flatFiles) {
     if (shouldIgnoreDocument(file)) continue;
@@ -44,13 +45,18 @@ export async function ScanWorkspace(store: CommentStore) {
     try {
       const doc = await vscode.workspace.openTextDocument(file);
       const comments = ScanDocument(doc);
+      seenUris.add(file.toString());
 
-      if (comments.length) {
-        store.setMany(comments);
-      }
+      store.replaceByUri(file, comments);
 
     } catch (err) {
       console.error('Taskio scan error:', err);
+    }
+  }
+
+  for (const comment of store.getAll()) {
+    if (!seenUris.has(comment.uri.toString())) {
+      store.remove(comment.id);
     }
   }
 }

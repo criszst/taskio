@@ -98,6 +98,11 @@ export class TrelloService {
     return this.request(`/boards/${boardId}/lists`);
   }
 
+  async getListCards(listId: string, fields?: string[]): Promise<TrelloApiCard[]> {
+    const params = fields ? `?fields=${fields.join(",")}` : "";
+    return this.request(`/lists/${listId}/cards${params}`);
+  }
+
   async createCard(body: TrelloCard): Promise<any> {
     const labelColor = body.priority ? this.PRIORITY_COLOR[body.priority.toLowerCase()] : undefined;
 

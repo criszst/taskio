@@ -4,7 +4,8 @@ import { Uri, window, workspace } from "vscode";
 
 import TaskioComment from "../../../types/TaskioComment";
 import { TaskioDependencies } from "../../../types/TaskioDependencies";
-import { TrelloService } from "./TrelloService";
+import TrelloApiCard from "../types/TrelloApiCard";
+import { TrelloHttpError, TrelloService } from "./TrelloService";
 
 export type TrelloAutoSyncSetting = number | false;
 
@@ -243,11 +244,20 @@ async function reconcileSingleTask(
   const currentBlockHash = desiredBlockHash;
 
   const hasRemoteLink = Boolean(task.trelloCardId);
+  const remoteCard = hasRemoteLink
+    ? await loadRemoteCardByIdOrFallback(task, deps, trello, desiredName)
+    : await findRemoteCardForTask(task, deps, trello, desiredName);
+  if (!task.trelloCardId && remoteCard?.id) {
+    task.trelloCardId = remoteCard.id;
+  }
+
+  const resolvedCardId = task.trelloCardId ?? remoteCard?.id;
+  const hasResolvedRemoteLink = Boolean(resolvedCardId);
   const hasLocalChanges =
     task.lastSyncedText !== desiredName ||
     task.lastSyncedMetadataHash !== currentBlockHash;
 
-  if (task.syncStatus === "synced" && hasRemoteLink && !hasLocalChanges) {
+  if (task.syncStatus === "synced" && hasResolvedRemoteLink && !hasLocalChanges) {
     return "skipped";
   }
 
@@ -262,8 +272,8 @@ async function reconcileSingleTask(
     task.lastError = undefined;
     deps.store.update(task);
 
-    if (hasRemoteLink) {
-      const currentCard = await trello.getCard(task.trelloCardId!, ["desc"]);
+    if (hasResolvedRemoteLink) {
+      const currentCard = remoteCard ?? await trello.getCard(resolvedCardId!, ["desc"]);
       const currentDesc = currentCard.desc ?? "";
       const mergedDesc = upsertTaskioBlock(currentDesc, desiredBlock);
 
@@ -271,7 +281,7 @@ async function reconcileSingleTask(
         normalizeForHash(mergedDesc) !== normalizeForHash(currentDesc) ||
         currentCard.name !== desiredName
       ) {
-        await trello.updateCard(task.trelloCardId!, {
+        await trello.updateCard(resolvedCardId!, {
           name: desiredName,
           description: mergedDesc,
         });
@@ -303,7 +313,7 @@ async function reconcileSingleTask(
     reconcileLocks.delete(stableId);
   }
 
-  return hasRemoteLink ? "updated" : "created";
+  return hasResolvedRemoteLink ? "updated" : "created";
 }
 
 function ensureStableIdentity(task: TaskioComment): string {
@@ -316,4 +326,105 @@ function ensureStableIdentity(task: TaskioComment): string {
 
 async function persistTrelloComments(deps: TaskioDependencies): Promise<void> {
   await deps.context.workspaceState.update("taskio.comments", deps.store.getAll());
+}
+
+type RemoteTaskioBlock = {
+  localId?: string;
+  file?: string;
+  line?: string;
+  keyword?: string;
+  priority?: string;
+  title?: string;
+  cardId?: string;
+};
+
+function normalizeRemoteValue(value: string | undefined): string {
+  return (value ?? "").trim().replace(/\r\n/g, "\n");
+}
+
+function parseTaskioBlock(desc: string | undefined): RemoteTaskioBlock | undefined {
+  if (!desc) return undefined;
+
+  const blockMatch = desc.match(/\[Taskio\][\s\S]*?\[\/Taskio\]/i);
+  if (!blockMatch) return undefined;
+
+  const block = blockMatch[0];
+  const read = (label: string) => {
+    const match = block.match(new RegExp(`${label}:\\s*(.*)`, "i"));
+    return match?.[1]?.trim();
+  };
+
+  return {
+    localId: read("LocalId"),
+    file: read("File"),
+    line: read("Line"),
+    keyword: read("Keyword"),
+    priority: read("Priority"),
+    title: read("Title"),
+    cardId: read("CardId"),
+  };
+}
+
+function normalizeTaskTitle(title: string | undefined): string {
+  return normalizeRemoteValue(title).toLowerCase();
+}
+
+function normalizeTaskKeyword(keyword: string | undefined): string {
+  return normalizeRemoteValue(keyword).replace(/[!?.:;,\s]+$/g, "").toUpperCase();
+}
+
+async function loadRemoteCardByIdOrFallback(
+  task: TaskioComment,
+  deps: TaskioDependencies,
+  trello: TrelloService,
+  desiredName: string,
+): Promise<TrelloApiCard | undefined> {
+  if (!task.trelloCardId) return undefined;
+
+  try {
+    return await trello.getCard(task.trelloCardId, ["desc", "name"]);
+  } catch (error) {
+    if (!(error instanceof TrelloHttpError) || error.status !== 404) {
+      throw error;
+    }
+
+    return findRemoteCardForTask(task, deps, trello, desiredName);
+  }
+}
+
+async function findRemoteCardForTask(
+  task: TaskioComment,
+  deps: TaskioDependencies,
+  trello: TrelloService,
+  desiredName: string,
+): Promise<TrelloApiCard | undefined> {
+  const listId = deps.context.workspaceState.get<string>("taskio.trello.listId");
+  if (!listId) return undefined;
+
+  const cards = await trello.getListCards(listId, ["name", "desc"]);
+  const taskFile = task.uri.fsPath.replace(/\\/g, "/").toLowerCase();
+  const taskLocalId = task.localStableId;
+  const taskKeyword = normalizeTaskKeyword(task.keyword);
+  const taskTitle = normalizeTaskTitle(desiredName);
+
+  const matches = cards.filter(card => {
+    const block = parseTaskioBlock(card.desc);
+    if (!block) return false;
+
+    if (block.localId && block.localId === taskLocalId) return true;
+
+    const remoteFile = normalizeTaskTitle(block.file);
+    const remoteKeyword = normalizeTaskKeyword(block.keyword);
+    const remoteTitle = normalizeTaskTitle(block.title);
+
+    return remoteFile === taskFile &&
+      remoteKeyword === taskKeyword &&
+      remoteTitle === taskTitle;
+  });
+
+  if (matches.length === 1) {
+    return matches[0];
+  }
+
+  return undefined;
 }

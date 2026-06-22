@@ -138,6 +138,93 @@ test("reconcile updates an existing Trello card instead of creating a duplicate"
   assert.strictEqual(updated.lastSyncedText, "FIXME!!!: Replace weak hashing algorithm fixed");
 });
 
+test("reconcile reuses an existing Trello card found by LocalId when trelloCardId is missing", async () => {
+  const store = new CommentStore();
+  const uri = Uri.file("D:/Programacao/Projetos/Taskio/taskio/example.ts");
+  const comment: TaskioComment = {
+    id: `${uri.toString()}:4:0`,
+    localStableId: "stable-comment-id",
+    uri,
+    line: 4,
+    character: 0,
+    keyword: "TODO",
+    text: "TODO: Replace weak hashing algorithm fixed",
+    displayText: "TODO: Replace weak hashing algorithm fixed",
+    priority: "default",
+    lastSyncedText: "TODO: Replace weak hashing algorithm",
+    lastSyncedMetadataHash: "hash-previous",
+    syncStatus: "modified",
+  };
+
+  store.setMany([comment]);
+
+  const workspaceState = new Map<string, unknown>([
+    ["taskio.trello.listId", "list-1"],
+  ]);
+
+  const updateCalls: Array<{ cardId: string; body: { name?: string; description?: string } }> = [];
+  let createCalls = 0;
+
+  const trello = {
+    getListCards: async () => ([{
+      id: "card-123",
+      name: "TODO: Replace weak hashing algorithm",
+      desc: [
+        "[Taskio]",
+        "LocalId: stable-comment-id",
+        `File: ${uri.fsPath.replace(/\\/g, "/")}`,
+        "Line: 4",
+        "Keyword: TODO",
+        "Title: TODO: Replace weak hashing algorithm",
+        "CardId: card-123",
+        "[/Taskio]",
+      ].join("\n"),
+    }]),
+    getCard: async () => ({ id: "card-123", name: "TODO: Replace weak hashing algorithm", desc: "" }),
+    updateCard: async (cardId: string, body: { name?: string; description?: string }) => {
+      updateCalls.push({ cardId, body });
+    },
+    createCard: async () => {
+      createCalls += 1;
+      return { id: "card-new" };
+    },
+  } as unknown as TrelloService;
+
+  const deps = {
+    store,
+    treeProvider: { refresh: () => undefined },
+    treeView: { title: "" },
+    applyDecorators: () => undefined,
+    updateTreeTitle: (treeView: { title: string }) => {
+      treeView.title = `Tree View (${store.getAll().length})`;
+    },
+    secretStore: {},
+    context: {
+      workspaceState: {
+        get: <T>(key: string, fallback?: T) => (workspaceState.has(key) ? workspaceState.get(key) as T : fallback),
+        update: async (key: string, value: unknown) => {
+          if (value === undefined) {
+            workspaceState.delete(key);
+          } else {
+            workspaceState.set(key, value);
+          }
+        },
+      },
+    },
+  } as unknown as TaskioDependencies;
+
+  const result = await reconcileTrelloTasks([comment], deps, trello, "manual");
+
+  assert.strictEqual(result.successCount, 1);
+  assert.strictEqual(createCalls, 0);
+  assert.strictEqual(updateCalls.length, 1);
+  assert.strictEqual(updateCalls[0].cardId, "card-123");
+
+  const [updated] = store.getByUri(uri);
+  assert.ok(updated);
+  assert.strictEqual(updated.trelloCardId, "card-123");
+});
+
 test("replaceByUri keeps all nearby TODOs when a new one is inserted", () => {
   const store = new CommentStore();
   const uri = Uri.file("D:/Programacao/Projetos/Taskio/taskio/example.ts");
