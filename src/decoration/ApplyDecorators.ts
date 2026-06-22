@@ -78,12 +78,13 @@ export function ApplyDecorators(editor: vscode.TextEditor, store: CommentStore):
     let range: vscode.Range;
 
     if (enhanceAllText) {
+      const lineEnd = editor.document.lineAt(comment.line).range.end.character;
 
       range = new vscode.Range(
         new vscode.Position(comment.line, comment.character),
         new vscode.Position(
           comment.line,
-          comment.character + comment.text.length
+          Math.max(comment.character, lineEnd)
         )
       );
     } else {

@@ -14,11 +14,21 @@ export default class TreeMode {
   constructor(private store: CommentStore) { }
 
   public getListMode() {
-
-    return this.sortNodes(this.store
+    return this.store
       .getAll()
-      .sort((a, b) => this.order[a.priority] - this.order[b.priority])
-      .map(c => new CommentNode(c)));
+      .sort((a, b) => {
+        const priorityDiff = this.order[a.priority] - this.order[b.priority];
+        if (priorityDiff !== 0) return priorityDiff;
+
+        if (a.uri.fsPath !== b.uri.fsPath) {
+          return a.uri.fsPath.localeCompare(b.uri.fsPath);
+        }
+
+        if (a.line !== b.line) return a.line - b.line;
+        if (a.character !== b.character) return a.character - b.character;
+        return a.id.localeCompare(b.id);
+      })
+      .map(c => new CommentNode(c));
   }
 
   public getFileMode(element: TreeItem): TreeNode[] {

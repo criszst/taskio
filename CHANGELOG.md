@@ -4,6 +4,26 @@ All notable changes to the "taskio" extension will be documented in this file.
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+---
+
+## [0.1.7] - 2026-07-21
+
+### Added
+- Added better examples for TODO, FIXME and BUG comments
+
+### Changed
+- Taskio branding in the marketplace
+- Extension description and marketplace metadata
+- README with clearer positioning
+
+
+### Fixed
+- Fixed the order of tasks in the list has been corrected, as the priority was not being ordered correctly.
+- Task detection edge cases
+- Fixed the "Enhance all text" option to actually highlight the entire task text.
+
+---
+
 ## [0.1.6] - 2026-06-21
 
 ### Added
@@ -134,6 +154,8 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ## 0.0.8 - 2026-01-26
 - Updated README demo (media optimization)
+
+---
 
 
 ## [0.0.7] - 2026-01-26

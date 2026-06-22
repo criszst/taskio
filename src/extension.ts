@@ -14,6 +14,7 @@ import { registerCommands } from './events/RegisterCommands';
 import { syncOnStartup } from './integrations/trello/events/OnStartup';
 import { registerTrelloUriHandler } from './integrations/trello/services/TrelloAuthUri';
 import { clearAllTrelloAutoSyncTimers, refreshAllTrelloAutoSyncTimers } from './integrations/trello/services/TimerToSync';
+import { refreshDecorationTypes } from './decoration/ApplyDecorators';
 
 
 export async function activate(context: vscode.ExtensionContext) {
@@ -23,6 +24,16 @@ export async function activate(context: vscode.ExtensionContext) {
 
     if (event.affectsConfiguration('taskio.trello.timerToSync')) {
       void refreshAllTrelloAutoSyncTimers(deps);
+    }
+
+    if (
+      event.affectsConfiguration('taskio.enhanceAllText') ||
+      event.affectsConfiguration('taskio.color')
+    ) {
+      refreshDecorationTypes();
+      for (const editor of vscode.window.visibleTextEditors) {
+        deps.applyDecorators(editor, deps.store);
+      }
     }
     
   }));

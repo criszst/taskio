@@ -7,6 +7,7 @@ import TaskioComment from "../types/TaskioComment";
 import { reconcileTrelloTasks } from "../integrations/trello/services/TimerToSync";
 import { TaskioDependencies } from "../types/TaskioDependencies";
 import { TrelloService } from "../integrations/trello/services/TrelloService";
+import TreeMode from "../treeView/TreeMode";
 
 test("preserves Trello linkage when a synced TODO changes text", () => {
   const store = new CommentStore();
@@ -435,4 +436,73 @@ test("identical TODOs keep separate state entries", () => {
   assert.strictEqual(comments.length, 2);
   assert.strictEqual(comments[0].trelloCardId, "card-1");
   assert.strictEqual(comments[1].trelloCardId, "card-2");
+});
+
+test("list mode keeps high priority tasks before lower priorities", () => {
+  const store = new CommentStore();
+  const uri = Uri.file("D:/Programacao/Projetos/Taskio/taskio/example.ts");
+
+  store.setMany([
+    {
+      id: `${uri.toString()}:1:0`,
+      localStableId: "stable-1",
+      uri,
+      line: 1,
+      character: 0,
+      keyword: "TODO",
+      text: "TODO: default task",
+      displayText: "TODO: default task",
+      priority: "default",
+      syncStatus: "never_synced",
+    },
+    {
+      id: `${uri.toString()}:2:0`,
+      localStableId: "stable-2",
+      uri,
+      line: 2,
+      character: 0,
+      keyword: "TODO",
+      text: "TODO: high task",
+      displayText: "TODO: high task",
+      priority: "high",
+      syncStatus: "never_synced",
+    },
+    {
+      id: `${uri.toString()}:3:0`,
+      localStableId: "stable-3",
+      uri,
+      line: 3,
+      character: 0,
+      keyword: "TODO",
+      text: "TODO: medium task",
+      displayText: "TODO: medium task",
+      priority: "medium",
+      syncStatus: "never_synced",
+    },
+    {
+      id: `${uri.toString()}:4:0`,
+      localStableId: "stable-4",
+      uri,
+      line: 4,
+      character: 0,
+      keyword: "TODO",
+      text: "TODO: low task",
+      displayText: "TODO: low task",
+      priority: "low",
+      syncStatus: "never_synced",
+    },
+  ]);
+
+  const treeMode = new TreeMode(store);
+  const nodes = treeMode.getListMode();
+
+  assert.deepStrictEqual(
+    nodes.map(node => node.comment.displayText),
+    [
+      "TODO: high task",
+      "TODO: medium task",
+      "TODO: low task",
+      "TODO: default task",
+    ],
+  );
 });

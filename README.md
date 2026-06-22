@@ -1,125 +1,46 @@
 # Taskio
 
-Taskio turns `TODO`, `FIXME` and `BUG` comments into a lightweight task board inside VS Code.
+Turn `TODO`, `FIXME` and `BUG` comments into an organized task board inside VS Code.
 
-Instead of letting technical debt disappear inside source files, Taskio keeps those comments visible in a dedicated Tree View, where they can be searched, grouped, prioritized and exported in a few clicks.
+Taskio helps you keep technical debt visible without leaving your editor. It scans your workspace, groups code comments by priority, file or folder, and lets you search, export or send tasks to Trello in a few clicks.
 
-No setup is required for the core workflow. Install Taskio and start organizing the comments already living in your codebase.
+No setup required for the core workflow. Install Taskio and start organizing the comments already living in your codebase.
 
 <div align="center">
-
-  <p align="center">
-    <img width="900" src="assets/taskioTeaser.gif" alt="Taskio demo animation" />
-  </p>
-
+  <img width="900" src="assets/taskioTeaser.gif" alt="Taskio demo animation" />
 </div>
+
+---
+
+## Features
+
+* Detect `TODO`, `FIXME` and `BUG` comments automatically
+* Add custom keywords to match your workflow
+* View all tasks in a dedicated VS Code Tree View
+* Search tasks across the entire workspace
+* Set priorities with `!`, `!!` and `!!!` (customizable)
+* Group tasks by priority, file or folder
+* Export tasks to JSON, Markdown or TXT
+* Customize highlight color
+* Send tasks to Trello with optional integration
 
 ---
 
 ## Why Taskio?
 
-Code comments are where a lot of technical debt quietly hides.
+Code comments are where technical debt often hides.
 
-Taskio makes that debt visible, searchable and easier to act on without leaving the editor.
-
-If you already leave TODOs in your codebase, Taskio gives them a home.
+Taskio makes those comments visible, searchable and easier to act on. Instead of losing important notes across source files, you get a lightweight task board built directly into VS Code.
 
 <div align="center">
-  <p align="center">
-    <img width="900" src="assets/demonstration.png" alt="Taskio tree view screenshot" />
-  </p>
+  <img width="900" src="assets/demonstration.png" alt="Taskio task board screenshot" />
 </div>
 
 ---
 
-## What It Does
+## Custom Keywords and Priorities
 
-- Detects `TODO`, `FIXME` and `BUG` comments automatically
-- Shows all tasks in a dedicated Tree View
-- Lets you search tasks quickly across the workspace
-- Supports priority markers with `!`, `!!` and `!!!`
-- Groups tasks by priority, file or folder
-- Exports tasks to JSON, Markdown or TXT
-- Lets you customize keywords and highlight color
-- Includes optional Trello integration for syncing tasks
-
----
-
-## Best For
-
-- Developers who want to keep track of TODOs without switching tools
-- Teams that use comments to mark technical debt
-- People who want a simple, lightweight task list based on code comments
-
----
-
-## Screenshots
-
-<div align="center">
-  <p align="center"><strong>Turn code comments into a visible task board.</strong></p>
-  <img width="900" src="assets/demonstration.png" alt="Taskio overview screenshot" />
-</div>
-
-<div align="center">
-  <p align="center"><strong>See what needs attention first.</strong></p>
-  <img width="900" src="assets/priority.png" alt="Taskio priority screenshot" />
-</div>
-
-<div align="center">
-  <p align="center"><strong>Find tasks fast across the whole project.</strong></p>
-  <img width="900" src="assets/searchCommand.png" alt="Taskio search screenshot" />
-</div>
-
-<div align="center">
-  <p align="center"><strong>Move tasks into your existing workflow.</strong></p>
-  <img width="900" src="assets/trelloExample.png" alt="Taskio Trello screenshot" />
-</div>
-
-<div align="center">
-  <p align="center"><strong>Export tasks to the format you need.</strong></p>
-  <img width="900" src="assets/exportExample.png" alt="Taskio export screenshot" />
-</div>
-
----
-
-## Commands
-
-Taskio adds the following commands to VS Code:
-
-- `Taskio: Search Tasks...`
-- `Taskio: Refresh`
-- `Taskio: Change Grouping Mode`
-- `Taskio: Export Tasks`
-- `Taskio: Copy Comment`
-- `Taskio: Remove Task`
-- `Taskio.Trello: Configure Trello Connection`
-- `Taskio.Trello: Manage Trello Integration`
-- `Taskio.Trello: Send to Trello`
-- `Taskio.Trello: Open in Trello`
-
----
-
-## Supported Keywords
-
-By default, Taskio detects:
-
-- `TODO`
-- `FIXME`
-- `BUG`
-
-You can fully customize this list in the extension settings.
-
----
-
-## Priority Markers
-
-You can define task priority directly in your comments using exclamation marks:
-
-- `!` -> Low priority
-- `!!` -> Medium priority
-- `!!!` -> High priority
-
-### Example
+Taskio detects `TODO`, `FIXME` and `BUG` by default, but both the keywords and priority markers are fully customizable on extension settings.
 
 ```ts
 // TODO! Refactor this function
@@ -127,27 +48,62 @@ You can define task priority directly in your comments using exclamation marks:
 // BUG!!! Crashes on startup
 ```
 
-Higher priority tasks are visually distinguished in the tree view and search results.
+Default priority markers:
+
+* `!` Low
+* `!!` Medium
+* `!!!` High
 
 ---
 
-## Task Examples
+## Trello Integration
 
-```ts
-// TODO! improve error handling
-// FIXME!! fix payment retry bug
-// BUG!!! login crashes on expired token
-```
+Taskio can send code tasks to Trello so they can move into your existing workflow.
 
-Taskio keeps those comments visible, searchable and easy to organize.
+Trello cards can include the task description, file path, line number and task metadata.
+
+<div align="center">
+  <img width="900" src="assets/trelloExample.png" alt="Taskio Trello integration screenshot" />
+</div>
 
 ---
 
-## Customization
+## Export Tasks
 
-Taskio can be configured via the VS Code Settings UI or directly in `settings.json`.
+Export your tasks when you need to share, document or review them outside VS Code.
 
-### Example configuration
+Supported formats:
+
+* JSON
+* Markdown
+* TXT
+
+Exported tasks include the file path, line number, priority and clean task description.
+
+<div align="center">
+  <img width="900" src="assets/exportExample.png" alt="Taskio export screenshot" />
+</div>
+
+---
+
+## Commands
+
+Taskio includes commands for searching, refreshing, grouping, exporting, copying, removing and sending tasks to Trello.
+
+Main commands:
+
+* `Taskio: Search Tasks...`
+* `Taskio: Refresh`
+* `Taskio: Change Grouping Mode`
+* `Taskio: Export Tasks`
+* `Taskio.Trello: Send to Trello`
+* `Taskio.Trello: Open in Trello`
+
+---
+
+## Settings
+
+Taskio can be configured from the VS Code Settings UI or directly in `settings.json`.
 
 ```json
 {
@@ -164,38 +120,15 @@ Taskio can be configured via the VS Code Settings UI or directly in `settings.js
 
 ---
 
-## Exporting Tasks
+## Best For
 
-Taskio supports exporting tasks for documentation or reporting:
-
-- JSON for integrations and tooling
-- Markdown for README files and reports
-- TXT for a quick plain-text export
-
-Exported tasks include file path, line number, priority and clean descriptions.
-
-<div align="center">
-  <img width="900" src="https://raw.githubusercontent.com/criszst/taskio/master/assets/exportExample.png" alt="Taskio tree view screenshot" />
-</div>
-
----
-
-## Trello Integration
-
-Taskio includes optional Trello support so you can send tasks to a board and keep them synced with your workflow.
-
-Use the built-in Trello commands to configure the integration, manage the connection, open synced cards and send comments to Trello.
-
----
-
-## Install
-
-Install Taskio from the VS Code Marketplace and start writing TODOs in your codebase.
-
-No setup is required for the core workflow.
+* Developers who use comments to track work
+* Teams that want to make technical debt more visible
+* Projects with scattered TODO, FIXME or BUG notes
+* Anyone who wants a lightweight task board inside VS Code
 
 ---
 
 ## Feedback
 
-If Taskio helps you stay productive, consider leaving a review on the VS Code Marketplace. It really helps the project grow.
+If Taskio helps you stay organized, leaving a review on the VS Code Marketplace really helps the project grow. :)
