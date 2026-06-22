@@ -18,8 +18,9 @@
             }
         },
         {
-            "type": "npm",
-            "script": "watch:esbuild",
+            "type": "shell",
+            "command": "npm.cmd",
+            "args": ["run", "watch:esbuild"],
             "group": "build",
             "problemMatcher": "$esbuild-watch",
             "isBackground": true,
@@ -30,8 +31,9 @@
             }
         },
 		{
-            "type": "npm",
-            "script": "watch:tsc",
+            "type": "shell",
+            "command": "npm.cmd",
+            "args": ["run", "watch:tsc"],
             "group": "build",
             "problemMatcher": "$tsc-watch",
             "isBackground": true,
@@ -42,10 +44,12 @@
             }
         },
 		{
-			"type": "npm",
-			"script": "watch-tests",
+			"type": "shell",
+			"command": "npm.cmd",
+			"args": ["run", "watch-tests"],
 			"problemMatcher": "$tsc-watch",
 			"isBackground": true,
+			"label": "npm: watch-tests",
 			"presentation": {
 				"reveal": "never",
 				"group": "watchers"
@@ -55,7 +59,7 @@
 		{
 			"label": "tasks: watch-tests",
 			"dependsOn": [
-				"npm: watch",
+				"watch",
 				"npm: watch-tests"
 			],
 			"problemMatcher": []

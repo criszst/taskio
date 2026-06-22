@@ -49,6 +49,8 @@ export class CommentNode extends vscode.TreeItem {
   constructor(public readonly comment: TaskioComment) {
     super(comment.displayText ?? comment.text, vscode.TreeItemCollapsibleState.None);
 
+    this.id = comment.localStableId;
+
     this.description = `Line ${this.comment.line + 1} - ${this.comment.priority.toUpperCase()}`;
     this.tooltip = `${this.comment.displayText ?? this.comment.text} (Line ${this.comment.line + 1}) - ${this.comment.priority.toUpperCase()}`;
 

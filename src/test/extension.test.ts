@@ -137,3 +137,215 @@ test("reconcile updates an existing Trello card instead of creating a duplicate"
   assert.strictEqual(updated.syncStatus, "synced");
   assert.strictEqual(updated.lastSyncedText, "FIXME!!!: Replace weak hashing algorithm fixed");
 });
+
+test("replaceByUri keeps all nearby TODOs when a new one is inserted", () => {
+  const store = new CommentStore();
+  const uri = Uri.file("D:/Programacao/Projetos/Taskio/taskio/example.ts");
+
+  store.setMany([
+    {
+      id: `${uri.toString()}:1:0`,
+      localStableId: "stable-1",
+      uri,
+      line: 1,
+      character: 0,
+      keyword: "FIXME",
+      text: "FIXME: just example",
+      displayText: "FIXME: just example",
+      priority: "default",
+      trelloCardId: "card-fixme",
+      lastSyncedText: "FIXME: just example",
+      syncStatus: "synced",
+    },
+    {
+      id: `${uri.toString()}:2:0`,
+      localStableId: "stable-2",
+      uri,
+      line: 2,
+      character: 0,
+      keyword: "TODO",
+      text: "TODO: example",
+      displayText: "TODO: example",
+      priority: "default",
+      trelloCardId: "card-todo-1",
+      lastSyncedText: "TODO: example",
+      syncStatus: "synced",
+    },
+    {
+      id: `${uri.toString()}:3:0`,
+      localStableId: "stable-3",
+      uri,
+      line: 3,
+      character: 0,
+      keyword: "TODO",
+      text: "TODO: todo example",
+      displayText: "TODO: todo example",
+      priority: "default",
+      trelloCardId: "card-todo-2",
+      lastSyncedText: "TODO: todo example",
+      syncStatus: "synced",
+    },
+  ]);
+
+  store.replaceByUri(uri, [
+    {
+      id: `${uri.toString()}:1:0`,
+      localStableId: "new-1",
+      uri,
+      line: 1,
+      character: 0,
+      keyword: "FIXME",
+      text: "FIXME: just example",
+      displayText: "FIXME: just example",
+      priority: "default",
+      syncStatus: "never_synced",
+    },
+    {
+      id: `${uri.toString()}:2:0`,
+      localStableId: "new-2",
+      uri,
+      line: 2,
+      character: 0,
+      keyword: "TODO",
+      text: "TODO: new inserted example",
+      displayText: "TODO: new inserted example",
+      priority: "default",
+      syncStatus: "never_synced",
+    },
+    {
+      id: `${uri.toString()}:3:0`,
+      localStableId: "new-3",
+      uri,
+      line: 3,
+      character: 0,
+      keyword: "TODO",
+      text: "TODO: example",
+      displayText: "TODO: example",
+      priority: "default",
+      syncStatus: "never_synced",
+    },
+    {
+      id: `${uri.toString()}:4:0`,
+      localStableId: "new-4",
+      uri,
+      line: 4,
+      character: 0,
+      keyword: "TODO",
+      text: "TODO: todo example",
+      displayText: "TODO: todo example",
+      priority: "default",
+      syncStatus: "never_synced",
+    },
+  ]);
+
+  const comments = store.getByUri(uri);
+  assert.strictEqual(comments.length, 4);
+  assert.ok(comments.some(c => c.text === "FIXME: just example"));
+  assert.ok(comments.some(c => c.text === "TODO: new inserted example"));
+  assert.ok(comments.some(c => c.text === "TODO: example"));
+  assert.ok(comments.some(c => c.text === "TODO: todo example"));
+  assert.strictEqual(comments.find(c => c.text === "TODO: example")?.trelloCardId, "card-todo-1");
+  assert.strictEqual(comments.find(c => c.text === "TODO: todo example")?.trelloCardId, "card-todo-2");
+});
+
+test("changing priority on one TODO does not leak to the TODO above", () => {
+  const store = new CommentStore();
+  const uri = Uri.file("D:/Programacao/Projetos/Taskio/taskio/example.ts");
+
+  store.setMany([
+    {
+      id: `${uri.toString()}:1:0`,
+      localStableId: "stable-1",
+      uri,
+      line: 1,
+      character: 0,
+      keyword: "TODO",
+      text: "TODO: example aaa",
+      displayText: "TODO: example aaa",
+      priority: "default",
+      syncStatus: "never_synced",
+    },
+    {
+      id: `${uri.toString()}:2:0`,
+      localStableId: "stable-2",
+      uri,
+      line: 2,
+      character: 0,
+      keyword: "TODO",
+      text: "TODO!: Other example",
+      displayText: "TODO!: Other example",
+      priority: "high",
+      syncStatus: "never_synced",
+    },
+  ]);
+
+  store.replaceByUri(uri, [
+    {
+      id: `${uri.toString()}:1:0`,
+      localStableId: "new-1",
+      uri,
+      line: 1,
+      character: 0,
+      keyword: "TODO",
+      text: "TODO: example aaa",
+      displayText: "TODO: example aaa",
+      priority: "default",
+      syncStatus: "never_synced",
+    },
+    {
+      id: `${uri.toString()}:2:0`,
+      localStableId: "new-2",
+      uri,
+      line: 2,
+      character: 0,
+      keyword: "TODO",
+      text: "TODO: Other example",
+      displayText: "TODO: Other example",
+      priority: "default",
+      syncStatus: "never_synced",
+    },
+  ]);
+
+  const comments = store.getByUri(uri);
+  assert.strictEqual(comments.find(c => c.text === "TODO: example aaa")?.priority, "default");
+  assert.strictEqual(comments.find(c => c.text === "TODO: Other example")?.priority, "default");
+});
+
+test("identical TODOs keep separate state entries", () => {
+  const store = new CommentStore();
+  const uri = Uri.file("D:/Programacao/Projetos/Taskio/taskio/example.ts");
+
+  store.setMany([
+    {
+      id: `${uri.toString()}:1:0`,
+      localStableId: "stable-1",
+      uri,
+      line: 1,
+      character: 0,
+      keyword: "TODO",
+      text: "TODO: example",
+      displayText: "TODO: example",
+      priority: "default",
+      trelloCardId: "card-1",
+      syncStatus: "synced",
+    },
+    {
+      id: `${uri.toString()}:2:0`,
+      localStableId: "stable-2",
+      uri,
+      line: 2,
+      character: 0,
+      keyword: "TODO",
+      text: "TODO: example",
+      displayText: "TODO: example",
+      priority: "default",
+      trelloCardId: "card-2",
+      syncStatus: "synced",
+    },
+  ]);
+
+  const comments = store.getByUri(uri);
+  assert.strictEqual(comments.length, 2);
+  assert.strictEqual(comments[0].trelloCardId, "card-1");
+  assert.strictEqual(comments[1].trelloCardId, "card-2");
+});

@@ -8,11 +8,15 @@ import shouldIgnoreDocument from '../../config/IgnoredFiles';
 import EventManager from '../EventManager';
 import OnUserSaveFile from '../../integrations/trello/events/OnUserSaveFile';
 
+const DOCUMENT_SYNC_DEBOUNCE_MS = 180;
+const pendingDocumentSyncTimers = new Map<string, ReturnType<typeof setTimeout>>();
+
 
 export function registerDocumentHandler(manager: EventManager, deps: TaskioDependencies): void {
   const { store, applyDecorators } = deps;
 
-  manager.register(vscode.workspace.onDidChangeTextDocument(e => syncDocument(e.document, deps)));
+  manager.register({ dispose: clearAllQueuedDocumentSyncs });
+  manager.register(vscode.workspace.onDidChangeTextDocument(e => queueSyncDocument(e.document, deps)));
 
   manager.register(vscode.window.onDidChangeWindowState(() => {
 
@@ -33,6 +37,7 @@ export function registerDocumentHandler(manager: EventManager, deps: TaskioDepen
 
     void (async () => {
 
+      flushQueuedDocumentSync(doc, deps);
       await new OnUserSaveFile(doc, deps).SaveTasks();
       deps.treeProvider.refresh();
 
@@ -66,3 +71,41 @@ export const syncDocument = (doc: vscode.TextDocument, deps: TaskioDependencies)
 
   if (editor) applyDecorators(editor, store);
 };
+
+function queueSyncDocument(doc: vscode.TextDocument, deps: TaskioDependencies): void {
+  const key = doc.uri.toString();
+  const existing = pendingDocumentSyncTimers.get(key);
+
+  if (existing) {
+    clearTimeout(existing);
+  }
+
+  const timer = setTimeout(() => {
+    pendingDocumentSyncTimers.delete(key);
+    const currentDoc = vscode.workspace.textDocuments.find(d => d.uri.toString() === key) ?? doc;
+    syncDocument(currentDoc, deps);
+  }, DOCUMENT_SYNC_DEBOUNCE_MS);
+
+  pendingDocumentSyncTimers.set(key, timer);
+}
+
+function flushQueuedDocumentSync(doc: vscode.TextDocument, deps: TaskioDependencies): void {
+  const key = doc.uri.toString();
+  const timer = pendingDocumentSyncTimers.get(key);
+
+  if (timer) {
+    clearTimeout(timer);
+    pendingDocumentSyncTimers.delete(key);
+  }
+
+  const currentDoc = vscode.workspace.textDocuments.find(d => d.uri.toString() === key) ?? doc;
+  syncDocument(currentDoc, deps);
+}
+
+function clearAllQueuedDocumentSyncs(): void {
+  for (const timer of pendingDocumentSyncTimers.values()) {
+    clearTimeout(timer);
+  }
+
+  pendingDocumentSyncTimers.clear();
+}

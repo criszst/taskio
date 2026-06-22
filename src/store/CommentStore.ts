@@ -20,7 +20,7 @@ export class CommentStore {
 
   setMany(newComments: TaskioComment[]): void {
     for (const newC of newComments) {
-      this.upsertComment(newC);
+      this.comments.set(newC.id, normalizeStoredComment(newC));
     }
   }
 
@@ -43,6 +43,7 @@ export class CommentStore {
 
   replaceByUri(uri: vscode.Uri, newComments: TaskioComment[]) {
     const oldComments = this.getByUri(uri);
+    const remainingOldComments = [...oldComments];
 
     this.comments = new Map(
       Array.from(this.comments.entries()).filter(
@@ -51,7 +52,8 @@ export class CommentStore {
     );
 
     for (const newC of newComments) {
-      const existing = findBestExistingMatch(oldComments, newC);
+      const existingIndex = findBestExistingMatchIndex(remainingOldComments, newC);
+      const existing = existingIndex >= 0 ? remainingOldComments.splice(existingIndex, 1)[0] : undefined;
       const merged = mergeCommentState(existing, newC);
       this.comments.set(merged.id, merged);
     }
@@ -86,10 +88,7 @@ export class CommentStore {
   }
 
   private upsertComment(newC: TaskioComment): void {
-    const existing = findBestExistingMatch(Array.from(this.comments.values()), newC);
-    const merged = mergeCommentState(existing, newC);
-
-    this.comments.set(merged.id, merged);
+    this.comments.set(newC.id, normalizeStoredComment(newC));
   }
 }
 
@@ -112,10 +111,17 @@ function normalizeText(text: string | undefined): string {
 }
 
 function findBestExistingMatch(existingComments: TaskioComment[], next: TaskioComment): TaskioComment | undefined {
+  const index = findBestExistingMatchIndex(existingComments, next);
+  return index >= 0 ? existingComments[index] : undefined;
+}
+
+function findBestExistingMatchIndex(existingComments: TaskioComment[], next: TaskioComment): number {
   let best: TaskioComment | undefined;
   let bestScore = Number.NEGATIVE_INFINITY;
+  let bestIndex = -1;
 
-  for (const old of existingComments) {
+  for (let i = 0; i < existingComments.length; i++) {
+    const old = existingComments[i];
     if (old.uri.fsPath !== next.uri.fsPath) continue;
 
     let score = 0;
@@ -131,10 +137,11 @@ function findBestExistingMatch(existingComments: TaskioComment[], next: TaskioCo
     if (score > bestScore) {
       bestScore = score;
       best = old;
+      bestIndex = i;
     }
   }
 
-  return bestScore >= 30 ? best : undefined;
+  return bestScore >= 30 ? bestIndex : -1;
 }
 
 function mergeCommentState(existing: TaskioComment | undefined, incoming: TaskioComment): TaskioComment {
@@ -167,11 +174,19 @@ function mergeCommentState(existing: TaskioComment | undefined, incoming: Taskio
     ...incoming,
     id: existing.id ?? incoming.id,
     localStableId: existing.localStableId || baseStableId,
-    priority: existing.priority,
+    priority: incoming.priority,
     trelloCardId: existing.trelloCardId,
     lastSyncedText: hasRemoteLink ? persistedLastSyncedText : existing.lastSyncedText,
     lastSyncedMetadataHash: existing.lastSyncedMetadataHash,
     lastError: existing.lastError,
     syncStatus,
+  };
+}
+
+function normalizeStoredComment(comment: TaskioComment): TaskioComment {
+  return {
+    ...comment,
+    syncStatus: normalizeSyncStatus(comment.syncStatus),
+    localStableId: comment.localStableId || comment.id || randomUUID(),
   };
 }
