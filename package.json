@@ -65,9 +65,14 @@
           "group": "edit@1"
         },
         {
-          "command": "taskio.trello.OpenCard",
+          "command": "taskio.trello.RemoveFromTrello",
           "when": "view == taskioView && viewItem == taskioCommentSynced",
           "group": "edit@2"
+        },
+        {
+          "command": "taskio.trello.OpenCard",
+          "when": "view == taskioView && viewItem == taskioCommentSynced",
+          "group": "edit@3"
         }
       ],
       "view/title": [
@@ -198,30 +203,7 @@
           "description": "Automatically sync tasks with Trello when VSCode starts",
           "type": "boolean",
           "default": false
-        },
-
-        "taskio.trello.authReturnUrl": {
-          "description": "Return URL used by Trello to redirect back with the token (callback_method=fragment). This URL must match the Trello API key 'Allowed Origins' and must host a static page that reads location.hash and redirects to vscode://taskio.taskio/trello-auth with token and state. Avoid query params in this URL to keep static hosts happy.",
-          "type": "string",
-          "default": "https://taskio.com/auth/trello"
-        },
-
-        
-        "taskio.trello.boardName": {
-          "description": "Name of the board setup on Trello Integration",
-          "type": "string",
-          "readOnly": true,
-          "markdownDescription": "**AUTO-MANAGED**: Do not edit this manually. Use the `Configure Trello Connection` command to update this value.",
-          "scope": "resource"
-        },
-        "taskio.trello.listName": {
-          "description": "Name of the list setup on Trello Integration",
-          "type": "string",
-          "readOnly": true,
-          "markdownDescription": "**AUTO-MANAGED**: Do not edit this manually. Use the `Configure Trello Connection` command to update this value.",
-          "scope": "resource"
         }
-
       }
     },
     "commands": [
@@ -293,6 +275,12 @@
         "title": "Send to Trello",
         "category": "Taskio.Trello",
         "icon": "$(cloud-upload)"
+      },
+      {
+        "command": "taskio.trello.RemoveFromTrello",
+        "title": "Remove from Trello",
+        "category": "Taskio.Trello",
+        "icon": "$(trash)"
       }
     ]
   },

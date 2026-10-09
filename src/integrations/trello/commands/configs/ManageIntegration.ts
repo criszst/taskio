@@ -105,11 +105,11 @@ export default async function ManageIntegration(deps: TaskioDependencies): Promi
 
     // SYNC ACTIONS
     case 'sync_all':
-      await syncService.processTasks(deps.store.getAll(), deps, 'sync');
+      await syncService.processTasks(deps.store.getAll().filter(c => !c.trelloCardId), deps, 'sync');
       break;
 
     case 'desync_all':
-      await syncService.processTasks(deps.store.getAll(), deps, 'desync');
+      await syncService.processTasks(deps.store.getAll().filter(c => c.trelloCardId), deps, 'desync');
       break;
 
 

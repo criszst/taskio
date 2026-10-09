@@ -13,12 +13,15 @@ export default async function DisconnectTrello(deps: TaskioDependencies): Promis
     );
     if (confirm === "Yes") {
         await deps.secretStore.removeTrelloCredentials();
+
         await context.workspaceState.update("taskio.trello.listId", undefined);
         await context.workspaceState.update("taskio.trello.boardId", undefined);
         await context.workspaceState.update("taskio.trello.boardName", undefined);
         await context.workspaceState.update("taskio.trello.listName", undefined);
         await context.workspaceState.update("taskio.trello.syncOnStartup", undefined);
+
         clearAllTrelloAutoSyncTimers();
+        
         await clearTrelloSyncCache(deps);
 
         for (const comment of deps.store.getAll()) {

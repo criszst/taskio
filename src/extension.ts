@@ -20,23 +20,18 @@ import { refreshDecorationTypes } from './decoration/ApplyDecorators';
 export async function activate(context: vscode.ExtensionContext) {
   const deps = createDeps(context);
   context.subscriptions.push(registerTrelloUriHandler());
-  context.subscriptions.push(vscode.workspace.onDidChangeConfiguration((event) => {
 
-    if (event.affectsConfiguration('taskio.trello.timerToSync')) {
-      void refreshAllTrelloAutoSyncTimers(deps);
-    }
-
-    if (
-      event.affectsConfiguration('taskio.enhanceAllText') ||
-      event.affectsConfiguration('taskio.color')
-    ) {
-      refreshDecorationTypes();
-      for (const editor of vscode.window.visibleTextEditors) {
-        deps.applyDecorators(editor, deps.store);
+  context.subscriptions.push(
+    vscode.workspace.onDidChangeConfiguration(event => {
+      if (event.affectsConfiguration('taskio.enhanceAllText') || event.affectsConfiguration('taskio.color')) {
+        refreshDecorationTypes(deps.store);
       }
-    }
-    
-  }));
+
+      if (event.affectsConfiguration('taskio.trello.timerToSync')) {
+        void refreshAllTrelloAutoSyncTimers(deps);
+      }
+    })
+  );
 
   context.subscriptions.push({ dispose: clearAllTrelloAutoSyncTimers });
 

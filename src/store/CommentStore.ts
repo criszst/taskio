@@ -218,7 +218,7 @@ function mergeCommentState(existing: TaskioComment | undefined, incoming: Taskio
   let syncStatus = normalizeSyncStatus(existing.syncStatus);
 
   if (syncStatus === "syncing" || syncStatus === "error") {
-    // Preserve transient or error states until an explicit reconcile succeeds.
+    // Preserve transient or error states until an explicit reconcile succeeds
   } else if (hasRemoteLink) {
     syncStatus = incomingText !== lastSyncedText ? "modified" : "synced";
   } else {
@@ -227,7 +227,7 @@ function mergeCommentState(existing: TaskioComment | undefined, incoming: Taskio
 
   return {
     ...incoming,
-    id: existing.id ?? incoming.id,
+    id: incoming.id,
     localStableId: existing.localStableId || baseStableId,
     priority: incoming.priority,
     trelloCardId: existing.trelloCardId,

@@ -8,6 +8,7 @@ type PendingAuth = {
 };
 
 const pendingByState = new Map<string, PendingAuth>();
+
 let pendingAny: PendingAuth | undefined;
 
 export function createTrelloAuthState(): string {
@@ -20,24 +21,31 @@ export function waitForTrelloAuthToken(state?: string, opts?: { timeoutMs?: numb
   return new Promise<string>((resolve, reject) => {
     if (state) {
       const existing = pendingByState.get(state);
+
       if (existing) {
         clearTimeout(existing.timeout);
         pendingByState.delete(state);
       }
+
     } else if (pendingAny) {
       clearTimeout(pendingAny.timeout);
+
       pendingAny = undefined;
     }
 
     const timeout = setTimeout(() => {
+
       if (state) pendingByState.delete(state);
+
       else pendingAny = undefined;
+
       reject(new Error("Timed out waiting for Trello authorization."));
     }, timeoutMs);
 
     const pending = { resolve, reject, timeout };
-    // Trello doesn't always round-trip `state` for fragment callbacks, so keep a fallback "any" pending request.
+
     if (state) pendingByState.set(state, pending);
+
     pendingAny = pending;
   });
 }
@@ -54,6 +62,7 @@ export function cancelTrelloAuth(state: string) {
 
 export function registerTrelloUriHandler(): vscode.Disposable {
   return vscode.window.registerUriHandler({
+    
     handleUri(uri: vscode.Uri) {
       if (uri.path !== "/trello-auth") return;
 
@@ -66,20 +75,20 @@ export function registerTrelloUriHandler(): vscode.Disposable {
         return;
       }
 
-      const pending =
-        (state ? pendingByState.get(state) : undefined) ??
-        // Trello doesn't always round-trip custom state, so allow a single pending auth.
-        pendingAny;
-      if (!pending) {
-        void vscode.window.showWarningMessage(
-          "Taskio: Trello authorization received, but there is no pending auth request. Run “Configure Trello Connection” again."
-        );
+      const pending = (state ? pendingByState.get(state) : undefined) ?? pendingAny;
+
+      if (!pending) { 
+        void vscode.window.showWarningMessage("Taskio: Trello authorization received, but there is no pending auth request. Run “Configure Trello Connection” again.");
+        
         return;
       }
 
       clearTimeout(pending.timeout);
+
       if (state) pendingByState.delete(state);
+
       else pendingAny = undefined;
+
       pending.resolve(token);
     },
   });

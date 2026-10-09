@@ -9,25 +9,52 @@ import { CommentNode, FileNode, FolderNode, TreeNode } from "./TreeNode";
 import { TreeProvider } from "./TreeProvider";
 
 export default class TreeMode {
-  readonly order = { high: 0, medium: 1, low: 2, default: 3 };
 
   constructor(private store: CommentStore) { }
+
+  private readonly priorityOrder = {
+    high: 0,
+    medium: 1,
+    low: 2,
+    default: 3,
+  };
+
+  private readonly syncOrder = {
+    error: 0,
+    never_synced: 1,
+    modified: 2,
+    syncing: 3,
+    synced: 4,
+  };
+
+  private compareTasks = (a: TaskioComment, b: TaskioComment): number => {
+    const priorityDiff = this.priorityOrder[a.priority] - this.priorityOrder[b.priority];
+
+    if (priorityDiff !== 0) return priorityDiff;
+
+    const syncDiff = 
+    (this.syncOrder[a.syncStatus] ?? this.syncOrder.never_synced) 
+    - (this.syncOrder[b.syncStatus] ?? this.syncOrder.never_synced);
+
+    if (syncDiff !== 0) return syncDiff;
+
+    const fileDiff = a.uri.fsPath.localeCompare(b.uri.fsPath);
+
+    if (fileDiff !== 0) return fileDiff;
+
+    if (a.line !== b.line) return a.line - b.line;
+
+    if (a.character !== b.character) {
+      return a.character - b.character;
+    }
+
+    return a.id.localeCompare(b.id);
+  };
 
   public getListMode() {
     return this.store
       .getAll()
-      .sort((a, b) => {
-        const priorityDiff = this.order[a.priority] - this.order[b.priority];
-        if (priorityDiff !== 0) return priorityDiff;
-
-        if (a.uri.fsPath !== b.uri.fsPath) {
-          return a.uri.fsPath.localeCompare(b.uri.fsPath);
-        }
-
-        if (a.line !== b.line) return a.line - b.line;
-        if (a.character !== b.character) return a.character - b.character;
-        return a.id.localeCompare(b.id);
-      })
+      .sort(this.compareTasks)
       .map(c => new CommentNode(c));
   }
 
@@ -47,8 +74,8 @@ export default class TreeMode {
     // return the TODO comment if the file has one
     if (element instanceof FileNode) {
       return comments
-        .sort((a, b) => this.order[a.priority] - this.order[b.priority])
         .filter(comment => comment.uri.fsPath === element.uri.fsPath)
+        .sort(this.compareTasks)
         .map(comment => new CommentNode(comment));
     }
 
@@ -118,7 +145,7 @@ export default class TreeMode {
         
           return parts[parts.length - 2] === element.label;
         })
-        .sort((a, b) => this.order[a.priority] - this.order[b.priority])
+        .sort(this.compareTasks)
         .map(c => new CommentNode(c));
     }
 
@@ -126,7 +153,7 @@ export default class TreeMode {
     if (element instanceof FileNode) {
       return comments
         .filter(c => c.uri.fsPath === element.uri.fsPath)
-        .sort((a, b) => this.order[a.priority] - this.order[b.priority])
+        .sort(this.compareTasks)
         .map(c => new CommentNode(c));
     }
 
@@ -195,7 +222,7 @@ export default class TreeMode {
 
 
     if (element instanceof FileNode) {
-      const fileComments = comments.sort((a, b) => this.order[a.priority] - this.order[b.priority]).filter(c => c.uri.fsPath === element.uri.fsPath);
+      const fileComments = comments.filter(c => c.uri.fsPath === element.uri.fsPath).sort(this.compareTasks);
       return fileComments.map(c => new CommentNode(c));
     }
 

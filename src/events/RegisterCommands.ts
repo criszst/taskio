@@ -14,6 +14,8 @@ import { CommentNode } from '../treeView/TreeNode';
 import SendTask from '../integrations/trello/commands/SendTask';
 import { setupTrello } from '../integrations/trello/commands/configs/SetupTrello';
 import ManageIntegration from '../integrations/trello/commands/configs/ManageIntegration';
+import SyncService from '../integrations/trello/services/SyncService';
+import { TrelloService } from '../integrations/trello/services/TrelloService';
 
 export function registerCommands(context: ExtensionContext, deps: TaskioDependencies) {
   context.subscriptions.push(
@@ -64,7 +66,7 @@ export function registerCommands(context: ExtensionContext, deps: TaskioDependen
 
     commands.registerCommand('taskio.RemoveTask',
       async (node: CommentNode) => {
-        const result = await RemoveTask(node.comment, deps.store);
+        const result = await RemoveTask(deps, node.comment, deps.store);
 
         if (!result.ok) {
           window.showErrorMessage(`Taskio: Failed to remove task — ${result.error}`);
@@ -96,6 +98,18 @@ export function registerCommands(context: ExtensionContext, deps: TaskioDependen
     commands.registerCommand('taskio.trello.SendTask',
       async (node: CommentNode) => {
         await SendTask(node, deps);
+      }
+    ),
+
+    commands.registerCommand('taskio.trello.RemoveFromTrello',
+      async (node: CommentNode) => {
+        if (node.comment.trelloCardId) {
+        const syncService = new SyncService(new TrelloService(deps.secretStore));
+
+        await syncService.processTasks(node.comment, deps, 'desync');
+        } else {
+          window.showInformationMessage("Task is not synced to Trello.");
+        }
       }
     ),
 

@@ -6,6 +6,23 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ---
 
+## [0.1.8] - 2026-10-09
+
+### Added
+- "Remove from Trello" action to the Taskio Tree View context menu, allowing users to remove tasks directly from Trello
+
+
+### Fixed
+- Fixed text highlighting not updating when toggling `Enhance All Text`
+- Fixed task ID collisions when inserting new TODOs, preventing existing tasks from disappearing or losing their Trello associations
+- Tree View now automatically refreshes after `Send to Trello` and `Remove from Trello` actions
+- Removing a synced task now also removes its associated Trello card, preventing orphaned cards
+- Exported tasks no longer retain language-specific comment delimiters (e.g., `#` in Python) across JSON, Markdown, and TXT formats
+- Removed internal settings, such as `Board Name` and `List Name`, from the VS Code Settings UI
+- Improved task sorting across all Tree View modes, consistently ordering tasks by priority and synchronization status
+
+---
+
 ## [0.1.7] - 2026-06-22
 
 ### Added
@@ -20,7 +37,7 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 ### Fixed
 - Fixed the order of tasks in the list has been corrected, as the priority was not being ordered correctly.
 - Task detection edge cases
-- Fixed the "Enhance all text" option to actually highlight the entire task text.
+- Fixed the `Enhance all text` option to actually highlight the entire task text.
 
 ---
 
@@ -35,7 +52,7 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 - Debounced document rescans to reduce churn while editing
 
 ### Changed
-- Manual "Send to Trello" now uses the same reconcile path as automatic sync
+- Manual `Send to Trello` now uses the same reconcile path as automatic sync
 - Sync confirmation only reports success when a real sync happened
 - Priority is now sent with both new cards and updates so the Trello label stays in sync
 - Taskio metadata stored in Trello descriptions was reduced to the minimum needed for reconciliation

@@ -4,8 +4,11 @@ import { CommentStore } from "../store/CommentStore";
 import TaskioComment from "../types/TaskioComment";
 
 import { AsyncResult, Err, Ok } from "../utils/AsyncResult";
+import SyncService from "../integrations/trello/services/SyncService";
+import { TrelloService } from "../integrations/trello/services/TrelloService";
+import { TaskioDependencies } from "../types/TaskioDependencies";
 
-export default async function RemoveTask(comment: TaskioComment, store: CommentStore): AsyncResult<void, string> {
+export default async function RemoveTask(deps: TaskioDependencies, comment: TaskioComment, store: CommentStore): AsyncResult<void, string> {
   if (!comment.id) {
     return Err('No comment selected');
   }
@@ -25,12 +28,17 @@ export default async function RemoveTask(comment: TaskioComment, store: CommentS
     store.remove(comment.id);
     store.refresh();
 
+    const syncService = new SyncService(new TrelloService(deps.secretStore));
     const doc = await workspace.openTextDocument(comment.uri);
 
     const edit = new WorkspaceEdit();
     const line = doc.lineAt(comment.line);
 
     edit.delete(doc.uri, line.range);
+
+    if (comment.trelloCardId) {
+      syncService.processTasksSilent(Array(comment), deps, 'desync');
+    }
 
     const success = await workspace.applyEdit(edit);
 

@@ -33,6 +33,7 @@ export function renderTaskioBlock(comment: TaskioComment, docUri: Uri): string {
 
 export function upsertTaskioBlock(existingDesc: string, newBlock: string): string {
   const desc = existingDesc ?? "";
+  
   const pattern = new RegExp(
     `${escapeRegExp(START)}[\\s\\S]*?${escapeRegExp(END)}`,
     "m"

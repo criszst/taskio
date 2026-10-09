@@ -53,13 +53,19 @@ export default class SyncService {
         for (const comment of comments) {
           try {
             if (mode === 'sync') {
+              
               const syncResult = await reconcileTrelloTasks([comment], deps, this.trello, "manual");
+
               successCount += syncResult.successCount + syncResult.skippedCount;
               failureCount += syncResult.failureCount;
+              
+
             } else {
               await this.desyncOne(comment, deps);
               successCount += 1;
             }
+
+             deps.treeProvider.refresh();
           } catch (error) {
             failureCount += 1;
             console.error(`[Taskio] Failed to process "${comment.text}":`, error);
