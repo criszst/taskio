@@ -6,6 +6,10 @@ Taskio helps you keep technical debt visible without leaving your editor. It sca
 
 No setup required for the core workflow. Install Taskio and start organizing the comments already living in your codebase.
 
+<a href="https://marketplace.visualstudio.com/items?itemName=taskio.taskio">
+Extension in Marketplace
+</a>
+
 <div align="center">
   <a href="https://marketplace.visualstudio.com/items?itemName=taskio.taskio">
     <img width="900" src="assets/image.png" alt="Taskio main image" />
